@@ -2,6 +2,7 @@
   --cream: #f0e4d6;
   --cream-light: #fdf8f3;
   --cream-card: rgba(247, 238, 227, 0.82);
+  --paper: #f7efe8;
   --ink: #141110;
   --ink-secondary: #3d3532;
   --sub: #6a5c57;
@@ -41,7 +42,7 @@ html, body {
 /* App Fullscreen Container */
 .app-container {
   position: relative;
-  width: 100vw;
+  width: 100%;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -227,7 +228,7 @@ nav a.active {
   position: relative;
   z-index: 10;
   width: 100%;
-  max-width: 1320px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: clamp(20px, 3vh, 40px) clamp(16px, 3vw, 36px) clamp(40px, 5vh, 64px);
   display: flex;
@@ -244,6 +245,7 @@ nav a.active {
   box-shadow: 0 16px 40px rgba(50, 30, 20, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8);
   padding: clamp(20px, 2.5vw, 36px);
   position: relative;
+  overflow: hidden;
 }
 
 .section-head {

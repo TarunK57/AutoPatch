@@ -307,7 +307,7 @@
           </svg>
           Deploy Remediations to Git Repository
         </h3>
-        <button type="button" class="btn btn-secondary" id="closeGitModalBtn" style="padding: 4px 10px; height: 28px; font-size: 13px; line-height: 1;">✕</button>
+        <button type="button" class="btn btn-secondary" id="closeGitModalBtn" style="padding: 4px 10px; height: 28px; font-size: 15px; line-height: 1;">&times;</button>
       </div>
       <div class="modal-body">
         <div style="display: flex; gap: 16px; margin-bottom: 16px; border-bottom: 1px solid rgba(100,75,60,0.12); padding-bottom: 12px;">
@@ -676,7 +676,7 @@
             const res = await window.autopatch.pushRemediationBranch(activeProjectId, branchName, token, remoteUrl);
             modalStatusArea.innerHTML = `
               <div style="background: rgba(40,122,76,0.1); border: 1px solid rgba(40,122,76,0.3); border-radius: 8px; padding: 10px 14px; color: #1b6339;">
-                <strong>✓ Successfully Pushed Branch!</strong><br>
+                <strong>Successfully Pushed Branch!</strong><br>
                 Branch <code>${escapeHtml(res.branch_name)}</code> pushed to remote repository.
               </div>
             `;
@@ -687,7 +687,7 @@
             const res = await window.autopatch.openPullRequest(activeProjectId, repoSlug, branchName, baseBranch, prTitle, token);
             modalStatusArea.innerHTML = `
               <div style="background: rgba(40,122,76,0.1); border: 1px solid rgba(40,122,76,0.3); border-radius: 8px; padding: 10px 14px; color: #1b6339;">
-                <strong>✓ Pull Request #${res.pr_number} Created!</strong><br>
+                <strong>Pull Request #${res.pr_number} Created!</strong><br>
                 <a href="${res.html_url}" target="_blank" style="color: #1b6339; font-weight: 700; text-decoration: underline;">View Pull Request on GitHub &rarr;</a>
               </div>
             `;
@@ -705,11 +705,11 @@
                   You do not have direct push permissions to write branches to this upstream repository. On GitHub, pushing directly to someone else's repository requires collaborator permissions.
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 8px;">
-                  <button type="button" class="btn" style="background: var(--ink); color: var(--paper); height: 34px; font-size: 12px; justify-content: center;" onclick="switchToForkPush()">
-                    🍴 Push to Your Own Fork / Custom Remote URL
+                  <button type="button" class="btn" style="background: var(--ink); color: #f7efe8; height: 34px; font-size: 12px; justify-content: center;" onclick="switchToForkPush()">
+                    Push to Your Own Fork / Custom Remote URL
                   </button>
                   <button type="button" class="btn btn-secondary" style="height: 34px; font-size: 12px; justify-content: center;" onclick="downloadZipFromModal()">
-                    ⬇ Download Patched ZIP Instead (All Fixes Applied)
+                    Download Patched ZIP Instead (All Fixes Applied)
                   </button>
                 </div>
               </div>

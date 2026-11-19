@@ -11,9 +11,13 @@
   <style>
     .studio-grid {
       display: grid;
-      grid-template-columns: 1.15fr 0.85fr;
-      gap: 24px;
+      grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
+      gap: 28px;
       margin-top: 16px;
+      align-items: start;
+    }
+    .studio-grid > div {
+      min-width: 0;
     }
     .form-group {
       margin-bottom: 18px;
@@ -62,7 +66,7 @@
     }
     .options-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 12px;
       margin-top: 8px;
     }
@@ -76,6 +80,7 @@
       gap: 10px;
       cursor: pointer;
       transition: all 0.2s ease;
+      min-width: 0;
     }
     .option-card:hover {
       background: rgba(255, 255, 255, 0.9);
@@ -84,6 +89,7 @@
     .option-card input {
       margin-top: 3px;
       accent-color: var(--ink);
+      flex-shrink: 0;
     }
     .option-title {
       font-size: 12.5px;
@@ -95,6 +101,7 @@
       color: var(--sub);
       line-height: 1.35;
       margin-top: 2px;
+      word-break: break-word;
     }
 
     /* Terminal Console */
@@ -213,8 +220,13 @@
     }
     .tab-btn.active {
       background: var(--ink);
-      color: var(--paper);
+      color: #f7efe8 !important;
       border-color: var(--ink);
+    }
+    .tab-btn.active svg {
+      color: #f7efe8 !important;
+      fill: #f7efe8 !important;
+      stroke: #f7efe8 !important;
     }
     .gh-card {
       background: rgba(255, 255, 255, 0.65);
@@ -222,6 +234,8 @@
       border-radius: 12px;
       padding: 18px;
       margin-bottom: 16px;
+      width: 100%;
+      min-width: 0;
     }
     .gh-repo-card {
       background: rgba(255, 255, 255, 0.85);
@@ -232,13 +246,21 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 12px;
       transition: transform 0.15s ease, border-color 0.15s ease;
+      width: 100%;
+      min-width: 0;
     }
     .gh-repo-card:hover {
       transform: translateY(-1px);
       border-color: var(--accent);
       background: #ffffff;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    .gh-repo-info {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
     }
     .gh-repo-name {
       font-weight: 600;
@@ -247,14 +269,18 @@
       display: flex;
       align-items: center;
       gap: 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .gh-repo-meta {
       font-size: 11.5px;
       color: var(--sub);
       margin-top: 3px;
       display: flex;
-      gap: 10px;
+      gap: 12px;
       align-items: center;
+      flex-wrap: wrap;
     }
 
     .btn-gh-portal {
@@ -319,12 +345,18 @@
       to { opacity: 1; transform: scale(1); }
     }
 
-    @media (max-width: 992px) {
+    @media (max-width: 1100px) {
       .studio-grid {
         grid-template-columns: 1fr;
+        gap: 28px;
       }
       .terminal-window {
-        min-height: 360px;
+        min-height: 420px;
+      }
+    }
+    @media (max-width: 600px) {
+      .options-grid {
+        grid-template-columns: 1fr;
       }
     }
   </style>
@@ -453,7 +485,7 @@
                         <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
                           <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
                         </svg>
-                        ⚡ Authorize via Official GitHub Portal
+                        Authorize via Official GitHub Portal
                       </button>
                     </div>
 
@@ -501,7 +533,7 @@
                   </div>
 
                   <div style="margin-bottom: 12px;">
-                    <input type="text" id="ghRepoSearchInput" class="input-glass" style="height: 38px; font-size: 12.5px;" placeholder="🔍 Filter your repositories by name, language...">
+                    <input type="text" id="ghRepoSearchInput" class="input-glass" style="height: 38px; font-size: 12.5px;" placeholder="Filter your repositories by name, language...">
                   </div>
 
                   <div id="ghRepoListContainer" style="max-height: 280px; overflow-y: auto; padding-right: 4px;">
@@ -641,15 +673,15 @@
         </div>
         <div style="display: flex; flex-direction: column; gap: 9px; margin-bottom: 18px; font-size: 12px; color: var(--ink);">
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="color: #2da44e; font-weight: 700;">✓</span>
+            <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="#2da44e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5l3 3 6-7"/></svg>
             <span>Verify your official GitHub identity and profile</span>
           </div>
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="color: #2da44e; font-weight: 700;">✓</span>
+            <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="#2da44e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5l3 3 6-7"/></svg>
             <span>Discover public & private repositories for autonomous repair</span>
           </div>
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="color: #2da44e; font-weight: 700;">✓</span>
+            <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="#2da44e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5l3 3 6-7"/></svg>
             <span>Create remediation branches & automated Pull Requests</span>
           </div>
         </div>
@@ -1018,7 +1050,7 @@
 
       ghRepoListContainer.innerHTML = repos.map(r => `
         <div class="gh-repo-card">
-          <div style="flex: 1; min-width: 0; padding-right: 12px;">
+          <div class="gh-repo-info">
             <div class="gh-repo-name">
               ${r.private ? '<svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor"><path d="M4 4v2h-.5A1.5 1.5 0 0 0 2 7.5v6A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5v-6A1.5 1.5 0 0 0 12.5 6H12V4a4 4 0 0 0-8 0zm6 2H6V4a2 2 0 1 1 4 0v2z"/></svg>' : '<svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor"><circle cx="8" cy="8" r="7" stroke="currentColor" fill="none"/><path d="M8 1a7 7 0 0 0 0 14A7 7 0 0 0 8 1zm0 2a5 5 0 0 1 0 10A5 5 0 0 1 8 3z"/></svg>'}
               <a href="${r.html_url}" target="_blank" style="color: var(--ink); text-decoration: none; font-weight: 600;" title="${r.full_name}">${r.name}</a>
@@ -1026,14 +1058,17 @@
             </div>
             ${r.description ? `<div style="font-size: 11.5px; color: var(--sub); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(r.description)}</div>` : ''}
             <div class="gh-repo-meta">
-              ${r.language ? `<span>● ${r.language}</span>` : ''}
-              <span>⭐ ${r.stargazers_count || 0}</span>
+              ${r.language ? `<span>● ${escapeHtml(r.language)}</span>` : ''}
+              <span style="display: inline-flex; align-items: center; gap: 3px;">
+                <svg viewBox="0 0 16 16" width="11" height="11" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"/></svg>
+                ${r.stargazers_count || 0}
+              </span>
               <span>Updated ${new Date(r.updated_at).toLocaleDateString()}</span>
             </div>
           </div>
-          <div>
+          <div style="flex-shrink: 0;">
             <button type="button" class="btn" style="padding: 0 14px; height: 32px; font-size: 11.5px; white-space: nowrap;" onclick="selectRepoForScan('${r.name}', '${r.clone_url || r.html_url}')">
-              ⚡ Select & Scan
+              Select &amp; Scan &rarr;
             </button>
           </div>
         </div>

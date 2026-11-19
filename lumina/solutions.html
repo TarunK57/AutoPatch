@@ -299,7 +299,7 @@
               <option value="">Loading project workspaces...</option>
             </select>
             <button type="button" class="btn" id="openImportModalBtn" style="padding: 0 14px; height: 36px; font-size: 12px; display: flex; align-items: center; gap: 6px;">
-              <span>📥</span> Import Git Repo
+              <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 2v8m-3-3l3 3 3-3M2 13h12"/></svg> Import Git Repo
             </button>
             <span id="hubProjectBadge" class="badge" style="background: rgba(194, 131, 64, 0.15); color: var(--accent-gold); font-size: 11px; font-weight: 600; display: none;"></span>
           </div>
@@ -309,40 +309,40 @@
         <div id="noProjectsBanner" style="display: none; background: rgba(194, 131, 64, 0.10); border: 1px dashed rgba(194, 131, 64, 0.35); border-radius: 14px; padding: 18px 24px; margin-bottom: 20px; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
           <div>
             <strong style="color: var(--ink); font-size: 14px; display: flex; align-items: center; gap: 6px;">
-              <span>📂</span> No Git repository workspaces loaded in this session.
+              No Git repository workspaces loaded in this session.
             </strong>
             <p style="margin: 4px 0 0 0; font-size: 12.5px; color: var(--sub);">Import a remote Git repository (GitHub/GitLab/Bitbucket), connected account repo, or local workspace to inspect its 3D Digital Twin and run automated repairs.</p>
           </div>
           <button type="button" class="btn" onclick="openImportModal()" style="padding: 0 16px; height: 38px; font-size: 13px;">
-            📥 Import Git Repo Now
+            Import Git Repo Now &rarr;
           </button>
         </div>
 
         <!-- Feature Tabs -->
         <div class="feature-tabs" role="tablist">
           <button class="feature-tab active" data-tab="tab-digitaltwin">
-            <span>🌐</span> Codebase Digital Twin (3D)
+            Codebase Digital Twin (3D)
           </button>
           <button class="feature-tab" data-tab="tab-committee">
-            <span>🏛️</span> AI Model Committee
+            AI Model Committee
           </button>
           <button class="feature-tab" data-tab="tab-predictive">
-            <span>🔮</span> Predictive Bug Detection
+            Predictive Bug Detection
           </button>
           <button class="feature-tab" data-tab="tab-hotspots">
-            <span>🌋</span> Code Hotspot Detection
+            Code Hotspot Detection
           </button>
           <button class="feature-tab" data-tab="tab-memory">
-            <span>🧠</span> Long-term Repair Learning
+            Long-term Repair Learning
           </button>
           <button class="feature-tab" data-tab="tab-apisec">
-            <span>🛡️</span> API Security Testing
+            API Security Testing
           </button>
           <button class="feature-tab" data-tab="tab-origin">
-            <span>🔍</span> Bug Origin Detection
+            Bug Origin Detection
           </button>
           <button class="feature-tab" data-tab="tab-docs">
-            <span>📝</span> Automatic Documentation
+            Automatic Documentation
           </button>
         </div>
 
@@ -362,10 +362,10 @@
                   <option value="">Select Defect / Component to Analyze</option>
                 </select>
                 <button class="btn" id="analyzeBlastBtn" style="padding: 0 16px; height: 38px; font-size: 13px;">
-                  ⚡ Analyze Patch Blast Radius
+                  Analyze Patch Blast Radius
                 </button>
                 <button class="btn btn-secondary" id="refreshTwinBtn" style="padding: 0 14px; height: 38px; font-size: 13px;">
-                  🔄 Reload Topology
+                  Reload Topology
                 </button>
               </div>
             </div>
@@ -418,8 +418,8 @@
 
                 <!-- 3D Controls -->
                 <div class="digital-twin-controls">
-                  <button class="dt-control-btn" id="dtAutoRotateBtn">⏸ Pause Orbit</button>
-                  <button class="dt-control-btn" id="dtResetViewBtn">⟲ Reset Camera</button>
+                  <button class="dt-control-btn" id="dtAutoRotateBtn">Pause Orbit</button>
+                  <button class="dt-control-btn" id="dtResetViewBtn">Reset Camera</button>
                 </div>
 
                 <!-- Tooltip -->
@@ -431,7 +431,7 @@
             <div id="blastDetailMatrix" style="margin-top: 18px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;">
               <div style="background: rgba(255,255,255,0.7); border: 1px solid rgba(100,75,60,0.12); padding: 14px 16px; border-radius: 12px;">
                 <div style="font-size: 11.5px; font-weight: 700; color: #b33927; text-transform: uppercase; display: flex; align-items: center; gap: 6px;">
-                  <span>🚨</span> Public APIs at Risk
+                  Public APIs at Risk
                 </div>
                 <div id="dtApisAtRiskList" style="margin-top: 8px; font-size: 12px; color: var(--ink);">
                   <span style="color: var(--sub);">Select a component to evaluate exposed ingress routes.</span>
@@ -439,7 +439,7 @@
               </div>
               <div style="background: rgba(255,255,255,0.7); border: 1px solid rgba(100,75,60,0.12); padding: 14px 16px; border-radius: 12px;">
                 <div style="font-size: 11.5px; font-weight: 700; color: #287a4c; text-transform: uppercase; display: flex; align-items: center; gap: 6px;">
-                  <span>🧪</span> Verification Tests Exercised
+                  Verification Tests Exercised
                 </div>
                 <div id="dtTestsExercisedList" style="margin-top: 8px; font-size: 12px; color: var(--ink);">
                   <span style="color: var(--sub);">Select a component to inspect linked test coverage.</span>
@@ -447,7 +447,7 @@
               </div>
               <div style="background: rgba(255,255,255,0.7); border: 1px solid rgba(100,75,60,0.12); padding: 14px 16px; border-radius: 12px;">
                 <div style="font-size: 11.5px; font-weight: 700; color: #bd7b1a; text-transform: uppercase; display: flex; align-items: center; gap: 6px;">
-                  <span>⚡</span> Downstream Functions Impacted
+                  Downstream Functions Impacted
                 </div>
                 <div id="dtFunctionsAffectedList" style="margin-top: 8px; font-size: 12px; color: var(--ink);">
                   <span style="color: var(--sub);">Select a component to traverse caller dependency paths.</span>
@@ -792,7 +792,7 @@
       <div style="padding: 18px 22px; border-bottom: 1px solid rgba(100,75,60,0.12); display: flex; justify-content: space-between; align-items: center;">
         <div>
           <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: var(--ink); display: flex; align-items: center; gap: 8px;">
-            <span>📥</span> Import Git Repository Workspace
+            Import Git Repository Workspace
           </h3>
           <p style="margin: 4px 0 0 0; font-size: 12px; color: var(--sub);">Clone and map any remote repository into a live 3D Codebase Digital Twin.</p>
         </div>
@@ -828,7 +828,7 @@
         <div id="importSectionGithub" style="display: none;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
             <span style="font-size: 12px; font-weight: 600; color: var(--ink);">Account Repositories:</span>
-            <button type="button" class="chip-btn" id="refreshGhReposBtn" style="font-size: 11px;">🔄 Refresh Repos</button>
+            <button type="button" class="chip-btn" id="refreshGhReposBtn" style="font-size: 11px;">Refresh Repos</button>
           </div>
           <div id="importGhRepoList" style="max-height: 220px; overflow-y: auto; border: 1px solid rgba(100,75,60,0.12); border-radius: 10px; padding: 6px; background: rgba(255,255,255,0.7);">
             <div style="text-align: center; padding: 24px; font-size: 12px; color: var(--sub);">Click 'Refresh Repos' to fetch from connected GitHub account.</div>
@@ -852,7 +852,7 @@
         <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; border-top: 1px solid rgba(100,75,60,0.1); padding-top: 14px;">
           <button type="button" class="btn btn-secondary" id="cancelImportModalBtn" style="height: 38px; padding: 0 16px; font-size: 12.5px;">Cancel</button>
           <button type="button" class="btn" id="submitImportBtn" style="height: 38px; padding: 0 20px; font-size: 13px;">
-            🚀 Import & Map Topology
+            Import & Map Topology
           </button>
         </div>
       </div>
@@ -1058,7 +1058,7 @@
         if (statusEl) {
           statusEl.style.background = 'rgba(40, 122, 76, 0.15)';
           statusEl.style.color = 'var(--success)';
-          statusEl.innerHTML = `✅ Successfully imported <strong>${escapeHtml(newProj.name)}</strong>! Mapping AST topology...`;
+          statusEl.innerHTML = `Successfully imported <strong>${escapeHtml(newProj.name)}</strong>. Mapping AST topology...`;
         }
         await initProjects();
         await selectProject(newProj.project_id);
@@ -1067,12 +1067,12 @@
         if (statusEl) {
           statusEl.style.background = 'rgba(224, 82, 68, 0.15)';
           statusEl.style.color = 'var(--danger)';
-          statusEl.innerHTML = `❌ Clone failed: ${escapeHtml(err.message)}`;
+          statusEl.innerHTML = `Clone failed: ${escapeHtml(err.message)}`;
         }
       } finally {
         if (submitBtn) {
           submitBtn.disabled = false;
-          submitBtn.innerText = '🚀 Import & Map Topology';
+          submitBtn.innerText = 'Import & Map Topology';
         }
       }
     }
@@ -1116,12 +1116,12 @@
           if (statusEl) {
             statusEl.style.background = 'rgba(224, 82, 68, 0.15)';
             statusEl.style.color = 'var(--danger)';
-            statusEl.innerHTML = `❌ Upload failed: ${escapeHtml(err.message)}`;
+            statusEl.innerHTML = `Upload failed: ${escapeHtml(err.message)}`;
           }
         } finally {
           if (submitBtn) {
             submitBtn.disabled = false;
-            submitBtn.innerText = '🚀 Import & Map Topology';
+            submitBtn.innerText = 'Import & Map Topology';
           }
         }
       }
@@ -1243,7 +1243,7 @@
         autoRotateBtn.addEventListener('click', () => {
           if (digitalTwinVisualizer) {
             digitalTwinVisualizer.autoRotate = !digitalTwinVisualizer.autoRotate;
-            autoRotateBtn.innerText = digitalTwinVisualizer.autoRotate ? '⏸ Pause Orbit' : '▶ Auto Orbit';
+            autoRotateBtn.innerText = digitalTwinVisualizer.autoRotate ? 'Pause Orbit' : 'Auto Orbit';
           }
         });
       }
@@ -1288,7 +1288,7 @@
             alert('Blast radius analysis failed: ' + e.message);
           } finally {
             analyzeBlastBtn.disabled = false;
-            analyzeBlastBtn.innerText = '⚡ Analyze Patch Blast Radius';
+            analyzeBlastBtn.innerText = 'Analyze Patch Blast Radius';
           }
         });
       }
@@ -1382,21 +1382,21 @@
       const apisEl = document.getElementById('dtApisAtRiskList');
       if (apisEl) {
         apisEl.innerHTML = (blast.critical_apis_at_risk && blast.critical_apis_at_risk.length)
-          ? blast.critical_apis_at_risk.map(a => `<div style="padding: 2px 0;">🔴 <code>${escapeHtml(a)}</code></div>`).join('')
-          : '<span style="color:var(--success);">✅ Zero public APIs exposed to regression.</span>';
+          ? blast.critical_apis_at_risk.map(a => `<div style="padding: 2px 0; color: #e05244;">&bull; <code>${escapeHtml(a)}</code></div>`).join('')
+          : '<span style="color:var(--success);">Zero public APIs exposed to regression.</span>';
       }
 
       const testsEl = document.getElementById('dtTestsExercisedList');
       if (testsEl) {
         testsEl.innerHTML = (blast.tests_exercised && blast.tests_exercised.length)
-          ? blast.tests_exercised.map(t => `<div style="padding: 2px 0;">🧪 <code>${escapeHtml(t)}</code></div>`).join('')
-          : '<span style="color:var(--success);">✅ Verified by BRT test harness.</span>';
+          ? blast.tests_exercised.map(t => `<div style="padding: 2px 0; color: #52c27c;">&bull; <code>${escapeHtml(t)}</code></div>`).join('')
+          : '<span style="color:var(--success);">Verified by BRT test harness.</span>';
       }
 
       const funcsEl = document.getElementById('dtFunctionsAffectedList');
       if (funcsEl) {
         funcsEl.innerHTML = (blast.functions_affected && blast.functions_affected.length)
-          ? blast.functions_affected.slice(0, 6).map(f => `<div style="padding: 2px 0;">⚡ <code>${escapeHtml(f)}</code></div>`).join('')
+          ? blast.functions_affected.slice(0, 6).map(f => `<div style="padding: 2px 0; color: #e2a865;">&bull; <code>${escapeHtml(f)}</code></div>`).join('')
           : '<span style="color:var(--sub);">No downstream callers affected.</span>';
       }
     }
