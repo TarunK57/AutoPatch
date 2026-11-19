@@ -1,9 +1,10 @@
 """Data models for candidate patches, strict patch tags, and diff validation."""
 
+import difflib
 from datetime import datetime, timezone
 from typing import List, Optional
 from uuid import UUID, uuid4
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from autopatch.core.exceptions import TestModificationForbiddenError
 from autopatch.core.models import TEST_FILE_PATTERNS
@@ -46,6 +47,36 @@ class CandidatePatch(BaseModel):
                     "Rule 3 strictly prohibits patches from modifying existing tests."
                 )
         return v
+
+    @model_validator(mode="after")
+    def _compute_diff_and_stats(self) -> "CandidatePatch":
+        """Automatically constructs valid unified diff and line metrics if omitted."""
+        if not self.unified_diff and self.original_snippet is not None and self.patched_snippet is not None:
+            orig_lines = self.original_snippet.splitlines(keepends=True)
+            patched_lines = self.patched_snippet.splitlines(keepends=True)
+            diff_lines = list(
+                difflib.unified_diff(
+                    orig_lines,
+                    patched_lines,
+                    fromfile=f"a/{self.file}",
+                    tofile=f"b/{self.file}",
+                )
+            )
+            self.unified_diff = "".join(diff_lines)
+
+        if self.unified_diff:
+            added = 0
+            deleted = 0
+            for line in self.unified_diff.splitlines():
+                if line.startswith("+") and not line.startswith("+++"):
+                    added += 1
+                elif line.startswith("-") and not line.startswith("---"):
+                    deleted += 1
+            if self.lines_added == 0:
+                self.lines_added = added
+            if self.lines_deleted == 0:
+                self.lines_deleted = deleted
+        return self
 
     def to_xml_format(self) -> str:
         """Renders patch into strict tag format."""

@@ -208,15 +208,28 @@ CANCELLATION_TOKENS: Dict[str, CancellationToken] = {}
     dependencies=[Depends(rate_limit_dependency)],
 )
 async def create_project(
+    request: Request,
     name: Optional[str] = Form(None),
     github_url: Optional[str] = Form(None),
     file: Optional[UploadFile] = File(None),
-    json_body: Optional[CreateProjectRequest] = None,
     current_user: User = Depends(get_current_user),
 ) -> ProjectResponse:
     project_id = str(uuid4())
-    proj_name = name or (json_body.name if json_body else f"project_{project_id[:8]}")
-    url = github_url or (json_body.github_url if json_body else None)
+    proj_name = name
+    url = github_url
+
+    content_type = request.headers.get("content-type", "")
+    if "application/json" in content_type:
+        try:
+            body = await request.json()
+            if not proj_name and body.get("name"):
+                proj_name = body.get("name")
+            if not url and (body.get("github_url") or body.get("repo_url")):
+                url = body.get("github_url") or body.get("repo_url")
+        except Exception:
+            pass
+
+    proj_name = proj_name or f"project_{project_id[:8]}"
 
     project_dir = Path(tempfile.mkdtemp(prefix=f"autopatch_proj_{project_id}_"))
 

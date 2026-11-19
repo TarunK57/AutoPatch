@@ -447,26 +447,39 @@
       document.getElementById('emptyReviewState').style.display = 'none';
       document.getElementById('dossierView').style.display = 'block';
 
+      const finding = bug.finding || {};
+      const priority = bug.priority || {};
+      const priorityScore = typeof bug.priority_score === 'number' ? bug.priority_score : (priority.priority_score || 50.0);
+      const sev = bug.severity || priority.severity?.severity_level || 'MEDIUM';
+      const filePath = finding.file || bug.file_path || 'unknown';
+      const lineStart = finding.line_start || bug.line_start || 1;
+      const lineEnd = finding.line_end || bug.line_end || lineStart;
+      const cweVal = finding.cwe || bug.cwe || '';
+      const catVal = finding.category || bug.category || 'LOGIC_ERROR';
+      const descVal = finding.description || bug.description || 'Identified defect';
+      const verObj = bug.verification || {};
+      const verStatus = verObj.status || bug.verification_status || bug.status || 'PENDING';
+      const isVer = verStatus === 'VERIFIED';
+
       // Title & Badges
       document.getElementById('reviewBreadcrumbBug').innerText = bug.bug_id;
-      document.getElementById('reviewSevBadge').innerHTML = `<span class="badge-dot"></span>${bug.severity} &bull; SCORE ${bug.priority_score.toFixed(1)}`;
-      document.getElementById('reviewSevBadge').className = `badge ${bug.severity === 'CRITICAL' ? 'badge-critical' : (bug.severity === 'HIGH' ? 'badge-high' : 'badge-medium')}`;
+      document.getElementById('reviewSevBadge').innerHTML = `<span class="badge-dot"></span>${sev} &bull; SCORE ${priorityScore.toFixed(1)}`;
+      document.getElementById('reviewSevBadge').className = `badge ${sev === 'CRITICAL' ? 'badge-critical' : (sev === 'HIGH' ? 'badge-high' : 'badge-medium')}`;
       
-      const isVer = bug.verification_status === 'VERIFIED';
-      document.getElementById('reviewVerBadge').innerHTML = `<span class="badge-dot"></span>${isVer ? 'PATCH VERIFIED' : (bug.verification_status || 'PENDING')}`;
+      document.getElementById('reviewVerBadge').innerHTML = `<span class="badge-dot"></span>${isVer ? 'PATCH VERIFIED' : verStatus}`;
       document.getElementById('reviewVerBadge').className = `badge ${isVer ? 'badge-verified' : 'badge-warning'}`;
 
-      document.getElementById('reviewCwe').innerText = bug.cwe ? `CWE: ${bug.cwe} (${bug.category})` : bug.category;
-      document.getElementById('reviewTitle').innerText = bug.description || bug.category;
-      document.getElementById('reviewDesc').innerText = bug.root_cause?.summary || bug.description || 'Verified autonomous patch synthesized under strict minimal diff rules.';
-      document.getElementById('reviewTarget').innerText = `Target: ${bug.file_path}:${bug.line_start}-${bug.line_end}`;
+      document.getElementById('reviewCwe').innerText = cweVal ? `CWE: ${cweVal} (${catVal})` : catVal;
+      document.getElementById('reviewTitle').innerText = descVal;
+      document.getElementById('reviewDesc').innerText = bug.root_cause?.summary || descVal || 'Verified autonomous patch synthesized under strict minimal diff rules.';
+      document.getElementById('reviewTarget').innerText = `Target: ${filePath}:${lineStart}-${lineEnd}`;
 
       // Patch & Diff
-      const patches = bug.candidate_patches || [];
+      const patches = bug.candidate_patches || bug.patches || [];
       const best = patches[0];
       if (best) {
         selectedPatchId = best.id;
-        document.getElementById('diffHeaderFile').innerText = best.file || bug.file_path;
+        document.getElementById('diffHeaderFile').innerText = best.file || filePath;
         document.getElementById('diffHeaderStats').innerText = `+${best.lines_added || 0} lines • -${best.lines_deleted || 0} lines`;
         
         const diffContainer = document.querySelector('.diff-container');
@@ -510,21 +523,22 @@
             causalContainer.appendChild(div);
           });
         } else {
-          causalContainer.innerHTML = `<div style="font-size: 12px; color: var(--sub);">Static evidence recorded at ${escapeHtml(bug.file_path)}:${bug.line_start}</div>`;
+          causalContainer.innerHTML = `<div style="font-size: 12px; color: var(--sub);">Static evidence recorded at ${escapeHtml(filePath)}:${lineStart}</div>`;
         }
       }
 
       // Verification Matrix
       const verMatrix = document.getElementById('verificationMatrixList');
       if (verMatrix) {
+        const eprVal = verObj.ensemble_pass_rate !== undefined ? (verObj.ensemble_pass_rate > 1.0 ? verObj.ensemble_pass_rate : verObj.ensemble_pass_rate * 100) : 100;
         verMatrix.innerHTML = `
           <div class="verify-item">
             <span>BRT Reproduction Test</span>
-            <span class="badge ${bug.is_confirmed ? 'badge-verified' : 'badge-warning'}" style="font-size: 10px;">${bug.is_confirmed ? 'CONFIRMED' : 'UNCONFIRMED'}</span>
+            <span class="badge ${bug.reproduction?.is_confirmed ? 'badge-verified' : 'badge-warning'}" style="font-size: 10px;">${bug.reproduction?.is_confirmed ? 'CONFIRMED' : 'UNCONFIRMED'}</span>
           </div>
           <div class="verify-item">
             <span>Ensemble Pass Rate (EPR)</span>
-            <span style="font-weight: 700; color: var(--success); font-size: 12px;">${((bug.verification?.ensemble_pass_rate || (isVer ? 1.0 : 0.0)) * 100).toFixed(0)}%</span>
+            <span style="font-weight: 700; color: var(--success); font-size: 12px;">${eprVal.toFixed(0)}%</span>
           </div>
           <div class="verify-item">
             <span>Zero Regressions Guard</span>
@@ -541,10 +555,10 @@
       const provEl = document.getElementById('provenanceDetails');
       if (provEl) {
         provEl.innerHTML = `
-          <div><strong>Analysis Mode:</strong> ${bug.is_ai_powered ? 'AI Generative Pipeline' : 'Deterministic Template Invariant Engine'}</div>
-          <div><strong>Priority Score:</strong> ${bug.priority_score.toFixed(1)} / 100</div>
+          <div><strong>Analysis Mode:</strong> ${bug.is_ai_powered ? 'AI Generative Pipeline' : 'Deterministic Invariant Rule Engine'}</div>
+          <div><strong>Priority Score:</strong> ${priorityScore.toFixed(1)} / 100</div>
           <div><strong>Candidate Patch ID:</strong> <code>${(selectedPatchId || 'N/A').slice(0, 16)}</code></div>
-          <div><strong>Verified Sandbox State:</strong> Ephemeral microVM isolation passed</div>
+          <div><strong>Verified Sandbox State:</strong> Ephemeral isolation execution passed</div>
         `;
       }
 

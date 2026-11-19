@@ -83,10 +83,10 @@ class SecurityDetector(BaseDetector):
                         )
 
                 # 2. SQL Injection (CWE-89)
-                # Formatted strings in execute, select, or query calls
+                # Formatted strings in execute, select, or query calls / assignments
                 sql_inj_match = re.search(
                     r"""(?ix)
-                    (?:execute|cursor\.execute|raw|query)\s*\(\s*
+                    (?:execute|cursor\.execute|raw_query|execute_raw_query|raw|query|sql|stmt)\s*(?:\(|=)\s*
                     (?:f['"].*?(?:SELECT|INSERT|UPDATE|DELETE|FROM|WHERE).*?\{.*?\}['"]|
                     ['"].*?(?:SELECT|INSERT|UPDATE|DELETE|FROM|WHERE).*?['"]\s*\+|
                     ['"].*?(?:SELECT|INSERT|UPDATE|DELETE|FROM|WHERE).*?%s.*?['"]\s*%)

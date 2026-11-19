@@ -35,7 +35,16 @@ DEFAULT_TIMEOUT_SECONDS = 30
 
 def discover_test_command(project_root: Path) -> str:
     """Discovers project test execution command across Python, Node/TS, Go, and C/C++."""
-    # 1. Node / TypeScript (package.json)
+    # 1. Python test suite priority if pytest configuration or python test files exist
+    if (
+        (project_root / "pytest.ini").is_file()
+        or (project_root / "pyproject.toml").is_file()
+        or list(project_root.glob("tests/test_*.py"))
+        or list(project_root.glob("**/test_*.py"))
+    ):
+        return "pytest"
+
+    # 2. Node / TypeScript (package.json)
     pkg_json = project_root / "package.json"
     if pkg_json.is_file():
         try:
@@ -46,11 +55,11 @@ def discover_test_command(project_root: Path) -> str:
         except Exception:
             pass
 
-    # 2. Go (go.mod)
+    # 3. Go (go.mod)
     if (project_root / "go.mod").is_file():
         return "go test ./..."
 
-    # 3. Makefile with test target
+    # 4. Makefile with test target
     makefile = project_root / "Makefile"
     if makefile.is_file():
         try:
@@ -60,7 +69,7 @@ def discover_test_command(project_root: Path) -> str:
         except Exception:
             pass
 
-    # 4. Default Python / pytest
+    # 5. Default Python / pytest
     return "pytest"
 
 
@@ -263,13 +272,13 @@ builtins.open = sandboxed_open
             cmd_tokens = command.split()
             if cmd_tokens:
                 if cmd_tokens[0] == "pytest":
-                    cmd_tokens = [sys.executable, "-m", "pytest", "-v"] + [
-                        t for t in cmd_tokens[1:] if t != "-v"
+                    cmd_tokens = [sys.executable, "-m", "pytest", "-v", "-o", 'addopts=""'] + [
+                        t for t in cmd_tokens[1:] if t not in {"-v", "-o"}
                     ]
                 elif cmd_tokens[0] in {"python", "python3"}:
                     if len(cmd_tokens) > 2 and cmd_tokens[1] == "-m" and cmd_tokens[2] == "pytest":
-                        cmd_tokens = [sys.executable, "-m", "pytest", "-v"] + [
-                            t for t in cmd_tokens[3:] if t != "-v"
+                        cmd_tokens = [sys.executable, "-m", "pytest", "-v", "-o", 'addopts=""'] + [
+                            t for t in cmd_tokens[3:] if t not in {"-v", "-o"}
                         ]
                     else:
                         cmd_tokens = [sys.executable] + cmd_tokens[1:]

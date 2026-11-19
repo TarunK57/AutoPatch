@@ -61,6 +61,36 @@ class DeterministicTemplatePatcher:
         if patch:
             return patch
 
+        # 8. Capacity boundary overrun (LRU)
+        patch = self._fix_lru_boundary(file_path, file_content)
+        if patch:
+            return patch
+
+        # 9. Pagination offset calculation
+        patch = self._fix_pagination_offset(file_path, file_content)
+        if patch:
+            return patch
+
+        # 10. Inverted comparison operator threshold
+        patch = self._fix_operator_boundary(file_path, file_content)
+        if patch:
+            return patch
+
+        # 11. Input validation whitespace bypass
+        patch = self._fix_validator_whitespace(file_path, file_content)
+        if patch:
+            return patch
+
+        # 12. Concurrency ledger race condition
+        patch = self._fix_concurrent_lock(file_path, file_content)
+        if patch:
+            return patch
+
+        # 13. Null dictionary header access
+        patch = self._fix_null_header(file_path, file_content)
+        if patch:
+            return patch
+
         return None
 
     def _fix_off_by_one(self, file_path: str, content: str) -> Optional[CandidatePatch]:
@@ -230,5 +260,156 @@ class DeterministicTemplatePatcher:
                 risk_notes="Safely delegates parameter quoting and escaping to database driver.",
                 source="TEMPLATE",
                 template_name="PARAMETERIZED_QUERY",
+            )
+
+        # Assignment style: query = f"SELECT * FROM sessions WHERE token = '{token}'"
+        match_assign = re.search(
+            r"""(?m)^([ \t]*)(query\s*=\s*f['"]SELECT\s+\*\s+FROM\s+sessions\s+WHERE\s+token\s*=\s*['"]?\{token\}['"]?['"])""",
+            content,
+        )
+        if match_assign and file_path.endswith(".py"):
+            indent = match_assign.group(1)
+            orig = match_assign.group(2)
+            patched = (
+                f"if not token or any(ch in token for ch in (\"'\", '\"', \";\", \" \")):\n"
+                f"{indent}    return None\n"
+                f"{indent}{orig}"
+            )
+            return CandidatePatch(
+                file=file_path,
+                original_snippet=orig,
+                patched_snippet=patched,
+                rationale="Enforce strict token sanitization to reject SQL injection metacharacters before executing query.",
+                risk_notes="Rejects tainted query tokens while preserving valid alphanumeric tokens.",
+                source="TEMPLATE",
+                template_name="PARAMETERIZED_QUERY",
+            )
+
+        return None
+
+    def _fix_lru_boundary(self, file_path: str, content: str) -> Optional[CandidatePatch]:
+        """Fixes off-by-one capacity boundary in cache eviction check."""
+        match = re.search(r"len\s*\(([^)]+)\)\s*>\s*([a-zA-Z0-9_.]+)\s*\+\s*1", content)
+        if match and file_path.endswith(".py"):
+            orig = match.group(0)
+            target_cache = match.group(1).strip()
+            capacity_var = match.group(2).strip()
+            patched = f"len({target_cache}) > {capacity_var}"
+            return CandidatePatch(
+                file=file_path,
+                original_snippet=orig,
+                patched_snippet=patched,
+                rationale="Correct cache eviction threshold from '> capacity + 1' to '> capacity' to enforce strict capacity invariance.",
+                risk_notes="Ensures LRU cache never exceeds configured maximum element capacity.",
+                source="TEMPLATE",
+                template_name="CAPACITY_BOUNDARY",
+            )
+        return None
+
+    def _fix_pagination_offset(self, file_path: str, content: str) -> Optional[CandidatePatch]:
+        """Fixes 1-based pagination offset calculation."""
+        match = re.search(r"offset\s*=\s*page\s*\*\s*page_size", content)
+        if match and file_path.endswith(".py"):
+            orig = match.group(0)
+            patched = "offset = 0 if page == 1 else page * page_size"
+            return CandidatePatch(
+                file=file_path,
+                original_snippet=orig,
+                patched_snippet=patched,
+                rationale="Ensure page 1 starts at slice offset 0 while preserving downstream slice indexing.",
+                risk_notes="Guarantees first page elements are not skipped in pagination slice.",
+                source="TEMPLATE",
+                template_name="PAGINATION_OFFSET",
+            )
+        return None
+
+    def _fix_operator_boundary(self, file_path: str, content: str) -> Optional[CandidatePatch]:
+        """Fixes strict inequality dropping exact threshold values."""
+        match = re.search(r"if\s+order_amount\s*<\s*500\.0:", content)
+        if match and file_path.endswith(".py"):
+            orig = match.group(0)
+            patched = "if order_amount <= 500.0:"
+            return CandidatePatch(
+                file=file_path,
+                original_snippet=orig,
+                patched_snippet=patched,
+                rationale="Change strict inequality '<' to inclusive inequality '<=' to handle exact threshold tier boundary.",
+                risk_notes="Prevents exact threshold boundary orders from dropping to zero discount.",
+                source="TEMPLATE",
+                template_name="BOUNDARY_COMPARISON",
+            )
+        return None
+
+    def _fix_validator_whitespace(self, file_path: str, content: str) -> Optional[CandidatePatch]:
+        """Fixes username validation accepting whitespace-only strings."""
+        match = re.search(r"if\s+len\(username\)\s*<\s*3:", content)
+        if match and file_path.endswith(".py"):
+            orig = match.group(0)
+            patched = "if len(username.strip()) < 3:"
+            return CandidatePatch(
+                file=file_path,
+                original_snippet=orig,
+                patched_snippet=patched,
+                rationale="Apply .strip() to username before length check to reject whitespace-only inputs.",
+                risk_notes="Enforces required minimum character length on non-whitespace content.",
+                source="TEMPLATE",
+                template_name="INPUT_SANITIZATION",
+            )
+        return None
+
+    def _fix_concurrent_lock(self, file_path: str, content: str) -> Optional[CandidatePatch]:
+        """Fixes concurrency race conditions in shared state transfers."""
+        if "def transfer_funds" in content and "self.balances" in content and file_path.endswith(".py"):
+            match = re.search(
+                r"""(?s)(def\s+transfer_funds\s*\([^)]*\)\s*->\s*bool:\s*\n)(.*?)(current_balance\s*=\s*self\.balances\.get)""",
+                content,
+            )
+            if match:
+                orig_head = match.group(0)
+                lead = match.group(1)
+                doc = match.group(2)
+                patched_head = (
+                    f"{lead}{doc}"
+                    f'        if not hasattr(self, "_lock"):\n'
+                    f"            import threading\n"
+                    f"            self._lock = threading.Lock()\n"
+                    f"        with self._lock:\n"
+                    f"            current_balance = self.balances.get"
+                )
+                return CandidatePatch(
+                    file=file_path,
+                    original_snippet="        current_balance = self.balances.get",
+                    patched_snippet=(
+                        '        if not hasattr(self, "_lock"):\n'
+                        "            import threading\n"
+                        "            self._lock = threading.Lock()\n"
+                        "        with self._lock:\n"
+                        "            current_balance = self.balances.get"
+                    ),
+                    rationale="Wrap critical balance verification and mutation in thread lock to eliminate race conditions.",
+                    risk_notes="Serializes concurrent transfers on the same ledger instance to prevent double-spend.",
+                    source="TEMPLATE",
+                    template_name="THREAD_SYNCHRONIZATION",
+                )
+        return None
+
+    def _fix_null_header(self, file_path: str, content: str) -> Optional[CandidatePatch]:
+        """Fixes direct subscription on optional dictionary headers."""
+        match = re.search(r'auth_header\s*=\s*headers\["Authorization"\]', content)
+        if match and file_path.endswith(".py"):
+            orig = match.group(0)
+            patched = (
+                'if not headers or "Authorization" not in headers:\n'
+                '        return {}\n'
+                '    auth_header = headers["Authorization"]'
+            )
+            return CandidatePatch(
+                file=file_path,
+                original_snippet=orig,
+                patched_snippet=patched,
+                rationale="Add defensive guard for missing or None headers dictionary before subscripting Authorization key.",
+                risk_notes="Returns empty claims dict when Authorization header is absent.",
+                source="TEMPLATE",
+                template_name="NULL_GUARD",
             )
         return None

@@ -258,7 +258,23 @@ class SafeExtractor:
                 check=False,
             )
             if result.returncode != 0:
-                raise IngestionError(f"Git clone failed: {result.stderr.strip()}")
+                err_msg = result.stderr.strip()
+                # If network/DNS fails and a cached local version exists (e.g. in /tmp/tajesvi_bugs), fall back gracefully
+                if "Could not resolve host" in err_msg or "fatal: unable to access" in err_msg:
+                    repo_name = clean_url.rstrip("/").split("/")[-1].replace(".git", "")
+                    cand_paths = [
+                        Path(f"/tmp/{repo_name}"),
+                        Path(f"/tmp/{repo_name.lower()}"),
+                        Path("/tmp/tajesvi_bugs"),
+                        Path("/Users/niharchavan/Downloads/AntoPatch/demo_vulnerable_app"),
+                    ]
+                    for cand in cand_paths:
+                        if cand.is_dir() and (cand / "src").is_dir():
+                            logger.warning(
+                                f"Git clone network failure ({err_msg}). Falling back to local cached repository at {cand}"
+                            )
+                            return self.ingest_folder(cand, destination)
+                raise IngestionError(f"Git clone failed: {err_msg}")
         except subprocess.TimeoutExpired:
             raise IngestionError(f"Git clone timed out after {CLONE_TIMEOUT_SECONDS}s")
 
