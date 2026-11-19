@@ -175,6 +175,52 @@
     .select-dropdown:focus {
       border-color: var(--accent-gold);
     }
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(20, 17, 16, 0.7);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-card {
+      background: #faf6f0;
+      border: 1px solid rgba(100, 75, 60, 0.2);
+      border-radius: 16px;
+      max-width: 560px;
+      width: 100%;
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.25);
+      overflow: hidden;
+      animation: modalFadeIn 0.2s ease-out;
+    }
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .chip-btn {
+      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid rgba(100, 75, 60, 0.16);
+      border-radius: 8px;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--ink);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .chip-btn:hover {
+      background: var(--ink);
+      color: #f7efe8;
+    }
+    .chip-btn.active {
+      background: var(--ink);
+      color: #f7efe8;
+      border-color: var(--ink);
+    }
     .defect-dossier-card {
       background: rgba(248, 243, 238, 0.9);
       border: 1px solid rgba(100, 75, 60, 0.14);
@@ -249,11 +295,27 @@
           </div>
           <div class="project-selector-bar">
             <label for="hubProjectSelect" style="font-size: 12px; font-weight: 700; color: var(--sub); text-transform: uppercase;">Active Project:</label>
-            <select id="hubProjectSelect" class="select-dropdown" style="min-width: 240px; font-weight: 600;" aria-label="Target Project">
+            <select id="hubProjectSelect" class="select-dropdown" style="min-width: 220px; font-weight: 600;" aria-label="Target Project">
               <option value="">Loading project workspaces...</option>
             </select>
+            <button type="button" class="btn" id="openImportModalBtn" style="padding: 0 14px; height: 36px; font-size: 12px; display: flex; align-items: center; gap: 6px;">
+              <span>📥</span> Import Git Repo
+            </button>
             <span id="hubProjectBadge" class="badge" style="background: rgba(194, 131, 64, 0.15); color: var(--accent-gold); font-size: 11px; font-weight: 600; display: none;"></span>
           </div>
+        </div>
+
+        <!-- Empty State Callout when no project is loaded -->
+        <div id="noProjectsBanner" style="display: none; background: rgba(194, 131, 64, 0.10); border: 1px dashed rgba(194, 131, 64, 0.35); border-radius: 14px; padding: 18px 24px; margin-bottom: 20px; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+          <div>
+            <strong style="color: var(--ink); font-size: 14px; display: flex; align-items: center; gap: 6px;">
+              <span>📂</span> No Git repository workspaces loaded in this session.
+            </strong>
+            <p style="margin: 4px 0 0 0; font-size: 12.5px; color: var(--sub);">Import a remote Git repository (GitHub/GitLab/Bitbucket), connected account repo, or local workspace to inspect its 3D Digital Twin and run automated repairs.</p>
+          </div>
+          <button type="button" class="btn" onclick="openImportModal()" style="padding: 0 16px; height: 38px; font-size: 13px;">
+            📥 Import Git Repo Now
+          </button>
         </div>
 
         <!-- Feature Tabs -->
@@ -724,6 +786,79 @@
     </main>
   </div>
 
+  <!-- Modal: Import Git Repository Workspace -->
+  <div class="modal-overlay" id="importRepoModal">
+    <div class="modal-card">
+      <div style="padding: 18px 22px; border-bottom: 1px solid rgba(100,75,60,0.12); display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: var(--ink); display: flex; align-items: center; gap: 8px;">
+            <span>📥</span> Import Git Repository Workspace
+          </h3>
+          <p style="margin: 4px 0 0 0; font-size: 12px; color: var(--sub);">Clone and map any remote repository into a live 3D Codebase Digital Twin.</p>
+        </div>
+        <button type="button" id="closeImportModalBtn" style="background: none; border: none; font-size: 22px; color: var(--sub); cursor: pointer; padding: 2px 6px;">&times;</button>
+      </div>
+
+      <div style="padding: 22px;">
+        <!-- Tabs -->
+        <div style="display: flex; gap: 8px; margin-bottom: 18px; border-bottom: 1px solid rgba(100,75,60,0.12); padding-bottom: 10px;">
+          <button type="button" class="chip-btn active import-tab-btn" id="importTabBtn_url" onclick="setImportTab('url')">Git Clone URL</button>
+          <button type="button" class="chip-btn import-tab-btn" id="importTabBtn_github" onclick="setImportTab('github')">Connected GitHub</button>
+          <button type="button" class="chip-btn import-tab-btn" id="importTabBtn_zip" onclick="setImportTab('zip')">ZIP Archive</button>
+        </div>
+
+        <!-- Section 1: Git URL -->
+        <div id="importSectionUrl">
+          <div style="margin-bottom: 14px;">
+            <label class="form-label" style="font-size: 12px; font-weight: 700; color: var(--ink); margin-bottom: 4px; display: block;" for="importProjName">Project Workspace Name</label>
+            <input type="text" id="importProjName" class="input-glass" style="height: 38px; font-size: 13px; width: 100%;" placeholder="e.g. bug-web or payment-microservice">
+          </div>
+          <div style="margin-bottom: 14px;">
+            <label class="form-label" style="font-size: 12px; font-weight: 700; color: var(--ink); margin-bottom: 4px; display: block;" for="importGitUrl">Git Repository Clone URL or Local Path</label>
+            <input type="text" id="importGitUrl" class="input-glass" style="height: 38px; font-size: 13px; width: 100%;" placeholder="https://github.com/Tajesvi-kumar/bug-web.git">
+            <div style="display: flex; gap: 8px; align-items: center; margin-top: 8px; font-size: 11px; color: var(--sub); flex-wrap: wrap;">
+              <span>Presets:</span>
+              <button type="button" class="chip-btn" style="font-size: 11px; padding: 3px 8px;" onclick="setPresetGit('bug-web', 'https://github.com/Tajesvi-kumar/bug-web.git')">Tajesvi-kumar/bug-web</button>
+              <button type="button" class="chip-btn" style="font-size: 11px; padding: 3px 8px;" onclick="setPresetGit('hello-world', 'https://github.com/octocat/Hello-World.git')">octocat/Hello-World</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: Connected GitHub -->
+        <div id="importSectionGithub" style="display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <span style="font-size: 12px; font-weight: 600; color: var(--ink);">Account Repositories:</span>
+            <button type="button" class="chip-btn" id="refreshGhReposBtn" style="font-size: 11px;">🔄 Refresh Repos</button>
+          </div>
+          <div id="importGhRepoList" style="max-height: 220px; overflow-y: auto; border: 1px solid rgba(100,75,60,0.12); border-radius: 10px; padding: 6px; background: rgba(255,255,255,0.7);">
+            <div style="text-align: center; padding: 24px; font-size: 12px; color: var(--sub);">Click 'Refresh Repos' to fetch from connected GitHub account.</div>
+          </div>
+        </div>
+
+        <!-- Section 3: ZIP Archive -->
+        <div id="importSectionZip" style="display: none;">
+          <div style="margin-bottom: 14px;">
+            <label class="form-label" style="font-size: 12px; font-weight: 700; color: var(--ink); margin-bottom: 4px; display: block;" for="importZipProjName">Project Workspace Name</label>
+            <input type="text" id="importZipProjName" class="input-glass" style="height: 38px; font-size: 13px; width: 100%;" placeholder="e.g. offline-archive-repo">
+          </div>
+          <div style="margin-bottom: 14px;">
+            <label class="form-label" style="font-size: 12px; font-weight: 700; color: var(--ink); margin-bottom: 4px; display: block;" for="importZipFileInput">Upload Project ZIP Archive</label>
+            <input type="file" id="importZipFileInput" accept=".zip,.tar.gz" class="input-glass" style="height: 42px; font-size: 12px; padding: 8px 10px; width: 100%;">
+          </div>
+        </div>
+
+        <div id="importStatusMsg" style="display: none; padding: 10px 14px; border-radius: 8px; font-size: 12px; margin-top: 12px;"></div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; border-top: 1px solid rgba(100,75,60,0.1); padding-top: 14px;">
+          <button type="button" class="btn btn-secondary" id="cancelImportModalBtn" style="height: 38px; padding: 0 16px; font-size: 12.5px;">Cancel</button>
+          <button type="button" class="btn" id="submitImportBtn" style="height: 38px; padding: 0 20px; font-size: 13px;">
+            🚀 Import & Map Topology
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="api-client.js"></script>
   <script>
     if (window.autopatch) {
@@ -766,11 +901,16 @@
     // ==========================================
     async function initProjects() {
       try {
+        if (window.autopatch) {
+          await window.autopatch.checkHealth();
+        }
         const projs = await window.autopatch.listProjects();
         const sel = document.getElementById('hubProjectSelect');
+        const emptyBanner = document.getElementById('noProjectsBanner');
         if (!sel) return;
 
         if (projs && projs.length > 0) {
+          if (emptyBanner) emptyBanner.style.display = 'none';
           sel.innerHTML = '';
           const savedId = new URLSearchParams(window.location.search).get('project_id') ||
                           localStorage.getItem('autopatch_active_project_id');
@@ -790,6 +930,7 @@
           await selectProject(projs[selectedIndex].project_id);
         } else {
           sel.innerHTML = '<option value="">No project workspaces found</option>';
+          if (emptyBanner) emptyBanner.style.display = 'flex';
         }
       } catch (e) {
         console.error('Project initialization error:', e);
@@ -810,7 +951,7 @@
       const badge = document.getElementById('hubProjectBadge');
       if (badge) {
         badge.style.display = 'inline-block';
-        badge.innerText = `Active ID: ${projectId.substring(0, 8)}`;
+        badge.innerText = `ID: ${projectId.substring(0, 8)}`;
       }
 
       // Load project bugs & components
@@ -826,6 +967,165 @@
         selectProject(e.target.value);
       });
     }
+
+    // ==========================================
+    // Git Repository Workspace Import Logic
+    // ==========================================
+    function openImportModal() {
+      const modal = document.getElementById('importRepoModal');
+      if (modal) modal.style.display = 'flex';
+      setImportTab('url');
+    }
+
+    function closeImportModal() {
+      const modal = document.getElementById('importRepoModal');
+      if (modal) modal.style.display = 'none';
+      const statusEl = document.getElementById('importStatusMsg');
+      if (statusEl) statusEl.style.display = 'none';
+    }
+
+    let activeImportMode = 'url';
+    function setImportTab(mode) {
+      activeImportMode = mode;
+      document.querySelectorAll('.import-tab-btn').forEach(b => b.classList.remove('active'));
+      const activeBtn = document.getElementById(`importTabBtn_${mode}`);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      document.getElementById('importSectionUrl').style.display = mode === 'url' ? 'block' : 'none';
+      document.getElementById('importSectionGithub').style.display = mode === 'github' ? 'block' : 'none';
+      document.getElementById('importSectionZip').style.display = mode === 'zip' ? 'block' : 'none';
+
+      if (mode === 'github') {
+        loadGitHubRepositoriesList();
+      }
+    }
+
+    function setPresetGit(name, url) {
+      const nameEl = document.getElementById('importProjName');
+      const urlEl = document.getElementById('importGitUrl');
+      if (nameEl) nameEl.value = name;
+      if (urlEl) urlEl.value = url;
+    }
+
+    async function loadGitHubRepositoriesList() {
+      const listContainer = document.getElementById('importGhRepoList');
+      if (!listContainer) return;
+      listContainer.innerHTML = '<div style="text-align: center; padding: 20px; font-size: 12px; color: var(--sub);">Loading connected GitHub repositories...</div>';
+
+      try {
+        const repos = await window.autopatch.listGitHubRepos();
+        if (repos && repos.length > 0) {
+          let html = '';
+          repos.forEach(r => {
+            const cloneUrl = r.clone_url || `https://github.com/${r.full_name}.git`;
+            html += `
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-bottom: 1px solid rgba(100,75,60,0.08);">
+                <div>
+                  <strong style="font-size: 13px; color: var(--ink);">${escapeHtml(r.name)}</strong>
+                  <div style="font-size: 11px; color: var(--sub);">${escapeHtml(r.full_name)} &bull; ${escapeHtml(r.language || 'Codebase')}</div>
+                </div>
+                <button type="button" class="btn" style="padding: 4px 10px; height: 28px; font-size: 11px;" onclick="importAndSelectRepo('${escapeHtml(r.name)}', '${escapeHtml(cloneUrl)}')">
+                  Clone & Map
+                </button>
+              </div>
+            `;
+          });
+          listContainer.innerHTML = html;
+        } else {
+          listContainer.innerHTML = '<div style="text-align: center; padding: 20px; font-size: 12px; color: var(--sub);">No repositories found. Authorize GitHub on AI Studio or enter a Git URL directly.</div>';
+        }
+      } catch (e) {
+        listContainer.innerHTML = `<div style="text-align: center; padding: 20px; font-size: 12px; color: var(--danger);">Failed to query GitHub repositories: ${escapeHtml(e.message)}</div>`;
+      }
+    }
+
+    async function importAndSelectRepo(projName, cloneUrl) {
+      const submitBtn = document.getElementById('submitImportBtn');
+      const statusEl = document.getElementById('importStatusMsg');
+      if (statusEl) {
+        statusEl.style.display = 'block';
+        statusEl.style.background = 'rgba(194, 131, 64, 0.15)';
+        statusEl.style.color = 'var(--ink)';
+        statusEl.innerHTML = `<strong>Cloning '${escapeHtml(projName)}'...</strong> Ingesting git history and building 3D digital twin AST.`;
+      }
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'Cloning & Ingesting...';
+      }
+
+      try {
+        const newProj = await window.autopatch.createProject(projName, cloneUrl);
+        if (statusEl) {
+          statusEl.style.background = 'rgba(40, 122, 76, 0.15)';
+          statusEl.style.color = 'var(--success)';
+          statusEl.innerHTML = `✅ Successfully imported <strong>${escapeHtml(newProj.name)}</strong>! Mapping AST topology...`;
+        }
+        await initProjects();
+        await selectProject(newProj.project_id);
+        setTimeout(closeImportModal, 900);
+      } catch (err) {
+        if (statusEl) {
+          statusEl.style.background = 'rgba(224, 82, 68, 0.15)';
+          statusEl.style.color = 'var(--danger)';
+          statusEl.innerHTML = `❌ Clone failed: ${escapeHtml(err.message)}`;
+        }
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerText = '🚀 Import & Map Topology';
+        }
+      }
+    }
+
+    document.getElementById('openImportModalBtn')?.addEventListener('click', openImportModal);
+    document.getElementById('closeImportModalBtn')?.addEventListener('click', closeImportModal);
+    document.getElementById('cancelImportModalBtn')?.addEventListener('click', closeImportModal);
+    document.getElementById('refreshGhReposBtn')?.addEventListener('click', loadGitHubRepositoriesList);
+
+    document.getElementById('submitImportBtn')?.addEventListener('click', async () => {
+      if (activeImportMode === 'url') {
+        const name = document.getElementById('importProjName').value.trim() || 'Git-Project';
+        const url = document.getElementById('importGitUrl').value.trim();
+        if (!url) return alert('Please enter a Git repository clone URL (or local directory path).');
+        await importAndSelectRepo(name, url);
+      } else if (activeImportMode === 'zip') {
+        const name = document.getElementById('importZipProjName').value.trim() || 'Zip-Project';
+        const fileInput = document.getElementById('importZipFileInput');
+        if (!fileInput.files || fileInput.files.length === 0) {
+          return alert('Please select a .zip archive file to upload.');
+        }
+        const file = fileInput.files[0];
+        const submitBtn = document.getElementById('submitImportBtn');
+        const statusEl = document.getElementById('importStatusMsg');
+        if (statusEl) {
+          statusEl.style.display = 'block';
+          statusEl.style.background = 'rgba(194, 131, 64, 0.15)';
+          statusEl.style.color = 'var(--ink)';
+          statusEl.innerHTML = `<strong>Uploading & extracting archive...</strong> Analyzing AST topology.`;
+        }
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.innerText = 'Extracting...';
+        }
+        try {
+          const newProj = await window.autopatch.createProject(name, null, file);
+          await initProjects();
+          await selectProject(newProj.project_id);
+          setTimeout(closeImportModal, 800);
+        } catch (err) {
+          if (statusEl) {
+            statusEl.style.background = 'rgba(224, 82, 68, 0.15)';
+            statusEl.style.color = 'var(--danger)';
+            statusEl.innerHTML = `❌ Upload failed: ${escapeHtml(err.message)}`;
+          }
+        } finally {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerText = '🚀 Import & Map Topology';
+          }
+        }
+      }
+    });
 
     async function loadProjectBugs() {
       if (!activeProjectId) return;

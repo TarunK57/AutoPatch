@@ -77,7 +77,7 @@ class AutoPatchClient {
    * Creates or registers a code project.
    */
   async createProject(name, githubUrl = null, file = null) {
-    if (!this._isOnline) {
+    if (this._isOnline === false) {
       throw new Error('Backend is offline. Cannot create live project.');
     }
     let res;
@@ -102,6 +102,7 @@ class AutoPatchClient {
       const err = await res.json().catch(() => ({ detail: res.statusText }));
       throw new Error(err.detail || `Project creation failed: ${res.status}`);
     }
+    this._isOnline = true;
     return await res.json();
   }
 
@@ -109,19 +110,26 @@ class AutoPatchClient {
    * Lists all projects owned by current user.
    */
   async listProjects() {
-    if (!this._isOnline) return [];
-    const res = await fetch(`${this.config.baseUrl}/projects`, {
-      headers: this.headers,
-    });
-    if (!res.ok) return [];
-    return await res.json();
+    try {
+      const res = await fetch(`${this.config.baseUrl}/projects`, {
+        headers: this.headers,
+      });
+      if (res.ok) {
+        this._isOnline = true;
+        return await res.json();
+      }
+      return [];
+    } catch (e) {
+      console.warn('listProjects fetch error:', e);
+      return [];
+    }
   }
 
   /**
    * Starts a new scan job for a project.
    */
   async startScanJob(projectId) {
-    if (!this._isOnline) {
+    if (this._isOnline === false) {
       throw new Error('Backend is offline. Cannot initiate autonomous scan job.');
     }
     // Try primary project scan endpoint first
@@ -218,7 +226,7 @@ class AutoPatchClient {
    * Records explicit human approval or rejection decision.
    */
   async recordDecision(projectId, bugId, decision) {
-    if (!this._isOnline) {
+    if (this._isOnline === false) {
       throw new Error('Backend is offline. Live human approval cannot be submitted without a running server.');
     }
     const payload = {
@@ -243,7 +251,7 @@ class AutoPatchClient {
    * Triggers download of the complete codebase as a ZIP archive with all verified fixes.
    */
   async downloadPatchedZip(projectId, customFilename = null) {
-    if (!this._isOnline) {
+    if (this._isOnline === false) {
       throw new Error('Backend is offline. Cannot download patched ZIP.');
     }
     const downloadUrl = `${this.config.baseUrl}/projects/${encodeURIComponent(projectId)}/download-zip`;
@@ -271,7 +279,7 @@ class AutoPatchClient {
    * Pushes remediation branch to remote git repository.
    */
   async pushRemediationBranch(projectId, branchName, githubToken = null, remoteUrl = null) {
-    if (!this._isOnline) {
+    if (this._isOnline === false) {
       throw new Error('Backend is offline. Cannot push branch to remote repository.');
     }
     const payload = {
@@ -295,7 +303,7 @@ class AutoPatchClient {
    * Opens a GitHub pull request with formatted verification evidence table.
    */
   async openPullRequest(projectId, repoSlug, headBranch, baseBranch = 'main', title = null, githubToken = null) {
-    if (!this._isOnline) {
+    if (this._isOnline === false) {
       throw new Error('Backend is offline. Cannot open pull request.');
     }
     const payload = {
@@ -389,7 +397,7 @@ class AutoPatchClient {
    * Fetches real live dashboard telemetry, KPIs, CWE breakdown, velocity points, and activity ledger.
    */
   async getDashboardMetrics(projectId = null) {
-    if (!this._isOnline) return null;
+    if (this._isOnline === false) return null;
     try {
       const url = projectId
         ? `${this.config.baseUrl}/observability/dashboard?project_id=${encodeURIComponent(projectId)}`
