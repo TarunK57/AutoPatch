@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LuminaAI — Patch Review Dossier</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--sub);
+      margin-bottom: 16px;
+    }
+    .breadcrumb a {
+      color: var(--ink);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .breadcrumb a:hover {
+      text-decoration: underline;
+    }
+
+    .dossier-grid {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 24px;
+      margin-top: 20px;
+    }
+
+    /* Diff Viewer */
+    .diff-wrapper {
+      background: #141110;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      overflow: hidden;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+    }
+    .diff-header {
+      background: #241e1b;
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: #bfaea6;
+    }
+    .diff-container {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12.5px;
+      line-height: 1.6;
+      overflow-x: auto;
+      padding: 8px 0;
+    }
+    .diff-line {
+      display: flex;
+      padding: 2px 14px;
+      white-space: pre;
+    }
+    .diff-line.del {
+      background: rgba(179, 57, 39, 0.22);
+      color: #f7a89e;
+    }
+    .diff-line.add {
+      background: rgba(40, 122, 76, 0.22);
+      color: #8ce3b0;
+    }
+    .diff-num {
+      width: 44px;
+      user-select: none;
+      color: #6a5a54;
+      text-align: right;
+      padding-right: 14px;
+      display: inline-block;
+    }
+    .diff-sign {
+      width: 18px;
+      user-select: none;
+      display: inline-block;
+      font-weight: 600;
+    }
+    .diff-code {
+      flex: 1;
+    }
+
+    /* Side details */
+    .detail-card {
+      background: rgba(255, 255, 255, 0.6);
+      border-radius: 16px;
+      border: 1px solid rgba(100, 75, 60, 0.12);
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+    .detail-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--ink);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .causal-step {
+      display: flex;
+      gap: 10px;
+      font-size: 12px;
+      margin-bottom: 8px;
+      padding-left: 4px;
+      position: relative;
+    }
+    .causal-step::before {
+      content: "";
+      position: absolute;
+      left: 10px;
+      top: 18px;
+      bottom: -6px;
+      width: 1px;
+      background: rgba(100, 75, 60, 0.25);
+    }
+    .causal-step:last-child::before {
+      display: none;
+    }
+    .step-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--accent-gold);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 2px;
+      z-index: 2;
+    }
+
+    /* Verification Checklist */
+    .verify-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(100, 75, 60, 0.08);
+      font-size: 12.5px;
+    }
+    .verify-item:last-child {
+      border-bottom: none;
+    }
+
+    /* Action bar */
+    .review-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-top: 18px;
+      flex-wrap: wrap;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #1e1816;
+      color: #f7efe8;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      padding: 14px 20px;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.3);
+      font-size: 13.5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 100;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    @media (max-width: 992px) {
+      .dossier-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <video class="bg-video" src="bg.mp4" autoplay muted loop playsinline preload="auto"></video>
+
+    <!-- Header Navigation -->
+    <header>
+      <a class="logo" href="index.html">
+        <svg viewBox="0 0 20 22">
+          <path d="M10 0 1 3.5v7C1 16 5 20 10 22c5-2 9-6 9-11.500v-7z" fill="#141110"/>
+          <circle cx="10" cy="10.5" r="3.2" fill="#f3ebe1"/>
+        </svg>
+        LuminaAI
+      </a>
+
+      <nav>
+        <a href="index.html">Overview</a>
+        <a href="solutions.html">Solutions</a>
+        <a href="studio.html">AI Studio</a>
+        <a href="queue.html">Issues Queue</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="pricing.html">Pricing</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+
+      <div class="header-actions">
+        <button class="fs-toggle" id="fsBtn" title="Toggle Fullscreen" aria-label="Toggle Fullscreen">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+          </svg>
+        </button>
+        <a class="btn try-btn" href="queue.html">
+          Back to Queue
+        </a>
+      </div>
+    </header>
+
+    <!-- Review Content -->
+    <main class="main-content">
+      <div class="glass-panel">
+        <div class="breadcrumb">
+          <a href="queue.html">&larr; Back to Bug Queue</a>
+          <span>/</span>
+          <span>Dossier #AUTOPATCH-401</span>
+          <span>/</span>
+          <span style="color: var(--ink); font-weight: 600;">CVE-2024-4112</span>
+        </div>
+
+        <div class="section-head" style="margin-bottom: 12px;">
+          <div>
+            <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
+              <span class="badge badge-critical"><span class="badge-dot"></span>CVSS 9.8 CRITICAL</span>
+              <span class="badge badge-verified"><span class="badge-dot"></span>PATCH VERIFIED</span>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--sub);">CWE-89: SQL Injection</span>
+            </div>
+            <h1 class="section-title">SQL Injection in User Authentication Query</h1>
+            <p class="section-desc">Unsanitized formatted token forwarded directly to database session retrieval cursor without query parameterization.</p>
+          </div>
+          <div>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; background: rgba(255,255,255,0.7); padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(100,75,60,0.15);">
+              Target: src/auth/service.py:34-38
+            </span>
+          </div>
+        </div>
+
+        <div class="dossier-grid">
+          <!-- Left: Diff & Verification -->
+          <div>
+            <div class="diff-wrapper">
+              <div class="diff-header">
+                <div>
+                  <span>src/auth/service.py</span> &bull; <span style="color: #6db1d4;">@@ -34,6 +34,8 @@</span>
+                </div>
+                <div>
+                  <span style="color: #8ce3b0;">+3 lines</span> &bull; <span style="color: #f7a89e;">-2 lines</span>
+                </div>
+              </div>
+              <div class="diff-container">
+                <div class="diff-line">
+                  <span class="diff-num">32</span><span class="diff-sign"> </span><span class="diff-code">def get_user_by_token(db_conn, token: str) -&gt; Optional[User]:</span>
+                </div>
+                <div class="diff-line">
+                  <span class="diff-num">33</span><span class="diff-sign"> </span><span class="diff-code">    cursor = db_conn.cursor()</span>
+                </div>
+                <div class="diff-line del">
+                  <span class="diff-num">34</span><span class="diff-sign">-</span><span class="diff-code">    # VULNERABLE: Direct f-string interpolation</span>
+                </div>
+                <div class="diff-line del">
+                  <span class="diff-num">35</span><span class="diff-sign">-</span><span class="diff-code">    query = f"SELECT * FROM sessions WHERE token = '{token}'"</span>
+                </div>
+                <div class="diff-line del">
+                  <span class="diff-num">36</span><span class="diff-sign">-</span><span class="diff-code">    cursor.execute(query)</span>
+                </div>
+                <div class="diff-line add">
+                  <span class="diff-num">34</span><span class="diff-sign">+</span><span class="diff-code">    # PATCHED: Parameterized query prevents syntax hijacking</span>
+                </div>
+                <div class="diff-line add">
+                  <span class="diff-num">35</span><span class="diff-sign">+</span><span class="diff-code">    query = "SELECT * FROM sessions WHERE token = %s"</span>
+                </div>
+                <div class="diff-line add">
+                  <span class="diff-num">36</span><span class="diff-sign">+</span><span class="diff-code">    cursor.execute(query, (token,))</span>
+                </div>
+                <div class="diff-line">
+                  <span class="diff-num">37</span><span class="diff-sign"> </span><span class="diff-code">    row = cursor.fetchone()</span>
+                </div>
+                <div class="diff-line">
+                  <span class="diff-num">38</span><span class="diff-sign"> </span><span class="diff-code">    return User.from_row(row) if row else None</span>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top: 18px;">
+              <div class="detail-title">Human Review & Patch Decision</div>
+              <textarea class="input-glass" id="reviewComment" rows="2" placeholder="Optional review note or audit log comment..."></textarea>
+              <div class="review-actions">
+                <button class="btn" id="approveBtn" style="padding: 0 24px; height: 42px; font-size: 13.5px;">
+                  <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6">
+                    <polyline points="3 8 7 12 13 4"></polyline>
+                  </svg>
+                  Approve & Merge Patch (PR #42)
+                </button>
+                <button class="btn btn-secondary" id="altBtn" style="padding: 0 18px; height: 42px; font-size: 13px;">
+                  Request Alternative Patch
+                </button>
+                <button class="btn btn-secondary" id="rejectBtn" style="padding: 0 16px; height: 42px; font-size: 13px; color: var(--danger);">
+                  Reject Candidate
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Root Cause & Test Invariants -->
+          <div>
+            <div class="detail-card">
+              <div class="detail-title">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="8" x2="12" y2="12"></line>
+                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                Root Cause Causal Chain
+              </div>
+              <div class="causal-step">
+                <div class="step-dot">1</div>
+                <div>
+                  <div style="font-weight: 600; color: var(--ink);">src/api/routes.py:12</div>
+                  <div style="color: var(--sub);">Client transmits raw Bearer token via HTTP header.</div>
+                </div>
+              </div>
+              <div class="causal-step">
+                <div class="step-dot">2</div>
+                <div>
+                  <div style="font-weight: 600; color: var(--ink);">src/auth/service.py:34</div>
+                  <div style="color: var(--sub);">Forwarded without token escaping or regex sanitization.</div>
+                </div>
+              </div>
+              <div class="causal-step">
+                <div class="step-dot">3</div>
+                <div>
+                  <div style="font-weight: 600; color: var(--danger);">src/auth/service.py:36</div>
+                  <div style="color: var(--sub);">Interpolated into SQL query; unauthenticated session bypass possible.</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="detail-card">
+              <div class="detail-title">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+                Sandbox Verification Matrix
+              </div>
+              <div class="verify-item">
+                <span>test_reproduce_sqli_payload</span>
+                <span class="badge badge-verified" style="font-size: 10px;">DEFENDED</span>
+              </div>
+              <div class="verify-item">
+                <span>test_legitimate_user_session_lookup</span>
+                <span class="badge badge-verified" style="font-size: 10px;">PASSED</span>
+              </div>
+              <div class="verify-item">
+                <span>test_empty_or_special_chars</span>
+                <span class="badge badge-verified" style="font-size: 10px;">PASSED</span>
+              </div>
+              <div class="verify-item">
+                <span>AST Invariant [NoRawInterpolation]</span>
+                <span class="badge badge-verified" style="font-size: 10px;">SATISFIED</span>
+              </div>
+              <div class="verify-item">
+                <span>Zero Regression Pass Rate</span>
+                <span style="font-weight: 700; color: var(--success); font-size: 12px;">100% (14/14)</span>
+              </div>
+            </div>
+
+            <div class="detail-card">
+              <div class="detail-title">Provenance & Model Telemetry</div>
+              <div style="font-size: 12px; color: var(--sub); line-height: 1.6;">
+                <div><strong>Synthesis Model:</strong> Gemini 1.5 Pro &bull; Temp: 0.1</div>
+                <div><strong>Token Consumption:</strong> 3,420 prompt / 280 completion</div>
+                <div><strong>Sandbox Environment:</strong> Python 3.11-alpine microVM</div>
+                <div><strong>Git Head Branch:</strong> autopatch/fix-cve-2024-4112</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#52c27c" stroke-width="2">
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+      <polyline points="22 4 12 14.01 9 11.01"></polyline>
+    </svg>
+    <span id="toastMsg">Action executed successfully.</span>
+  </div>
+
+  <script>
+    // Fullscreen toggle handler
+    const fsBtn = document.getElementById('fsBtn');
+    if (fsBtn) {
+      fsBtn.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(err => console.log(err));
+        } else {
+          document.exitFullscreen();
+        }
+      });
+      document.addEventListener('fullscreenchange', () => {
+        if (document.fullscreenElement) {
+          fsBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>';
+        } else {
+          fsBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>';
+        }
+      });
+    }
+
+    const toast = document.getElementById('toast');
+    const toastMsg = document.getElementById('toastMsg');
+
+    function showToast(msg) {
+      toastMsg.innerText = msg;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3500);
+    }
+
+    document.getElementById('approveBtn').addEventListener('click', () => {
+      showToast('Patch Approved! Opened PR #42 on branch autopatch/fix-cve-2024-4112.');
+      setTimeout(() => {
+        window.location.href = 'queue.html';
+      }, 1800);
+    });
+
+    document.getElementById('altBtn').addEventListener('click', () => {
+      showToast('Synthesizing alternative candidate patch with temperature=0.25...');
+    });
+
+    document.getElementById('rejectBtn').addEventListener('click', () => {
+      showToast('Patch candidate marked as REJECTED. Triage audit recorded.');
+      setTimeout(() => {
+        window.location.href = 'queue.html';
+      }, 1500);
+    });
+  </script>
+</body>
+</html>

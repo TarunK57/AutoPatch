@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LuminaAI — Contact & Consultation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1.3fr 0.9fr;
+      gap: 32px;
+      margin-top: 16px;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 6px;
+    }
+    textarea.input-glass {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    /* Contact Details Side */
+    .contact-card {
+      background: rgba(255, 255, 255, 0.6);
+      border-radius: 20px;
+      border: 1px solid rgba(100, 75, 60, 0.12);
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .contact-item {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .contact-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: rgba(194, 131, 64, 0.15);
+      color: var(--accent-gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .contact-item-title {
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--ink);
+    }
+    .contact-item-desc {
+      font-size: 12.5px;
+      color: var(--sub);
+      margin-top: 2px;
+      line-height: 1.45;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #1e1816;
+      color: #f7efe8;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      padding: 14px 20px;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.3);
+      font-size: 13.5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 100;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    @media (max-width: 992px) {
+      .contact-grid {
+        grid-template-columns: 1fr;
+      }
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <video class="bg-video" src="bg.mp4" autoplay muted loop playsinline preload="auto"></video>
+
+    <!-- Header Navigation -->
+    <header>
+      <a class="logo" href="index.html">
+        <svg viewBox="0 0 20 22">
+          <path d="M10 0 1 3.5v7C1 16 5 20 10 22c5-2 9-6 9-11.500v-7z" fill="#141110"/>
+          <circle cx="10" cy="10.5" r="3.2" fill="#f3ebe1"/>
+        </svg>
+        LuminaAI
+      </a>
+
+      <nav>
+        <a href="index.html">Overview</a>
+        <a href="solutions.html">Solutions</a>
+        <a href="studio.html">AI Studio</a>
+        <a href="queue.html">Issues Queue</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="pricing.html">Pricing</a>
+        <a href="contact.html" class="active">Contact</a>
+      </nav>
+
+      <div class="header-actions">
+        <button class="fs-toggle" id="fsBtn" title="Toggle Fullscreen" aria-label="Toggle Fullscreen">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+          </svg>
+        </button>
+        <a class="btn try-btn" href="studio.html">
+          Try AI Studio
+        </a>
+      </div>
+    </header>
+
+    <!-- Main Contact Content -->
+    <main class="main-content">
+      <div class="glass-panel">
+        <div class="section-head">
+          <div>
+            <h1 class="section-title"><em>Connect</em> With Our Security Engineers</h1>
+            <p class="section-desc">Consult on custom invariant design, air-gapped on-premise deployments, or schedule a formal live verification demo.</p>
+          </div>
+        </div>
+
+        <div class="contact-grid">
+          <!-- Form -->
+          <form id="contactForm">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="fullName">Full Name</label>
+                <input type="text" id="fullName" class="input-glass" placeholder="Alex Morgan" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="email">Work Email</label>
+                <input type="email" id="email" class="input-glass" placeholder="alex@company.com" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="company">Company / Organization</label>
+                <input type="text" id="company" class="input-glass" placeholder="Acme Security Corp" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="scale">Repository Scale</label>
+                <input type="text" id="scale" class="input-glass" placeholder="e.g. 50+ repositories">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="message">Project Requirements or Scope</label>
+              <textarea id="message" class="input-glass" placeholder="Tell us about your tech stack, compliance targets (SOC2, ISO, HIPAA), or desired verification guardrails..." required></textarea>
+            </div>
+
+            <div style="margin-top: 18px;">
+              <button type="submit" class="btn" style="padding: 0 32px; height: 46px; font-size: 14px;">
+                Submit Inquiry &rarr;
+              </button>
+            </div>
+          </form>
+
+          <!-- Contact Details -->
+          <div>
+            <div class="contact-card">
+              <div class="contact-item">
+                <div class="contact-icon">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                    <polyline points="22,6 12,13 2,6"></polyline>
+                  </svg>
+                </div>
+                <div>
+                  <div class="contact-item-title">Enterprise Security Desk</div>
+                  <div class="contact-item-desc">security@lumina-ai.dev<br>Response time: &lt; 2 business hours</div>
+                </div>
+              </div>
+
+              <div class="contact-item">
+                <div class="contact-icon">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+                  </svg>
+                </div>
+                <div>
+                  <div class="contact-item-title">Open Source Community</div>
+                  <div class="contact-item-desc">github.com/lumina-ai/autopatch<br>Join our developer discussions & bug bounties</div>
+                </div>
+              </div>
+
+              <div class="contact-item">
+                <div class="contact-icon">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polygon points="12 8 8 12 12 16 12 8"></polygon>
+                  </svg>
+                </div>
+                <div>
+                  <div class="contact-item-title">99.99% Availability SLA</div>
+                  <div class="contact-item-desc">Dedicated enterprise tier microVM orchestration clusters with multi-region failover.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#52c27c" stroke-width="2">
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+      <polyline points="22 4 12 14.01 9 11.01"></polyline>
+    </svg>
+    <span>Inquiry submitted! Our security engineering team will reach out shortly.</span>
+  </div>
+
+  <script>
+    // Fullscreen toggle handler
+    const fsBtn = document.getElementById('fsBtn');
+    if (fsBtn) {
+      fsBtn.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(err => console.log(err));
+        } else {
+          document.exitFullscreen();
+        }
+      });
+      document.addEventListener('fullscreenchange', () => {
+        if (document.fullscreenElement) {
+          fsBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>';
+        } else {
+          fsBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>';
+        }
+      });
+    }
+
+    const form = document.getElementById('contactForm');
+    const toast = document.getElementById('toast');
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      toast.classList.add('show');
+      form.reset();
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 4000);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LuminaAI — Solutions & Architecture</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .solutions-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-top: 24px;
+    }
+    .solution-card {
+      background: rgba(255, 255, 255, 0.6);
+      border-radius: 20px;
+      border: 1px solid rgba(100, 75, 60, 0.12);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .solution-card:hover {
+      background: rgba(255, 255, 255, 0.92);
+      transform: translateY(-4px);
+      box-shadow: 0 16px 32px rgba(50, 30, 20, 0.08);
+      border-color: var(--accent-gold);
+    }
+    .sol-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(194, 131, 64, 0.15);
+      color: var(--accent-gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+    .sol-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 8px;
+      letter-spacing: -0.015em;
+    }
+    .sol-desc {
+      font-size: 13.5px;
+      color: var(--sub);
+      line-height: 1.55;
+      margin-bottom: 16px;
+    }
+    .sol-features {
+      list-style: none;
+      font-size: 12.5px;
+      color: #3b322f;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .sol-features li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sol-features svg {
+      color: var(--success);
+      flex-shrink: 0;
+    }
+
+    /* Workflow Banner */
+    .workflow-banner {
+      margin-top: 32px;
+      background: #181412;
+      border-radius: 20px;
+      padding: 32px;
+      color: #f7efe8;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .pipeline-steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-top: 12px;
+      position: relative;
+    }
+    .pipeline-step {
+      background: #241e1b;
+      border-radius: 14px;
+      padding: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .step-number {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--accent-gold);
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .step-name {
+      font-weight: 600;
+      font-size: 14px;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+    .step-detail {
+      font-size: 12px;
+      color: #a3958f;
+      line-height: 1.45;
+    }
+
+    @media (max-width: 992px) {
+      .solutions-grid {
+        grid-template-columns: 1fr;
+      }
+      .pipeline-steps {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <video class="bg-video" src="bg.mp4" autoplay muted loop playsinline preload="auto"></video>
+
+    <!-- Header Navigation -->
+    <header>
+      <a class="logo" href="index.html">
+        <svg viewBox="0 0 20 22">
+          <path d="M10 0 1 3.5v7C1 16 5 20 10 22c5-2 9-6 9-11.500v-7z" fill="#141110"/>
+          <circle cx="10" cy="10.5" r="3.2" fill="#f3ebe1"/>
+        </svg>
+        LuminaAI
+      </a>
+
+      <nav>
+        <a href="index.html">Overview</a>
+        <a href="solutions.html" class="active">Solutions</a>
+        <a href="studio.html">AI Studio</a>
+        <a href="queue.html">Issues Queue</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="pricing.html">Pricing</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+
+      <div class="header-actions">
+        <button class="fs-toggle" id="fsBtn" title="Toggle Fullscreen" aria-label="Toggle Fullscreen">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+          </svg>
+        </button>
+        <a class="btn try-btn" href="studio.html">
+          Try AI Studio
+        </a>
+      </div>
+    </header>
+
+    <!-- Main Solutions Content -->
+    <main class="main-content">
+      <div class="glass-panel">
+        <div class="section-head">
+          <div>
+            <h1 class="section-title"><em>Autonomous</em> Solutions & Architecture</h1>
+            <p class="section-desc">Lumina transforms vulnerability patching from weeks of manual developer triage into guaranteed, regression-verified fixes delivered in minutes.</p>
+          </div>
+          <a href="studio.html" class="btn" style="padding: 0 22px; height: 42px; font-size: 13.5px;">
+            Open AI Studio &rarr;
+          </a>
+        </div>
+
+        <!-- Solutions Grid -->
+        <div class="solutions-grid">
+          <!-- Card 1 -->
+          <div class="solution-card">
+            <div>
+              <div class="sol-icon">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                  <polyline points="2 17 12 22 22 17"></polyline>
+                  <polyline points="2 12 12 17 22 12"></polyline>
+                </svg>
+              </div>
+              <div class="sol-title">Deterministic AST Taint Analysis</div>
+              <div class="sol-desc">Mathematical dataflow tracking across complex symbol trees. Identifies untrusted user input sinks before exploit execution occurs.</div>
+              <ul class="sol-features">
+                <li>
+                  <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 8 7 12 13 4"></polyline></svg>
+                  Cross-procedural symbol propagation
+                </li>
+                <li>
+                  <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 8 7 12 13 4"></polyline></svg>
+                  Zero false positives on dead code branches
+                </li>
+                <li>
+                  <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 8 7 12 13 4"></polyline></svg>
+                  Supports Python, Go, C/C++, TypeScript
+                </li>
+              </ul>
+            </div>
+            <div style="margin-top: 20px;">
+              <a href="queue.html" class="btn btn-secondary" style="width: 100%; height: 36px; font-size: 12.5px;">
+                Explore Detected CVEs
+              </a>
+            </div>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="solution-card">
+            <div>
+              <div class="sol-icon">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+              </div>
+              <div class="sol-title">Formal Verification Sandboxing</div>
+              <div class="sol-desc">Every candidate patch is executed inside ephemeral microVM containers. Validates that the exploit payload is neutralized with 0 side regressions.</div>
+              <ul class="sol-features">
+                <li>
+                  <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 8 7 12 13 4"></polyline></svg>
+                  Automated BRT test harness generation
+                </li>
+                <li>
+                  <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 8 7 12 13 4"></polyline></svg>
+                  Full repository regression test execution
+                </li>
+                <li>
+                  <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 8 7 12 13 4"></polyline></svg>
+                  Kernel-level namespace isolation
+                </li>
+              </ul>
+            </div>
+            <div style="margin-top: 20px;">
+              <a href="review.html?id=cve-2024-4112" class="btn btn-secondary" style="width: 100%; height: 36px; font-size: 12.5px;">
+                Inspect Live Verification
+              </a>
+            </div>
+          </div>
+
+          <!-- Card 3 -->
+          <div class="solution-card">
+            <div>
+              <div class="sol-icon">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="18" cy="5" r="3"></circle>
+                  <circle cx="6" cy="12" r="3"></circle>
+                  <circle cx="18" cy="19" r="3"></circle>
+                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                  <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                </svg>
+              </div>
+              <div class="sol-title">Multi-Model Agent Ensemble</div>
+              <div class="sol-desc">Leverages Gemini 1.5 Pro and Claude 3.5 Sonnet in consensus loops to synthesize the most idiomatic, minimal, and secure patch.</div>
+              <ul class="sol-features">
+                <li>
+                  <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 8 7 12 13 4"></polyline></svg>
+                  Temperature-controlled invariant sampling
+                </li>
+                <li>
+                  <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 8 7 12 13 4"></polyline></svg>
+                  Style-preserving code patch generation
+                </li>
+                <li>
+                  <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 8 7 12 13 4"></polyline></svg>
+                  Automated Git pull requests with full audit
+                </li>
+              </ul>
+            </div>
+            <div style="margin-top: 20px;">
+              <a href="dashboard.html" class="btn btn-secondary" style="width: 100%; height: 36px; font-size: 12.5px;">
+                View System Metrics
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Workflow Banner -->
+        <div class="workflow-banner">
+          <div>
+            <span class="badge" style="background: rgba(194, 131, 64, 0.2); color: #e9ba7e; margin-bottom: 10px;">END-TO-END AUTONOMY</span>
+            <h2 style="font-size: 22px; font-weight: 600;">How Lumina Heals Repositories in 4 Stages</h2>
+          </div>
+
+          <div class="pipeline-steps">
+            <div class="pipeline-step">
+              <div class="step-number">PHASE 01</div>
+              <div class="step-name">Scan & Taint Model</div>
+              <div class="step-detail">Indexes source AST, maps dataflow routes, and marks all unescaped vulnerability sinks.</div>
+            </div>
+
+            <div class="pipeline-step">
+              <div class="step-number">PHASE 02</div>
+              <div class="step-name">Synthesize Candidates</div>
+              <div class="step-detail">Ensemble agents generate candidate patches satisfying formal security invariants.</div>
+            </div>
+
+            <div class="pipeline-step">
+              <div class="step-number">PHASE 03</div>
+              <div class="step-name">Sandbox Verification</div>
+              <div class="step-detail">Executes exploit test and full regression suite in isolated microVMs to verify safety.</div>
+            </div>
+
+            <div class="pipeline-step">
+              <div class="step-number">PHASE 04</div>
+              <div class="step-name">Human Review & PR</div>
+              <div class="step-detail">Developer audits rich diff dossier with one click; automatically opens production PR.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Fullscreen toggle handler
+    const fsBtn = document.getElementById('fsBtn');
+    if (fsBtn) {
+      fsBtn.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(err => console.log(err));
+        } else {
+          document.exitFullscreen();
+        }
+      });
+      document.addEventListener('fullscreenchange', () => {
+        if (document.fullscreenElement) {
+          fsBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>';
+        } else {
+          fsBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>';
+        }
+      });
+    }
+  </script>
+</body>
+</html>
