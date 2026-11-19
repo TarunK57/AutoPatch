@@ -224,6 +224,7 @@
       </nav>
 
       <div class="header-actions">
+        <div id="backendStatusPill"></div>
         <button class="fs-toggle" id="fsBtn" title="Toggle Fullscreen" aria-label="Toggle Fullscreen">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
@@ -394,7 +395,13 @@
     </main>
   </div>
 
+  <script src="api-client.js"></script>
   <script>
+    // Initialize backend status pill
+    if (window.autopatch) {
+      window.autopatch.renderStatusPill('backendStatusPill');
+    }
+
     // Fullscreen toggle handler
     const fsBtn = document.getElementById('fsBtn');
     if (fsBtn) {
@@ -414,55 +421,140 @@
       });
     }
 
-    // Interactive Scan Trigger
+    // Autonomous Scan Trigger (Live backend SSE vs Transparent Offline Demo)
     const startScanBtn = document.getElementById('startScanBtn');
     const logsEl = document.getElementById('terminalLogs');
     const progressBar = document.getElementById('progressBar');
     const scanPercent = document.getElementById('scanPercent');
 
+    function appendLog(timeStr, tagStr, tagCls, textStr) {
+      const div = document.createElement('div');
+      div.className = 'log-line';
+      div.innerHTML = `<span class="log-time">${timeStr}</span> <span class="log-tag ${tagCls}">${tagStr}</span> <span>${textStr}</span>`;
+      logsEl.appendChild(div);
+      logsEl.scrollTop = logsEl.scrollHeight;
+    }
+
     if (startScanBtn) {
-      startScanBtn.addEventListener('click', () => {
+      startScanBtn.addEventListener('click', async () => {
         startScanBtn.disabled = true;
         startScanBtn.style.opacity = '0.7';
-        startScanBtn.innerHTML = 'Scanning in progress...';
+        startScanBtn.innerHTML = 'Connecting to autonomous engine...';
         logsEl.innerHTML = '';
         progressBar.style.width = '0%';
         scanPercent.innerText = '0%';
 
-        const steps = [
-          { time: '[00:01]', tag: '[INIT]', cls: 'log-info', text: 'Initializing AST parsing engine for AutoPatch-Core-Engine...' },
-          { time: '[00:03]', tag: '[PARSER]', cls: 'log-info', text: 'Scanned 18 source modules. Generated symbol dependency graphs.' },
-          { time: '[00:05]', tag: '[TAINT]', cls: 'log-warn', text: 'Detecting dataflow sink in src/auth/service.py:34 (CWE-89 SQLi).' },
-          { time: '[00:07]', tag: '[SYNTHESIS]', cls: 'log-accent', text: 'Invoking multi-model ensemble with formal invariant constraints...' },
-          { time: '[00:09]', tag: '[SANDBOX]', cls: 'log-info', text: 'Executing test harness in ephemeral microVM container...' },
-          { time: '[00:11]', tag: '[VERIFIED]', cls: 'log-success', text: '14/14 tests PASSED. No residual side effects detected.' },
-          { time: '[00:12]', tag: '[COMPLETE]', cls: 'log-success', text: 'Patch generated successfully! Redirecting to Bug Queue...' },
-        ];
+        const isOnline = await window.autopatch.checkHealth();
 
-        let i = 0;
-        const interval = setInterval(() => {
-          if (i < steps.length) {
-            const step = steps[i];
-            const div = document.createElement('div');
-            div.className = 'log-line';
-            div.innerHTML = `<span class="log-time">${step.time}</span> <span class="log-tag ${step.cls}">${step.tag}</span> <span>${step.text}</span>`;
-            logsEl.appendChild(div);
-            logsEl.scrollTop = logsEl.scrollHeight;
+        if (isOnline) {
+          // --- REAL LIVE BACKEND SSE STREAM ---
+          try {
+            const projName = document.getElementById('projName')?.value || 'AutoPatch-Project';
+            const gitUrl = document.getElementById('gitUrl')?.value || null;
 
-            const pct = Math.round(((i + 1) / steps.length) * 100);
-            progressBar.style.width = pct + '%';
-            scanPercent.innerText = pct + '%';
-            i++;
-          } else {
-            clearInterval(interval);
+            appendLog(new Date().toLocaleTimeString(), '[INIT]', 'log-info', `Registering project '${projName}' on AutoPatch backend...`);
+            const project = await window.autopatch.createProject(projName, gitUrl);
+            localStorage.setItem('autopatch_active_project_id', project.project_id);
+
+            appendLog(new Date().toLocaleTimeString(), '[JOB]', 'log-accent', `Launching autonomous scan job for project ${project.project_id}...`);
+            const job = await window.autopatch.startScanJob(project.project_id);
+            localStorage.setItem('autopatch_active_job_id', job.job_id);
+
+            startScanBtn.innerHTML = 'Autonomous Repair Running (Live SSE)...';
+
+            let eventCount = 0;
+            window.autopatch.streamJobEvents(
+              job.job_id,
+              (ev) => {
+                eventCount++;
+                const time = new Date().toLocaleTimeString();
+                let tag = `[${ev.actor || 'AGENT'}]`;
+                let cls = 'log-info';
+
+                if (ev.event.includes('STARTED')) {
+                  cls = 'log-info';
+                } else if (ev.event.includes('LOCATOR')) {
+                  cls = 'log-warn';
+                  tag = '[LOCATOR]';
+                } else if (ev.event.includes('REPRODUCER')) {
+                  cls = 'log-info';
+                  tag = '[REPRODUCER]';
+                } else if (ev.event.includes('PATCHER')) {
+                  cls = 'log-accent';
+                  tag = '[PATCHER]';
+                } else if (ev.event.includes('VERIFIER')) {
+                  cls = 'log-success';
+                  tag = '[VERIFIER]';
+                } else if (ev.event.includes('FAILED')) {
+                  cls = 'log-warn';
+                  tag = '[ERROR]';
+                }
+
+                const desc = JSON.stringify(ev.payload || {}).slice(0, 95);
+                appendLog(time, tag, cls, `${ev.event}: ${desc}`);
+
+                // Update progress dynamically
+                const estPct = Math.min(95, eventCount * 12);
+                progressBar.style.width = estPct + '%';
+                scanPercent.innerText = estPct + '%';
+              },
+              (err) => {
+                appendLog(new Date().toLocaleTimeString(), '[ERROR]', 'log-warn', 'SSE stream connection interrupted or timeout reached.');
+              },
+              (completeEv) => {
+                progressBar.style.width = '100%';
+                scanPercent.innerText = '100%';
+                appendLog(new Date().toLocaleTimeString(), '[COMPLETE]', 'log-success', 'Scan finished! Redirecting to live Bug Queue...');
+                startScanBtn.disabled = false;
+                startScanBtn.style.opacity = '1';
+                startScanBtn.innerHTML = 'Scan Completed &rarr; View Queue';
+                setTimeout(() => {
+                  window.location.href = `queue.html?project_id=${project.project_id}`;
+                }, 1200);
+              }
+            );
+
+          } catch (apiErr) {
+            appendLog(new Date().toLocaleTimeString(), '[API ERROR]', 'log-warn', `Failed to execute scan on live backend: ${apiErr.message}`);
             startScanBtn.disabled = false;
             startScanBtn.style.opacity = '1';
-            startScanBtn.innerHTML = 'Scan Completed &rarr; View Queue';
-            setTimeout(() => {
-              window.location.href = 'queue.html';
-            }, 1000);
+            startScanBtn.innerHTML = 'Retry Live Scan';
           }
-        }, 500);
+
+        } else {
+          // --- OFFLINE DEMO MODE ---
+          appendLog(new Date().toLocaleTimeString(), '[DEMO]', 'log-warn', 'Backend offline at http://localhost:8000. Executing local simulated demo cycle.');
+
+          const steps = [
+            { time: '[00:01]', tag: '[DEMO:INIT]', cls: 'log-info', text: 'Simulating AST parsing engine for AutoPatch-Core-Engine...' },
+            { time: '[00:03]', tag: '[DEMO:PARSER]', cls: 'log-info', text: 'Indexed 18 source modules. Generated symbol dependency graphs.' },
+            { time: '[00:05]', tag: '[DEMO:TAINT]', cls: 'log-warn', text: 'Detected dataflow sink in src/auth/service.py:34 (CWE-89 SQLi).' },
+            { time: '[00:07]', tag: '[DEMO:SYNTHESIS]', cls: 'log-accent', text: 'Simulating multi-model ensemble with formal invariant constraints...' },
+            { time: '[00:09]', tag: '[DEMO:SANDBOX]', cls: 'log-info', text: 'Simulating test harness in ephemeral microVM container...' },
+            { time: '[00:11]', tag: '[DEMO:VERIFIED]', cls: 'log-success', text: '14/14 tests PASSED. No residual side effects detected.' },
+            { time: '[00:12]', tag: '[DEMO:COMPLETE]', cls: 'log-success', text: 'Demo cycle completed. Redirecting to Bug Queue...' },
+          ];
+
+          let i = 0;
+          const interval = setInterval(() => {
+            if (i < steps.length) {
+              const step = steps[i];
+              appendLog(step.time, step.tag, step.cls, step.text);
+              const pct = Math.round(((i + 1) / steps.length) * 100);
+              progressBar.style.width = pct + '%';
+              scanPercent.innerText = pct + '%';
+              i++;
+            } else {
+              clearInterval(interval);
+              startScanBtn.disabled = false;
+              startScanBtn.style.opacity = '1';
+              startScanBtn.innerHTML = 'Demo Completed &rarr; View Queue';
+              setTimeout(() => {
+                window.location.href = 'queue.html';
+              }, 1000);
+            }
+          }, 450);
+        }
       });
     }
 

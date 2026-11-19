@@ -226,6 +226,7 @@
       </nav>
 
       <div class="header-actions">
+        <div id="backendStatusPill"></div>
         <button class="fs-toggle" id="fsBtn" title="Toggle Fullscreen" aria-label="Toggle Fullscreen">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
@@ -240,6 +241,7 @@
     <!-- Review Content -->
     <main class="main-content">
       <div class="glass-panel">
+        <div id="modeBanner"></div>
         <div class="breadcrumb">
           <a href="queue.html">&larr; Back to Bug Queue</a>
           <span>/</span>
@@ -419,7 +421,13 @@
     <span id="toastMsg">Action executed successfully.</span>
   </div>
 
+  <script src="api-client.js"></script>
   <script>
+    // Initialize backend status pill
+    if (window.autopatch) {
+      window.autopatch.renderStatusPill('backendStatusPill');
+    }
+
     // Fullscreen toggle handler
     const fsBtn = document.getElementById('fsBtn');
     if (fsBtn) {
@@ -441,32 +449,160 @@
 
     const toast = document.getElementById('toast');
     const toastMsg = document.getElementById('toastMsg');
+    const modeBannerEl = document.getElementById('modeBanner');
 
-    function showToast(msg) {
+    function showToast(msg, isErr = false) {
       toastMsg.innerText = msg;
+      if (isErr) {
+        toast.style.borderColor = 'var(--danger)';
+      } else {
+        toast.style.borderColor = 'rgba(40, 122, 76, 0.4)';
+      }
       toast.classList.add('show');
       setTimeout(() => {
         toast.classList.remove('show');
-      }, 3500);
+      }, 4000);
     }
 
-    document.getElementById('approveBtn').addEventListener('click', () => {
-      showToast('Patch Approved! Opened PR #42 on branch autopatch/fix-cve-2024-4112.');
-      setTimeout(() => {
-        window.location.href = 'queue.html';
-      }, 1800);
-    });
+    const urlParams = new URLSearchParams(window.location.search);
+    const projectId = urlParams.get('project_id') || localStorage.getItem('autopatch_active_project_id');
+    const bugId = urlParams.get('bug_id');
 
-    document.getElementById('altBtn').addEventListener('click', () => {
-      showToast('Synthesizing alternative candidate patch with temperature=0.25...');
-    });
+    let selectedPatchId = null;
 
-    document.getElementById('rejectBtn').addEventListener('click', () => {
-      showToast('Patch candidate marked as REJECTED. Triage audit recorded.');
-      setTimeout(() => {
-        window.location.href = 'queue.html';
-      }, 1500);
-    });
+    async function initReview() {
+      const isOnline = await window.autopatch.checkHealth();
+
+      if (isOnline && projectId && bugId) {
+        // Live Review
+        modeBannerEl.innerHTML = `
+          <div style="background: rgba(40, 122, 76, 0.1); border: 1px solid rgba(40, 122, 76, 0.3); border-radius: 12px; padding: 10px 16px; margin-bottom: 16px; font-size: 12.5px; color: #1b6339; display: flex; justify-content: space-between; align-items: center;">
+            <span><strong>Live Bug Dossier:</strong> <code>${bugId}</code> &bull; Project <code>${projectId}</code> &bull; Verified Sandbox State</span>
+            <a href="queue.html?project_id=${encodeURIComponent(projectId)}" style="color: #1b6339; font-weight: 600;">&larr; Back to Queue</a>
+          </div>
+        `;
+
+        try {
+          const bug = await window.autopatch.getBugDetails(projectId, bugId);
+          renderLiveBug(bug);
+        } catch (err) {
+          showToast(`Failed to load live bug details: ${err.message}`, true);
+        }
+        return;
+      }
+
+      // Offline Demo Mode
+      modeBannerEl.innerHTML = `
+        <div class="demo-banner">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          <span><strong>DEMO MODE:</strong> Backend offline at http://localhost:8000. Displaying local static defect dossier (CVE-2024-4112). Live patch approvals require backend server.</span>
+        </div>
+      `;
+      setupOfflineActions();
+    }
+
+    function renderLiveBug(bug) {
+      const patches = bug.candidate_patches || [];
+      const best = patches[0];
+      if (best) {
+        selectedPatchId = best.id;
+      }
+
+      // Update Diff lines
+      const diffContainer = document.querySelector('.diff-container');
+      if (diffContainer && best && best.unified_diff) {
+        diffContainer.innerHTML = '';
+        const rawLines = best.unified_diff.split('\n');
+        let lineNo = 1;
+        rawLines.forEach(l => {
+          const div = document.createElement('div');
+          let cls = 'diff-line';
+          let sign = ' ';
+          if (l.startsWith('+') && !l.startsWith('+++')) {
+            cls += ' add';
+            sign = '+';
+          } else if (l.startsWith('-') && !l.startsWith('---')) {
+            cls += ' del';
+            sign = '-';
+          }
+          div.className = cls;
+          div.innerHTML = `<span class="diff-num">${lineNo++}</span><span class="diff-sign">${sign}</span><span class="diff-code">${escapeHtml(l)}</span>`;
+          diffContainer.appendChild(div);
+        });
+      }
+
+      setupLiveActions();
+    }
+
+    function setupLiveActions() {
+      const approveBtn = document.getElementById('approveBtn');
+      const rejectBtn = document.getElementById('rejectBtn');
+
+      if (approveBtn) {
+        approveBtn.onclick = async () => {
+          approveBtn.disabled = true;
+          approveBtn.innerHTML = 'Applying Reviewed Patch to Workspace...';
+          try {
+            const dec = await window.autopatch.recordDecision(projectId, bugId, {
+              status: 'APPROVED',
+              patch_id: selectedPatchId,
+              comment: 'Approved via Lumina Review Console',
+            });
+            showToast(`Patch Approved! Applied patch ID ${selectedPatchId.slice(0, 8)}. Signature: ${dec.signature_hash.slice(0, 10)}...`);
+            setTimeout(() => {
+              window.location.href = `queue.html?project_id=${encodeURIComponent(projectId)}`;
+            }, 1600);
+          } catch (err) {
+            approveBtn.disabled = false;
+            approveBtn.innerHTML = 'Approve & Apply Patch';
+            showToast(`Error recording decision: ${err.message}`, true);
+          }
+        };
+      }
+
+      if (rejectBtn) {
+        rejectBtn.onclick = async () => {
+          rejectBtn.disabled = true;
+          try {
+            await window.autopatch.recordDecision(projectId, bugId, {
+              status: 'REJECTED',
+              patch_id: selectedPatchId,
+              comment: 'Rejected by security reviewer',
+            });
+            showToast('Patch candidate marked as REJECTED in audit store.');
+            setTimeout(() => {
+              window.location.href = `queue.html?project_id=${encodeURIComponent(projectId)}`;
+            }, 1400);
+          } catch (err) {
+            rejectBtn.disabled = false;
+            showToast(`Error recording rejection: ${err.message}`, true);
+          }
+        };
+      }
+    }
+
+    function setupOfflineActions() {
+      document.getElementById('approveBtn')?.addEventListener('click', () => {
+        showToast('Patch Approved! [DEMO MODE: No active backend connection to apply patch]');
+      });
+      document.getElementById('altBtn')?.addEventListener('click', () => {
+        showToast('Requesting alternative patch... [DEMO MODE]');
+      });
+      document.getElementById('rejectBtn')?.addEventListener('click', () => {
+        showToast('Patch candidate marked as REJECTED. [DEMO MODE]');
+      });
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    initReview();
   </script>
 </body>
 </html>

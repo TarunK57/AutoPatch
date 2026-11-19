@@ -49,6 +49,11 @@ def main() -> int:
         action="store_true",
         help="Skip running ablation conditions (Full, No-BRT, No-SBFL, Templates, LLM)",
     )
+    parser.add_argument(
+        "--diverse",
+        action="store_true",
+        help="Include diverse unseen defect instances beyond the 30 canonical seeded bugs",
+    )
 
     args = parser.parse_args()
 
@@ -65,12 +70,23 @@ def main() -> int:
     print(f"Include Ablations:  {not args.no_ablations}")
     print("=================================================================\n")
 
+    cmd_str = f"python3 eval/run.py --seed {args.seed} --runs {args.runs}"
+    if args.swe_bench:
+        cmd_str += f" --swe-bench {args.swe_bench}"
+    if args.no_ablations:
+        cmd_str += " --no-ablations"
+    if args.diverse:
+        cmd_str += " --diverse"
+
     res = run_evaluation_benchmark(
         swe_bench_file=swe_file,
         output_dir=out_dir,
         seed=args.seed,
         runs=args.runs,
         include_ablations=not args.no_ablations,
+        include_diverse=args.diverse,
+        command_executed=cmd_str,
+        model_version="AutoPatch v2.4 (Deterministic Invariant Verification Engine)",
     )
 
     print("\n-----------------------------------------------------------------")

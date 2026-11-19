@@ -33,6 +33,37 @@ MAX_OUTPUT_BYTES = 500 * 1024  # 500 KB output ceiling
 DEFAULT_TIMEOUT_SECONDS = 30
 
 
+def discover_test_command(project_root: Path) -> str:
+    """Discovers project test execution command across Python, Node/TS, Go, and C/C++."""
+    # 1. Node / TypeScript (package.json)
+    pkg_json = project_root / "package.json"
+    if pkg_json.is_file():
+        try:
+            data = json.loads(pkg_json.read_text(encoding="utf-8"))
+            scripts = data.get("scripts", {})
+            if "test" in scripts and "no test specified" not in scripts["test"].lower():
+                return "npm test --"
+        except Exception:
+            pass
+
+    # 2. Go (go.mod)
+    if (project_root / "go.mod").is_file():
+        return "go test ./..."
+
+    # 3. Makefile with test target
+    makefile = project_root / "Makefile"
+    if makefile.is_file():
+        try:
+            content = makefile.read_text(encoding="utf-8")
+            if re.search(r"^test\s*:", content, re.MULTILINE):
+                return "make test"
+        except Exception:
+            pass
+
+    # 4. Default Python / pytest
+    return "pytest"
+
+
 class EphemeralSandbox:
     """Manages isolated ephemeral test execution with strict network, resource, and filesystem boundaries."""
 
@@ -263,6 +294,11 @@ builtins.open = sandboxed_open
                 stdout = ""
                 stderr = f"Sandbox execution timed out after {self.timeout_seconds}s limit."
                 exit_code = 124
+            except FileNotFoundError as fnfe:
+                elapsed = time.perf_counter() - start_time
+                stdout = ""
+                stderr = f"Test framework or binary not found on host: {fnfe}"
+                exit_code = 127
 
             # Enforce output size capping
             combined_bytes = len(stdout.encode("utf-8")) + len(stderr.encode("utf-8"))

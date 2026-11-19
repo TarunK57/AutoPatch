@@ -162,6 +162,7 @@
       </nav>
 
       <div class="header-actions">
+        <div id="backendStatusPill"></div>
         <button class="fs-toggle" id="fsBtn" title="Toggle Fullscreen" aria-label="Toggle Fullscreen">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
@@ -190,6 +191,9 @@
             </a>
           </div>
         </div>
+
+        <!-- Mode Banner -->
+        <div id="modeBanner"></div>
 
         <!-- Controls -->
         <div class="queue-controls">
@@ -427,7 +431,13 @@
     </main>
   </div>
 
+  <script src="api-client.js"></script>
   <script>
+    // Initialize backend status pill
+    if (window.autopatch) {
+      window.autopatch.renderStatusPill('backendStatusPill');
+    }
+
     // Fullscreen toggle handler
     const fsBtn = document.getElementById('fsBtn');
     if (fsBtn) {
@@ -447,42 +457,162 @@
       });
     }
 
-    // Live Filtering & Search
+    // Live Data & Offline Filtering Setup
     const searchInput = document.getElementById('searchInput');
     const filterPills = document.querySelectorAll('#severityFilters .filter-pill');
-    const rows = document.querySelectorAll('#issuesList .issue-row');
+    const issuesListEl = document.getElementById('issuesList');
+    const modeBannerEl = document.getElementById('modeBanner');
 
     let currentSeverity = 'ALL';
     let searchQuery = '';
+    let isLiveBackend = false;
+    let activeProjectId = new URLSearchParams(window.location.search).get('project_id') || localStorage.getItem('autopatch_active_project_id');
 
-    function applyFilters() {
-      rows.forEach(row => {
-        const rowSev = row.getAttribute('data-sev');
-        const rowQuery = row.getAttribute('data-query').toLowerCase();
-        const matchesSev = (currentSeverity === 'ALL' || rowSev === currentSeverity);
-        const matchesQuery = !searchQuery || rowQuery.includes(searchQuery.toLowerCase());
+    async function initQueue() {
+      isLiveBackend = await window.autopatch.checkHealth();
 
-        if (matchesSev && matchesQuery) {
-          row.style.display = 'grid';
-        } else {
-          row.style.display = 'none';
+      if (isLiveBackend) {
+        // Live Mode
+        if (!activeProjectId) {
+          const projs = await window.autopatch.listProjects();
+          if (projs.length > 0) {
+            activeProjectId = projs[0].project_id;
+            localStorage.setItem('autopatch_active_project_id', activeProjectId);
+          }
         }
+
+        if (activeProjectId) {
+          modeBannerEl.innerHTML = `
+            <div style="background: rgba(40, 122, 76, 0.1); border: 1px solid rgba(40, 122, 76, 0.3); border-radius: 12px; padding: 10px 16px; margin-bottom: 16px; font-size: 12.5px; color: #1b6339; display: flex; justify-content: space-between; align-items: center;">
+              <span><strong>Connected to Live Project:</strong> <code>${activeProjectId}</code> &bull; Priority ordering computed from detector agreement, reachability, and sandbox verification.</span>
+              <a href="studio.html" style="color: #1b6339; font-weight: 600; text-decoration: underline;">Launch New Scan</a>
+            </div>
+          `;
+          await loadLiveBugs();
+          return;
+        }
+      }
+
+      // Offline Demo Mode
+      modeBannerEl.innerHTML = `
+        <div class="demo-banner">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          <span><strong>DEMO MODE:</strong> Backend offline at http://localhost:8000. Displaying local static defect fixtures. Start backend (<code>uvicorn autopatch.api.main:app</code>) to query live database.</span>
+        </div>
+      `;
+      setupOfflineFilter();
+    }
+
+    async function loadLiveBugs() {
+      try {
+        const sevParam = currentSeverity === 'ALL' ? null : currentSeverity;
+        const res = await window.autopatch.listBugs(activeProjectId, sevParam);
+        const bugs = res.items || [];
+
+        if (bugs.length === 0) {
+          issuesListEl.innerHTML = `
+            <div style="padding: 32px 20px; text-align: center; color: var(--sub); font-size: 13.5px;">
+              No bugs found matching filter criteria in project <code>${activeProjectId}</code>.
+            </div>
+          `;
+          return;
+        }
+
+        issuesListEl.innerHTML = '';
+        bugs.forEach(b => {
+          const sevClass = b.severity === 'CRITICAL' ? 'badge-critical' : (b.severity === 'HIGH' ? 'badge-high' : 'badge-medium');
+          const isVer = b.verification_status === 'VERIFIED';
+          const verClass = isVer ? 'badge-verified' : 'badge-warning';
+          const verText = isVer ? 'Verified' : (b.verification_status || 'Pending');
+
+          const row = document.createElement('div');
+          row.className = 'issue-row';
+          row.setAttribute('data-sev', b.severity);
+          row.setAttribute('data-query', `${b.file_path} ${b.category} ${b.description}`);
+
+          row.innerHTML = `
+            <div>
+              <span class="badge ${sevClass}"><span class="badge-dot"></span>${b.severity}</span>
+            </div>
+            <div>
+              <div class="issue-title">${escapeHtml(b.description || b.category)}</div>
+              <div class="issue-desc">Score: ${b.priority_score.toFixed(1)} &bull; ${escapeHtml(b.category)}</div>
+            </div>
+            <div>
+              <span class="issue-file">${escapeHtml(b.file_path)}:${b.line_start}</span>
+            </div>
+            <div>
+              <div class="issue-score">${(b.confidence * 100).toFixed(0)}% <span>conf</span></div>
+            </div>
+            <div>
+              <span class="badge ${verClass}"><span class="badge-dot"></span>${verText}</span>
+            </div>
+            <div style="text-align: right;">
+              <a href="review.html?project_id=${encodeURIComponent(activeProjectId)}&bug_id=${encodeURIComponent(b.bug_id)}" class="btn btn-secondary" style="padding: 0 14px; height: 32px; font-size: 12px;">
+                Review &rarr;
+              </a>
+            </div>
+          `;
+          issuesListEl.appendChild(row);
+        });
+
+      } catch (err) {
+        issuesListEl.innerHTML = `
+          <div style="padding: 24px; color: var(--danger); font-size: 13px;">
+            Failed to load live bugs: ${escapeHtml(err.message)}
+          </div>
+        `;
+      }
+    }
+
+    function setupOfflineFilter() {
+      const rows = document.querySelectorAll('#issuesList .issue-row');
+      function apply() {
+        rows.forEach(row => {
+          const rowSev = row.getAttribute('data-sev');
+          const rowQuery = (row.getAttribute('data-query') || '').toLowerCase();
+          const matchesSev = (currentSeverity === 'ALL' || rowSev === currentSeverity);
+          const matchesQuery = !searchQuery || rowQuery.includes(searchQuery.toLowerCase());
+          row.style.display = (matchesSev && matchesQuery) ? 'grid' : 'none';
+        });
+      }
+
+      searchInput.addEventListener('input', (e) => {
+        searchQuery = e.target.value.trim();
+        apply();
+      });
+
+      filterPills.forEach(pill => {
+        pill.addEventListener('click', () => {
+          filterPills.forEach(p => p.classList.remove('active'));
+          pill.classList.add('active');
+          currentSeverity = pill.getAttribute('data-sev');
+          apply();
+        });
       });
     }
 
-    searchInput.addEventListener('input', (e) => {
-      searchQuery = e.target.value.trim();
-      applyFilters();
-    });
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
 
     filterPills.forEach(pill => {
-      pill.addEventListener('click', () => {
+      pill.addEventListener('click', async () => {
         filterPills.forEach(p => p.classList.remove('active'));
         pill.classList.add('active');
         currentSeverity = pill.getAttribute('data-sev');
-        applyFilters();
+        if (isLiveBackend && activeProjectId) {
+          await loadLiveBugs();
+        }
       });
     });
+
+    initQueue();
   </script>
 </body>
 </html>

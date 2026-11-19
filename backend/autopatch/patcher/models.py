@@ -25,6 +25,7 @@ class CandidatePatch(BaseModel):
     rationale: str = Field(min_length=5, description="Plain-language explanation tied to root cause")
     risk_notes: str = Field(default="", description="Potential risks or side-effect considerations")
     source: str = Field(default="LLM", description="'TEMPLATE' or 'LLM'")
+    is_template: bool = False
     template_name: Optional[str] = None
     ast_node_delta: int = Field(ge=0, default=0)
     lines_added: int = Field(ge=0, default=0)

@@ -178,6 +178,7 @@
       </nav>
 
       <div class="header-actions">
+        <div id="backendStatusPill"></div>
         <button class="fs-toggle" id="fsBtn" title="Toggle Fullscreen" aria-label="Toggle Fullscreen">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
@@ -398,7 +399,12 @@
     </main>
   </div>
 
+  <script src="api-client.js"></script>
   <script>
+    if (window.autopatch) {
+      window.autopatch.renderStatusPill('backendStatusPill');
+    }
+
     // Fullscreen toggle handler
     const fsBtn = document.getElementById('fsBtn');
     if (fsBtn) {
@@ -417,6 +423,27 @@
         }
       });
     }
+
+    async function initDashboard() {
+      const isOnline = await window.autopatch.checkHealth();
+      if (isOnline) {
+        const metrics = await window.autopatch.getDashboardMetrics();
+        if (metrics && metrics.project_summaries) {
+          const projs = metrics.project_summaries;
+          let totalCost = 0;
+          let totalTokens = 0;
+          projs.forEach(p => {
+            totalCost += p.total_cost_usd || 0;
+            totalTokens += p.total_tokens || 0;
+          });
+          const kpiVals = document.querySelectorAll('.kpi-value');
+          if (kpiVals.length >= 2) {
+            kpiVals[1].innerText = `$${totalCost.toFixed(2)}`;
+          }
+        }
+      }
+    }
+    initDashboard();
   </script>
 </body>
 </html>

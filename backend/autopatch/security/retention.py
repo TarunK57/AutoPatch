@@ -90,9 +90,10 @@ class DataRetentionManager:
             # Delete project-level events and job-level events
             target_ids = [project_id] + associated_job_ids
             try:
-                with event_store._conn:
+                conn = getattr(event_store, "_conn", None) or event_store._get_connection()
+                with conn:
                     for tid in target_ids:
-                        cursor = event_store._conn.execute(
+                        cursor = conn.execute(
                             "DELETE FROM audit_events WHERE job_id = ? OR bug_id LIKE ?",
                             (tid, f"%{tid}%"),
                         )
@@ -136,8 +137,9 @@ class DataRetentionManager:
         # Purge from event_store
         if event_store is not None:
             try:
-                with event_store._conn:
-                    cursor = event_store._conn.execute(
+                conn = getattr(event_store, "_conn", None) or event_store._get_connection()
+                with conn:
+                    cursor = conn.execute(
                         "DELETE FROM audit_events WHERE job_id = ?",
                         (job_id,),
                     )

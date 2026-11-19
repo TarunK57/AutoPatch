@@ -10,6 +10,7 @@ from eval.dataset.models import (
     MetricWithCI,
 )
 from eval.dataset.seeded_bugs import SEEDED_BUGS, get_seeded_dataset
+from eval.dataset.diverse_bugs import DIVERSE_BUGS, get_diverse_dataset
 from eval.dataset.swe_bench_loader import load_swe_bench_dataset
 
 __all__ = [
@@ -22,5 +23,7 @@ __all__ = [
     "BenchmarkReportMetrics",
     "SEEDED_BUGS",
     "get_seeded_dataset",
+    "DIVERSE_BUGS",
+    "get_diverse_dataset",
     "load_swe_bench_dataset",
 ]

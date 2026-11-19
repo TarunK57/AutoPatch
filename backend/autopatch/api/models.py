@@ -53,6 +53,9 @@ class BugSummaryItem(BaseModel):
     priority_score: float
     status: str
     rank: int = 1
+    rank_explanation: Optional[str] = None
+    cwe: Optional[str] = None
+    symbol: Optional[str] = None
 
 
 class BugListResponse(BaseModel):
@@ -86,6 +89,7 @@ class ValidationRequest(BaseModel):
 class DecisionRequest(BaseModel):
     decision: str = Field(pattern="^(APPROVED|REJECTED|NEEDS_REVIEW)$")
     comment: str = ""
+    patch_id: Optional[str] = Field(default=None, description="Exact patch ID approved by reviewer")
 
 
 class DecisionResponse(BaseModel):
@@ -95,6 +99,8 @@ class DecisionResponse(BaseModel):
     comment: str
     signature_hash: str
     applied: bool = False
+    patch_id: Optional[str] = None
+    patch_hash: Optional[str] = None
     timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 

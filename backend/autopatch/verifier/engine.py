@@ -40,7 +40,7 @@ from autopatch.verifier.models import (
     VerificationStatus,
 )
 from autopatch.verifier.overfitting import OverfittingGuard
-from autopatch.verifier.sandbox import EphemeralSandbox
+from autopatch.verifier.sandbox import EphemeralSandbox, discover_test_command
 
 logger = get_logger(__name__)
 
@@ -83,6 +83,9 @@ class VerifierEngine:
             )
 
         root = project_root.resolve()
+        test_cmd = existing_test_command
+        if test_cmd == "pytest":
+            test_cmd = discover_test_command(root)
         verified_results: List[PatchVerificationResult] = []
 
         # 1. Evaluate baseline test suite and BRT reproduction on unmodified code
@@ -90,7 +93,7 @@ class VerifierEngine:
             root=root,
             brt_test_paths=brt_test_paths,
             brt_contents=brt_contents,
-            existing_test_command=existing_test_command,
+            existing_test_command=test_cmd,
         )
 
         baseline_passing_tests = {

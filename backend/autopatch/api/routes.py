@@ -58,6 +58,7 @@ from autopatch.git.github_client import GitHubClient, GitHubTokenMissingError, G
 from autopatch.security.retention import DataRetentionManager
 from autopatch.security.dependency_scanner import DependencyScanner
 from autopatch.security.privacy_mode import PrivacyGuard
+from autopatch.storage.db import get_default_db_path, get_storage
 from autopatch.api.rate_limit import rate_limit_dependency
 from autopatch.api.upload_scanner import UploadScanner
 from autopatch.core.exceptions import CancellationToken, UnauthorizedPatchApplicationError
@@ -86,18 +87,110 @@ logger = get_logger(__name__)
 
 router = APIRouter(prefix="/api/v1", tags=["AutoPatch API"])
 
-# Global shared services for the API instance
-event_store = EventStore()
+storage = get_storage()
+event_store = EventStore(db_path=get_default_db_path().parent / "audit_events.db")
 token_tracker = TokenUsageTracker()
 orchestrator = BugPipelineOrchestrator(event_store=event_store, token_tracker=token_tracker)
 upload_scanner = UploadScanner()
 safe_extractor = SafeExtractor()
 intel_service = CodeIntelligenceService()
 
-# In-memory repositories for state persistence
-# (Can be configured with SQLite / Postgres in production)
-PROJECTS_DB: Dict[str, Dict[str, Any]] = {}
-JOBS_DB: Dict[str, Dict[str, Any]] = {}
+
+class PersistentProjectDict(dict):
+    def __init__(self, db_storage):
+        super().__init__()
+        self.db_storage = db_storage
+
+    def __getitem__(self, key: str) -> Dict[str, Any]:
+        if key not in self:
+            val = self.db_storage.get_project(key)
+            if val is not None:
+                super().__setitem__(key, val)
+                return val
+            raise KeyError(key)
+        return super().__getitem__(key)
+
+    def get(self, key: str, default: Any = None) -> Any:
+        if not super().__contains__(key):
+            val = self.db_storage.get_project(key)
+            if val is not None:
+                super().__setitem__(key, val)
+                return val
+            return default
+        return super().get(key, default)
+
+    def __setitem__(self, key: str, value: Dict[str, Any]) -> None:
+        super().__setitem__(key, value)
+        self.db_storage.save_project(value)
+
+    def __delitem__(self, key: str) -> None:
+        if super().__contains__(key):
+            super().__delitem__(key)
+        self.db_storage.delete_project(key)
+
+    def __contains__(self, key: object) -> bool:
+        if super().__contains__(key):
+            return True
+        return self.db_storage.get_project(str(key)) is not None
+
+    def pop(self, key: str, default: Any = None) -> Any:
+        val = self.get(key, default)
+        try:
+            del self[key]
+        except KeyError:
+            pass
+        return val
+
+
+class PersistentJobDict(dict):
+    def __init__(self, db_storage):
+        super().__init__()
+        self.db_storage = db_storage
+
+    def __getitem__(self, key: str) -> Dict[str, Any]:
+        if key not in self:
+            val = self.db_storage.get_job(key)
+            if val is not None:
+                super().__setitem__(key, val)
+                return val
+            raise KeyError(key)
+        return super().__getitem__(key)
+
+    def get(self, key: str, default: Any = None) -> Any:
+        if not super().__contains__(key):
+            val = self.db_storage.get_job(key)
+            if val is not None:
+                super().__setitem__(key, val)
+                return val
+            return default
+        return super().get(key, default)
+
+    def __setitem__(self, key: str, value: Dict[str, Any]) -> None:
+        super().__setitem__(key, value)
+        self.db_storage.save_job(value)
+
+    def __delitem__(self, key: str) -> None:
+        if super().__contains__(key):
+            super().__delitem__(key)
+        self.db_storage.delete_job(key)
+
+    def __contains__(self, key: object) -> bool:
+        if super().__contains__(key):
+            return True
+        return self.db_storage.get_job(str(key)) is not None
+
+    def pop(self, key: str, default: Any = None) -> Any:
+        val = self.get(key, default)
+        try:
+            del self[key]
+        except KeyError:
+            pass
+        return val
+
+
+# Persistent repositories for state persistence across server restarts
+PROJECTS_DB = PersistentProjectDict(storage)
+JOBS_DB = PersistentJobDict(storage)
 CANCELLATION_TOKENS: Dict[str, CancellationToken] = {}
 
 
@@ -484,10 +577,12 @@ async def resume_job(
     "/projects/{project_id}/bugs",
     response_model=BugListResponse,
     summary="List Ranked Bugs",
-    description="Returns prioritized bugs ordered deterministically by Priority score.",
+    description="Returns prioritized bugs ordered deterministically by Priority score with optional filtering.",
 )
 async def list_bugs(
     project_id: str,
+    severity: Optional[str] = Query(None, description="Filter by severity level (CRITICAL, HIGH, MEDIUM, LOW)"),
+    status: Optional[str] = Query(None, description="Filter by status (VERIFIED, NEEDS_REVIEW, FAILED, etc.)"),
     current_user: User = Depends(get_current_user),
 ) -> BugListResponse:
     project = PROJECTS_DB.get(project_id)
@@ -524,8 +619,17 @@ async def list_bugs(
                 priority_score=p_data.get("priority_score", 50.0),
                 status=state.get("status", "INITIALIZED"),
                 rank=p_data.get("rank", 1),
+                rank_explanation=p_data.get("rank_explanation"),
+                cwe=finding.get("cwe"),
+                symbol=finding.get("symbol"),
             )
         )
+
+    # Apply optional filtering
+    if severity:
+        bug_items = [b for b in bug_items if b.severity_level.upper() == severity.upper()]
+    if status:
+        bug_items = [b for b in bug_items if b.status.upper() == status.upper()]
 
     # Deterministic sort
     bug_items.sort(key=lambda b: (-b.priority_score, b.file_path, b.line_start))
@@ -617,10 +721,27 @@ async def record_decision(
     )
 
     applied = False
+    chosen_patch_id = None
+    chosen_patch_hash = None
+
     if decision_status == ApprovalStatus.APPROVED:
         patches = state.get("patches", [])
-        if patches:
-            best_patch = patches[0]
+        best_patch = None
+
+        # P1 — 6: Apply the exact reviewed/selected patch, never regenerate
+        if request.patch_id:
+            best_patch = next((p for p in patches if str(p.get("id")) == str(request.patch_id)), None)
+        if not best_patch and patches:
+            ver = state.get("verification") or {}
+            sel_id = ver.get("selected_patch_id")
+            if sel_id:
+                best_patch = next((p for p in patches if str(p.get("id")) == str(sel_id)), None)
+            if not best_patch:
+                best_patch = patches[0]
+
+        if best_patch:
+            chosen_patch_id = best_patch.get("id")
+            chosen_patch_hash = best_patch.get("patch_hash")
             proj_dir = Path(project["project_dir"])
             target_file = proj_dir / best_patch["file"]
             if target_file.is_file():
@@ -631,15 +752,33 @@ async def record_decision(
                     target_file.write_text(content.replace(orig, patched, 1), encoding="utf-8")
                     applied = True
                     project["applied_patches"][bug_id] = best_patch
+                    storage.save_project(project)
                     event_store.append(
                         AuditEvent(
                             job_id=bug_id.split(":")[0],
                             bug_id=bug_id,
                             event_type=EventType.PATCH_APPLIED,
                             actor=current_user.user_id,
-                            payload={"patch_id": best_patch.get("id"), "file": best_patch["file"]},
+                            payload={
+                                "patch_id": best_patch.get("id"),
+                                "patch_hash": chosen_patch_hash,
+                                "file": best_patch["file"],
+                            },
                         )
                     )
+
+    # Persist decision to SQLite database
+    storage.save_decision({
+        "bug_id": bug_id,
+        "project_id": project_id,
+        "reviewer_id": current_user.user_id,
+        "status": decision_status.value,
+        "comment": request.comment,
+        "signature_hash": approval.signature_hash,
+        "patch_id": str(chosen_patch_id) if chosen_patch_id else None,
+        "patch_hash": chosen_patch_hash,
+        "timestamp": approval.timestamp.isoformat(),
+    })
 
     return DecisionResponse(
         bug_id=bug_id,
@@ -648,6 +787,8 @@ async def record_decision(
         comment=request.comment,
         signature_hash=approval.signature_hash,
         applied=applied,
+        patch_id=str(chosen_patch_id) if chosen_patch_id else None,
+        patch_hash=chosen_patch_hash,
         timestamp=approval.timestamp,
     )
 
@@ -682,6 +823,7 @@ async def revert_patch(
             target_file.write_text(content.replace(patched, orig, 1), encoding="utf-8")
 
     del project["applied_patches"][bug_id]
+    storage.save_project(project)
     event_store.append(
         AuditEvent(
             job_id=bug_id.split(":")[0],

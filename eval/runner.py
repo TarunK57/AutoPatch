@@ -19,6 +19,7 @@ from autopatch.core.logging import get_logger
 from eval.ablations.runner import AblationMode, AblationRunner, run_all_ablations
 from eval.dataset.models import BenchmarkReportMetrics, EvaluationInstance, InstanceEvaluationResult
 from eval.dataset.seeded_bugs import get_seeded_dataset
+from eval.dataset.diverse_bugs import get_diverse_dataset
 from eval.dataset.swe_bench_loader import load_swe_bench_dataset
 from eval.metrics.engine import EvaluationMetricsEngine
 from eval.reporter.markdown_reporter import MarkdownReporter
@@ -33,6 +34,9 @@ def run_evaluation_benchmark(
     seed: int = 42,
     runs: int = 1,
     include_ablations: bool = True,
+    include_diverse: bool = False,
+    command_executed: Optional[str] = None,
+    model_version: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
     Executes the comprehensive evaluation benchmark across instances and ablations.
@@ -66,7 +70,12 @@ def run_evaluation_benchmark(
         dataset_source = "custom-dataset"
     else:
         instances = get_seeded_dataset()
-        dataset_source = "seeded-30"
+        if include_diverse:
+            diverse_instances = get_diverse_dataset()
+            instances.extend(diverse_instances)
+            dataset_source = f"seeded-30 + diverse-{len(diverse_instances)}"
+        else:
+            dataset_source = "seeded-30"
 
     logger.info(f"Loaded {len(instances)} instances from {dataset_source}. Running benchmark (seed={seed}, runs={runs})...")
 
@@ -106,6 +115,8 @@ def run_evaluation_benchmark(
         seed=seed,
         runs=runs,
         dataset_source=dataset_source,
+        command_executed=command_executed,
+        model_version=model_version,
     )
 
     logger.info(f"Evaluation benchmark complete! Reports written to:\n - {md_path}\n - {json_path}")

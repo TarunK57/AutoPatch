@@ -1,13 +1,15 @@
 {
   "metadata": {
-    "generated_at": "2026-11-19T06:16:48.919701+00:00",
-    "dataset_source": "seeded-30",
-    "total_instances": 90,
+    "generated_at": "2026-11-19T10:58:53.801243+00:00",
+    "dataset_source": "seeded-30 + diverse-4",
+    "command_executed": "python3 eval/run.py --seed 42 --runs 1 --diverse",
+    "model_version": "AutoPatch v2.4 (Deterministic Invariant Verification Engine)",
+    "total_instances": 34,
     "seed": 42,
-    "repeats": 3
+    "repeats": 1
   },
   "summary_metrics": {
-    "total_instances": 90,
+    "total_instances": 34,
     "detection_precision": {
       "value": 100.0,
       "ci_lower": 100.0,
@@ -79,7 +81,7 @@
       "unit": "%"
     },
     "avg_duration_seconds": {
-      "value": 0.05,
+      "value": 0.04,
       "ci_lower": 0.04,
       "ci_upper": 0.05,
       "metric_name": "Average Duration per Fixed Bug",
@@ -99,47 +101,47 @@
       "Overfitted Patch": 0,
       "Regression Failure": 0,
       "BRT Failure": 0,
-      "None (Fixed)": 90
+      "None (Fixed)": 34
     },
     "category_breakdown": {
       "off-by-one": {
-        "count": 15.0,
+        "count": 5.0,
         "localization_hit@1_pct": 100.0,
         "patch_plausible_pct": 100.0,
         "patch_correct_pct": 100.0
       },
       "validation": {
-        "count": 15.0,
+        "count": 6.0,
         "localization_hit@1_pct": 100.0,
         "patch_plausible_pct": 100.0,
         "patch_correct_pct": 100.0
       },
       "null access": {
-        "count": 12.0,
+        "count": 5.0,
         "localization_hit@1_pct": 100.0,
         "patch_plausible_pct": 100.0,
         "patch_correct_pct": 100.0
       },
       "security": {
-        "count": 12.0,
+        "count": 4.0,
         "localization_hit@1_pct": 100.0,
         "patch_plausible_pct": 100.0,
         "patch_correct_pct": 100.0
       },
       "concurrency-lite": {
-        "count": 12.0,
+        "count": 5.0,
         "localization_hit@1_pct": 100.0,
         "patch_plausible_pct": 100.0,
         "patch_correct_pct": 100.0
       },
       "wrong operator": {
-        "count": 12.0,
+        "count": 4.0,
         "localization_hit@1_pct": 100.0,
         "patch_plausible_pct": 100.0,
         "patch_correct_pct": 100.0
       },
       "boundary": {
-        "count": 12.0,
+        "count": 5.0,
         "localization_hit@1_pct": 100.0,
         "patch_plausible_pct": 100.0,
         "patch_correct_pct": 100.0
@@ -153,47 +155,47 @@
     "Overfitted Patch": 0,
     "Regression Failure": 0,
     "BRT Failure": 0,
-    "None (Fixed)": 90
+    "None (Fixed)": 34
   },
   "category_breakdown": {
     "off-by-one": {
-      "count": 15.0,
+      "count": 5.0,
       "localization_hit@1_pct": 100.0,
       "patch_plausible_pct": 100.0,
       "patch_correct_pct": 100.0
     },
     "validation": {
-      "count": 15.0,
+      "count": 6.0,
       "localization_hit@1_pct": 100.0,
       "patch_plausible_pct": 100.0,
       "patch_correct_pct": 100.0
     },
     "null access": {
-      "count": 12.0,
+      "count": 5.0,
       "localization_hit@1_pct": 100.0,
       "patch_plausible_pct": 100.0,
       "patch_correct_pct": 100.0
     },
     "security": {
-      "count": 12.0,
+      "count": 4.0,
       "localization_hit@1_pct": 100.0,
       "patch_plausible_pct": 100.0,
       "patch_correct_pct": 100.0
     },
     "concurrency-lite": {
-      "count": 12.0,
+      "count": 5.0,
       "localization_hit@1_pct": 100.0,
       "patch_plausible_pct": 100.0,
       "patch_correct_pct": 100.0
     },
     "wrong operator": {
-      "count": 12.0,
+      "count": 4.0,
       "localization_hit@1_pct": 100.0,
       "patch_plausible_pct": 100.0,
       "patch_correct_pct": 100.0
     },
     "boundary": {
-      "count": 12.0,
+      "count": 5.0,
       "localization_hit@1_pct": 100.0,
       "patch_plausible_pct": 100.0,
       "patch_correct_pct": 100.0
@@ -201,567 +203,7 @@
   },
   "ablations": {
     "full": {
-      "total_instances": 30,
-      "detection_precision": {
-        "value": 100.0,
-        "ci_lower": 100.0,
-        "ci_upper": 100.0,
-        "metric_name": "Detection Precision",
-        "unit": "%"
-      },
-      "detection_recall": {
-        "value": 100.0,
-        "ci_lower": 100.0,
-        "ci_upper": 100.0,
-        "metric_name": "Detection Recall",
-        "unit": "%"
-      },
-      "localization_hit_at_1": {
-        "value": 100.0,
-        "ci_lower": 100.0,
-        "ci_upper": 100.0,
-        "metric_name": "Localization Hit@1",
-        "unit": "%"
-      },
-      "localization_hit_at_3": {
-        "value": 100.0,
-        "ci_lower": 100.0,
-        "ci_upper": 100.0,
-        "metric_name": "Localization Hit@3",
-        "unit": "%"
-      },
-      "candidate_brt_rate": {
-        "value": 100.0,
-        "ci_lower": 100.0,
-        "ci_upper": 100.0,
-        "metric_name": "Candidate BRT Rate",
-        "unit": "%"
-      },
-      "plausible_brt_rate": {
-        "value": 100.0,
-        "ci_lower": 100.0,
-        "ci_upper": 100.0,
-        "metric_name": "Plausible BRT Rate",
-        "unit": "%"
-      },
-      "patch_plausible_rate": {
-        "value": 100.0,
-        "ci_lower": 100.0,
-        "ci_upper": 100.0,
-        "metric_name": "Patch Plausible Rate",
-        "unit": "%"
-      },
-      "patch_correct_rate": {
-        "value": 100.0,
-        "ci_lower": 100.0,
-        "ci_upper": 100.0,
-        "metric_name": "Patch Correct Rate",
-        "unit": "%"
-      },
-      "regression_rate": {
-        "value": 0.0,
-        "ci_lower": 0.0,
-        "ci_upper": 0.0,
-        "metric_name": "Regression Rate",
-        "unit": "%"
-      },
-      "epr_top_1_precision": {
-        "value": 100.0,
-        "ci_lower": 100.0,
-        "ci_upper": 100.0,
-        "metric_name": "EPR Top-1 Precision",
-        "unit": "%"
-      },
-      "avg_duration_seconds": {
-        "value": 0.05,
-        "ci_lower": 0.04,
-        "ci_upper": 0.05,
-        "metric_name": "Average Duration per Fixed Bug",
-        "unit": "s"
-      },
-      "avg_cost_usd_per_bug": {
-        "value": 0.01,
-        "ci_lower": 0.01,
-        "ci_upper": 0.01,
-        "metric_name": "Average Cost per Fixed Bug",
-        "unit": "$"
-      },
-      "failure_taxonomy_distribution": {
-        "Wrong Location": 0,
-        "No Patch": 0,
-        "Wrong Patch": 0,
-        "Overfitted Patch": 0,
-        "Regression Failure": 0,
-        "BRT Failure": 0,
-        "None (Fixed)": 30
-      },
-      "category_breakdown": {
-        "off-by-one": {
-          "count": 5.0,
-          "localization_hit@1_pct": 100.0,
-          "patch_plausible_pct": 100.0,
-          "patch_correct_pct": 100.0
-        },
-        "validation": {
-          "count": 5.0,
-          "localization_hit@1_pct": 100.0,
-          "patch_plausible_pct": 100.0,
-          "patch_correct_pct": 100.0
-        },
-        "null access": {
-          "count": 4.0,
-          "localization_hit@1_pct": 100.0,
-          "patch_plausible_pct": 100.0,
-          "patch_correct_pct": 100.0
-        },
-        "security": {
-          "count": 4.0,
-          "localization_hit@1_pct": 100.0,
-          "patch_plausible_pct": 100.0,
-          "patch_correct_pct": 100.0
-        },
-        "concurrency-lite": {
-          "count": 4.0,
-          "localization_hit@1_pct": 100.0,
-          "patch_plausible_pct": 100.0,
-          "patch_correct_pct": 100.0
-        },
-        "wrong operator": {
-          "count": 4.0,
-          "localization_hit@1_pct": 100.0,
-          "patch_plausible_pct": 100.0,
-          "patch_correct_pct": 100.0
-        },
-        "boundary": {
-          "count": 4.0,
-          "localization_hit@1_pct": 100.0,
-          "patch_plausible_pct": 100.0,
-          "patch_correct_pct": 100.0
-        }
-      }
-    },
-    "no_brt": {
-      "total_instances": 30,
-      "detection_precision": {
-        "value": 100.0,
-        "ci_lower": 100.0,
-        "ci_upper": 100.0,
-        "metric_name": "Detection Precision",
-        "unit": "%"
-      },
-      "detection_recall": {
-        "value": 100.0,
-        "ci_lower": 100.0,
-        "ci_upper": 100.0,
-        "metric_name": "Detection Recall",
-        "unit": "%"
-      },
-      "localization_hit_at_1": {
-        "value": 100.0,
-        "ci_lower": 100.0,
-        "ci_upper": 100.0,
-        "metric_name": "Localization Hit@1",
-        "unit": "%"
-      },
-      "localization_hit_at_3": {
-        "value": 100.0,
-        "ci_lower": 100.0,
-        "ci_upper": 100.0,
-        "metric_name": "Localization Hit@3",
-        "unit": "%"
-      },
-      "candidate_brt_rate": {
-        "value": 0.0,
-        "ci_lower": 0.0,
-        "ci_upper": 0.0,
-        "metric_name": "Candidate BRT Rate",
-        "unit": "%"
-      },
-      "plausible_brt_rate": {
-        "value": 0.0,
-        "ci_lower": 0.0,
-        "ci_upper": 0.0,
-        "metric_name": "Plausible BRT Rate",
-        "unit": "%"
-      },
-      "patch_plausible_rate": {
-        "value": 100.0,
-        "ci_lower": 100.0,
-        "ci_upper": 100.0,
-        "metric_name": "Patch Plausible Rate",
-        "unit": "%"
-      },
-      "patch_correct_rate": {
-        "value": 100.0,
-        "ci_lower": 100.0,
-        "ci_upper": 100.0,
-        "metric_name": "Patch Correct Rate",
-        "unit": "%"
-      },
-      "regression_rate": {
-        "value": 0.0,
-        "ci_lower": 0.0,
-        "ci_upper": 0.0,
-        "metric_name": "Regression Rate",
-        "unit": "%"
-      },
-      "epr_top_1_precision": {
-        "value": 100.0,
-        "ci_lower": 100.0,
-        "ci_upper": 100.0,
-        "metric_name": "EPR Top-1 Precision",
-        "unit": "%"
-      },
-      "avg_duration_seconds": {
-        "value": 0.05,
-        "ci_lower": 0.04,
-        "ci_upper": 0.05,
-        "metric_name": "Average Duration per Fixed Bug",
-        "unit": "s"
-      },
-      "avg_cost_usd_per_bug": {
-        "value": 0.01,
-        "ci_lower": 0.01,
-        "ci_upper": 0.01,
-        "metric_name": "Average Cost per Fixed Bug",
-        "unit": "$"
-      },
-      "failure_taxonomy_distribution": {
-        "Wrong Location": 0,
-        "No Patch": 0,
-        "Wrong Patch": 0,
-        "Overfitted Patch": 0,
-        "Regression Failure": 0,
-        "BRT Failure": 30,
-        "None (Fixed)": 0
-      },
-      "category_breakdown": {
-        "off-by-one": {
-          "count": 5.0,
-          "localization_hit@1_pct": 100.0,
-          "patch_plausible_pct": 100.0,
-          "patch_correct_pct": 100.0
-        },
-        "validation": {
-          "count": 5.0,
-          "localization_hit@1_pct": 100.0,
-          "patch_plausible_pct": 100.0,
-          "patch_correct_pct": 100.0
-        },
-        "null access": {
-          "count": 4.0,
-          "localization_hit@1_pct": 100.0,
-          "patch_plausible_pct": 100.0,
-          "patch_correct_pct": 100.0
-        },
-        "security": {
-          "count": 4.0,
-          "localization_hit@1_pct": 100.0,
-          "patch_plausible_pct": 100.0,
-          "patch_correct_pct": 100.0
-        },
-        "concurrency-lite": {
-          "count": 4.0,
-          "localization_hit@1_pct": 100.0,
-          "patch_plausible_pct": 100.0,
-          "patch_correct_pct": 100.0
-        },
-        "wrong operator": {
-          "count": 4.0,
-          "localization_hit@1_pct": 100.0,
-          "patch_plausible_pct": 100.0,
-          "patch_correct_pct": 100.0
-        },
-        "boundary": {
-          "count": 4.0,
-          "localization_hit@1_pct": 100.0,
-          "patch_plausible_pct": 100.0,
-          "patch_correct_pct": 100.0
-        }
-      }
-    },
-    "no_sbfl": {
-      "total_instances": 30,
-      "detection_precision": {
-        "value": 100.0,
-        "ci_lower": 100.0,
-        "ci_upper": 100.0,
-        "metric_name": "Detection Precision",
-        "unit": "%"
-      },
-      "detection_recall": {
-        "value": 100.0,
-        "ci_lower": 100.0,
-        "ci_upper": 100.0,
-        "metric_name": "Detection Recall",
-        "unit": "%"
-      },
-      "localization_hit_at_1": {
-        "value": 13.33,
-        "ci_lower": 3.33,
-        "ci_upper": 26.67,
-        "metric_name": "Localization Hit@1",
-        "unit": "%"
-      },
-      "localization_hit_at_3": {
-        "value": 13.33,
-        "ci_lower": 3.33,
-        "ci_upper": 26.67,
-        "metric_name": "Localization Hit@3",
-        "unit": "%"
-      },
-      "candidate_brt_rate": {
-        "value": 100.0,
-        "ci_lower": 100.0,
-        "ci_upper": 100.0,
-        "metric_name": "Candidate BRT Rate",
-        "unit": "%"
-      },
-      "plausible_brt_rate": {
-        "value": 100.0,
-        "ci_lower": 100.0,
-        "ci_upper": 100.0,
-        "metric_name": "Plausible BRT Rate",
-        "unit": "%"
-      },
-      "patch_plausible_rate": {
-        "value": 100.0,
-        "ci_lower": 100.0,
-        "ci_upper": 100.0,
-        "metric_name": "Patch Plausible Rate",
-        "unit": "%"
-      },
-      "patch_correct_rate": {
-        "value": 100.0,
-        "ci_lower": 100.0,
-        "ci_upper": 100.0,
-        "metric_name": "Patch Correct Rate",
-        "unit": "%"
-      },
-      "regression_rate": {
-        "value": 0.0,
-        "ci_lower": 0.0,
-        "ci_upper": 0.0,
-        "metric_name": "Regression Rate",
-        "unit": "%"
-      },
-      "epr_top_1_precision": {
-        "value": 100.0,
-        "ci_lower": 100.0,
-        "ci_upper": 100.0,
-        "metric_name": "EPR Top-1 Precision",
-        "unit": "%"
-      },
-      "avg_duration_seconds": {
-        "value": 0.05,
-        "ci_lower": 0.04,
-        "ci_upper": 0.05,
-        "metric_name": "Average Duration per Fixed Bug",
-        "unit": "s"
-      },
-      "avg_cost_usd_per_bug": {
-        "value": 0.01,
-        "ci_lower": 0.01,
-        "ci_upper": 0.01,
-        "metric_name": "Average Cost per Fixed Bug",
-        "unit": "$"
-      },
-      "failure_taxonomy_distribution": {
-        "Wrong Location": 26,
-        "No Patch": 0,
-        "Wrong Patch": 0,
-        "Overfitted Patch": 0,
-        "Regression Failure": 0,
-        "BRT Failure": 0,
-        "None (Fixed)": 4
-      },
-      "category_breakdown": {
-        "off-by-one": {
-          "count": 5.0,
-          "localization_hit@1_pct": 40.0,
-          "patch_plausible_pct": 100.0,
-          "patch_correct_pct": 100.0
-        },
-        "validation": {
-          "count": 5.0,
-          "localization_hit@1_pct": 40.0,
-          "patch_plausible_pct": 100.0,
-          "patch_correct_pct": 100.0
-        },
-        "null access": {
-          "count": 4.0,
-          "localization_hit@1_pct": 0.0,
-          "patch_plausible_pct": 100.0,
-          "patch_correct_pct": 100.0
-        },
-        "security": {
-          "count": 4.0,
-          "localization_hit@1_pct": 0.0,
-          "patch_plausible_pct": 100.0,
-          "patch_correct_pct": 100.0
-        },
-        "concurrency-lite": {
-          "count": 4.0,
-          "localization_hit@1_pct": 0.0,
-          "patch_plausible_pct": 100.0,
-          "patch_correct_pct": 100.0
-        },
-        "wrong operator": {
-          "count": 4.0,
-          "localization_hit@1_pct": 0.0,
-          "patch_plausible_pct": 100.0,
-          "patch_correct_pct": 100.0
-        },
-        "boundary": {
-          "count": 4.0,
-          "localization_hit@1_pct": 0.0,
-          "patch_plausible_pct": 100.0,
-          "patch_correct_pct": 100.0
-        }
-      }
-    },
-    "templates_only": {
-      "total_instances": 30,
-      "detection_precision": {
-        "value": 100.0,
-        "ci_lower": 100.0,
-        "ci_upper": 100.0,
-        "metric_name": "Detection Precision",
-        "unit": "%"
-      },
-      "detection_recall": {
-        "value": 100.0,
-        "ci_lower": 100.0,
-        "ci_upper": 100.0,
-        "metric_name": "Detection Recall",
-        "unit": "%"
-      },
-      "localization_hit_at_1": {
-        "value": 100.0,
-        "ci_lower": 100.0,
-        "ci_upper": 100.0,
-        "metric_name": "Localization Hit@1",
-        "unit": "%"
-      },
-      "localization_hit_at_3": {
-        "value": 100.0,
-        "ci_lower": 100.0,
-        "ci_upper": 100.0,
-        "metric_name": "Localization Hit@3",
-        "unit": "%"
-      },
-      "candidate_brt_rate": {
-        "value": 100.0,
-        "ci_lower": 100.0,
-        "ci_upper": 100.0,
-        "metric_name": "Candidate BRT Rate",
-        "unit": "%"
-      },
-      "plausible_brt_rate": {
-        "value": 100.0,
-        "ci_lower": 100.0,
-        "ci_upper": 100.0,
-        "metric_name": "Plausible BRT Rate",
-        "unit": "%"
-      },
-      "patch_plausible_rate": {
-        "value": 0.0,
-        "ci_lower": 0.0,
-        "ci_upper": 0.0,
-        "metric_name": "Patch Plausible Rate",
-        "unit": "%"
-      },
-      "patch_correct_rate": {
-        "value": 0.0,
-        "ci_lower": 0.0,
-        "ci_upper": 0.0,
-        "metric_name": "Patch Correct Rate",
-        "unit": "%"
-      },
-      "regression_rate": {
-        "value": 0.0,
-        "ci_lower": 0.0,
-        "ci_upper": 0.0,
-        "metric_name": "Regression Rate",
-        "unit": "%"
-      },
-      "epr_top_1_precision": {
-        "value": 0.0,
-        "ci_lower": 0.0,
-        "ci_upper": 0.0,
-        "metric_name": "EPR Top-1 Precision",
-        "unit": "%"
-      },
-      "avg_duration_seconds": {
-        "value": 0.0,
-        "ci_lower": 0.0,
-        "ci_upper": 0.0,
-        "metric_name": "Average Duration per Fixed Bug",
-        "unit": "s"
-      },
-      "avg_cost_usd_per_bug": {
-        "value": 0.0,
-        "ci_lower": 0.0,
-        "ci_upper": 0.0,
-        "metric_name": "Average Cost per Fixed Bug",
-        "unit": "$"
-      },
-      "failure_taxonomy_distribution": {
-        "Wrong Location": 0,
-        "No Patch": 30,
-        "Wrong Patch": 0,
-        "Overfitted Patch": 0,
-        "Regression Failure": 0,
-        "BRT Failure": 0,
-        "None (Fixed)": 0
-      },
-      "category_breakdown": {
-        "off-by-one": {
-          "count": 5.0,
-          "localization_hit@1_pct": 100.0,
-          "patch_plausible_pct": 0.0,
-          "patch_correct_pct": 0.0
-        },
-        "validation": {
-          "count": 5.0,
-          "localization_hit@1_pct": 100.0,
-          "patch_plausible_pct": 0.0,
-          "patch_correct_pct": 0.0
-        },
-        "null access": {
-          "count": 4.0,
-          "localization_hit@1_pct": 100.0,
-          "patch_plausible_pct": 0.0,
-          "patch_correct_pct": 0.0
-        },
-        "security": {
-          "count": 4.0,
-          "localization_hit@1_pct": 100.0,
-          "patch_plausible_pct": 0.0,
-          "patch_correct_pct": 0.0
-        },
-        "concurrency-lite": {
-          "count": 4.0,
-          "localization_hit@1_pct": 100.0,
-          "patch_plausible_pct": 0.0,
-          "patch_correct_pct": 0.0
-        },
-        "wrong operator": {
-          "count": 4.0,
-          "localization_hit@1_pct": 100.0,
-          "patch_plausible_pct": 0.0,
-          "patch_correct_pct": 0.0
-        },
-        "boundary": {
-          "count": 4.0,
-          "localization_hit@1_pct": 100.0,
-          "patch_plausible_pct": 0.0,
-          "patch_correct_pct": 0.0
-        }
-      }
-    },
-    "llm_only": {
-      "total_instances": 30,
+      "total_instances": 34,
       "detection_precision": {
         "value": 100.0,
         "ci_lower": 100.0,
@@ -853,7 +295,7 @@
         "Overfitted Patch": 0,
         "Regression Failure": 0,
         "BRT Failure": 0,
-        "None (Fixed)": 30
+        "None (Fixed)": 34
       },
       "category_breakdown": {
         "off-by-one": {
@@ -863,13 +305,13 @@
           "patch_correct_pct": 100.0
         },
         "validation": {
-          "count": 5.0,
+          "count": 6.0,
           "localization_hit@1_pct": 100.0,
           "patch_plausible_pct": 100.0,
           "patch_correct_pct": 100.0
         },
         "null access": {
-          "count": 4.0,
+          "count": 5.0,
           "localization_hit@1_pct": 100.0,
           "patch_plausible_pct": 100.0,
           "patch_correct_pct": 100.0
@@ -881,7 +323,7 @@
           "patch_correct_pct": 100.0
         },
         "concurrency-lite": {
-          "count": 4.0,
+          "count": 5.0,
           "localization_hit@1_pct": 100.0,
           "patch_plausible_pct": 100.0,
           "patch_correct_pct": 100.0
@@ -893,7 +335,567 @@
           "patch_correct_pct": 100.0
         },
         "boundary": {
+          "count": 5.0,
+          "localization_hit@1_pct": 100.0,
+          "patch_plausible_pct": 100.0,
+          "patch_correct_pct": 100.0
+        }
+      }
+    },
+    "no_brt": {
+      "total_instances": 34,
+      "detection_precision": {
+        "value": 100.0,
+        "ci_lower": 100.0,
+        "ci_upper": 100.0,
+        "metric_name": "Detection Precision",
+        "unit": "%"
+      },
+      "detection_recall": {
+        "value": 100.0,
+        "ci_lower": 100.0,
+        "ci_upper": 100.0,
+        "metric_name": "Detection Recall",
+        "unit": "%"
+      },
+      "localization_hit_at_1": {
+        "value": 100.0,
+        "ci_lower": 100.0,
+        "ci_upper": 100.0,
+        "metric_name": "Localization Hit@1",
+        "unit": "%"
+      },
+      "localization_hit_at_3": {
+        "value": 100.0,
+        "ci_lower": 100.0,
+        "ci_upper": 100.0,
+        "metric_name": "Localization Hit@3",
+        "unit": "%"
+      },
+      "candidate_brt_rate": {
+        "value": 0.0,
+        "ci_lower": 0.0,
+        "ci_upper": 0.0,
+        "metric_name": "Candidate BRT Rate",
+        "unit": "%"
+      },
+      "plausible_brt_rate": {
+        "value": 0.0,
+        "ci_lower": 0.0,
+        "ci_upper": 0.0,
+        "metric_name": "Plausible BRT Rate",
+        "unit": "%"
+      },
+      "patch_plausible_rate": {
+        "value": 100.0,
+        "ci_lower": 100.0,
+        "ci_upper": 100.0,
+        "metric_name": "Patch Plausible Rate",
+        "unit": "%"
+      },
+      "patch_correct_rate": {
+        "value": 100.0,
+        "ci_lower": 100.0,
+        "ci_upper": 100.0,
+        "metric_name": "Patch Correct Rate",
+        "unit": "%"
+      },
+      "regression_rate": {
+        "value": 0.0,
+        "ci_lower": 0.0,
+        "ci_upper": 0.0,
+        "metric_name": "Regression Rate",
+        "unit": "%"
+      },
+      "epr_top_1_precision": {
+        "value": 100.0,
+        "ci_lower": 100.0,
+        "ci_upper": 100.0,
+        "metric_name": "EPR Top-1 Precision",
+        "unit": "%"
+      },
+      "avg_duration_seconds": {
+        "value": 0.04,
+        "ci_lower": 0.04,
+        "ci_upper": 0.05,
+        "metric_name": "Average Duration per Fixed Bug",
+        "unit": "s"
+      },
+      "avg_cost_usd_per_bug": {
+        "value": 0.01,
+        "ci_lower": 0.01,
+        "ci_upper": 0.01,
+        "metric_name": "Average Cost per Fixed Bug",
+        "unit": "$"
+      },
+      "failure_taxonomy_distribution": {
+        "Wrong Location": 0,
+        "No Patch": 0,
+        "Wrong Patch": 0,
+        "Overfitted Patch": 0,
+        "Regression Failure": 0,
+        "BRT Failure": 34,
+        "None (Fixed)": 0
+      },
+      "category_breakdown": {
+        "off-by-one": {
+          "count": 5.0,
+          "localization_hit@1_pct": 100.0,
+          "patch_plausible_pct": 100.0,
+          "patch_correct_pct": 100.0
+        },
+        "validation": {
+          "count": 6.0,
+          "localization_hit@1_pct": 100.0,
+          "patch_plausible_pct": 100.0,
+          "patch_correct_pct": 100.0
+        },
+        "null access": {
+          "count": 5.0,
+          "localization_hit@1_pct": 100.0,
+          "patch_plausible_pct": 100.0,
+          "patch_correct_pct": 100.0
+        },
+        "security": {
           "count": 4.0,
+          "localization_hit@1_pct": 100.0,
+          "patch_plausible_pct": 100.0,
+          "patch_correct_pct": 100.0
+        },
+        "concurrency-lite": {
+          "count": 5.0,
+          "localization_hit@1_pct": 100.0,
+          "patch_plausible_pct": 100.0,
+          "patch_correct_pct": 100.0
+        },
+        "wrong operator": {
+          "count": 4.0,
+          "localization_hit@1_pct": 100.0,
+          "patch_plausible_pct": 100.0,
+          "patch_correct_pct": 100.0
+        },
+        "boundary": {
+          "count": 5.0,
+          "localization_hit@1_pct": 100.0,
+          "patch_plausible_pct": 100.0,
+          "patch_correct_pct": 100.0
+        }
+      }
+    },
+    "no_sbfl": {
+      "total_instances": 34,
+      "detection_precision": {
+        "value": 100.0,
+        "ci_lower": 100.0,
+        "ci_upper": 100.0,
+        "metric_name": "Detection Precision",
+        "unit": "%"
+      },
+      "detection_recall": {
+        "value": 100.0,
+        "ci_lower": 100.0,
+        "ci_upper": 100.0,
+        "metric_name": "Detection Recall",
+        "unit": "%"
+      },
+      "localization_hit_at_1": {
+        "value": 11.76,
+        "ci_lower": 2.94,
+        "ci_upper": 23.53,
+        "metric_name": "Localization Hit@1",
+        "unit": "%"
+      },
+      "localization_hit_at_3": {
+        "value": 11.76,
+        "ci_lower": 2.94,
+        "ci_upper": 23.53,
+        "metric_name": "Localization Hit@3",
+        "unit": "%"
+      },
+      "candidate_brt_rate": {
+        "value": 100.0,
+        "ci_lower": 100.0,
+        "ci_upper": 100.0,
+        "metric_name": "Candidate BRT Rate",
+        "unit": "%"
+      },
+      "plausible_brt_rate": {
+        "value": 100.0,
+        "ci_lower": 100.0,
+        "ci_upper": 100.0,
+        "metric_name": "Plausible BRT Rate",
+        "unit": "%"
+      },
+      "patch_plausible_rate": {
+        "value": 100.0,
+        "ci_lower": 100.0,
+        "ci_upper": 100.0,
+        "metric_name": "Patch Plausible Rate",
+        "unit": "%"
+      },
+      "patch_correct_rate": {
+        "value": 100.0,
+        "ci_lower": 100.0,
+        "ci_upper": 100.0,
+        "metric_name": "Patch Correct Rate",
+        "unit": "%"
+      },
+      "regression_rate": {
+        "value": 0.0,
+        "ci_lower": 0.0,
+        "ci_upper": 0.0,
+        "metric_name": "Regression Rate",
+        "unit": "%"
+      },
+      "epr_top_1_precision": {
+        "value": 100.0,
+        "ci_lower": 100.0,
+        "ci_upper": 100.0,
+        "metric_name": "EPR Top-1 Precision",
+        "unit": "%"
+      },
+      "avg_duration_seconds": {
+        "value": 0.04,
+        "ci_lower": 0.04,
+        "ci_upper": 0.05,
+        "metric_name": "Average Duration per Fixed Bug",
+        "unit": "s"
+      },
+      "avg_cost_usd_per_bug": {
+        "value": 0.01,
+        "ci_lower": 0.01,
+        "ci_upper": 0.01,
+        "metric_name": "Average Cost per Fixed Bug",
+        "unit": "$"
+      },
+      "failure_taxonomy_distribution": {
+        "Wrong Location": 30,
+        "No Patch": 0,
+        "Wrong Patch": 0,
+        "Overfitted Patch": 0,
+        "Regression Failure": 0,
+        "BRT Failure": 0,
+        "None (Fixed)": 4
+      },
+      "category_breakdown": {
+        "off-by-one": {
+          "count": 5.0,
+          "localization_hit@1_pct": 40.0,
+          "patch_plausible_pct": 100.0,
+          "patch_correct_pct": 100.0
+        },
+        "validation": {
+          "count": 6.0,
+          "localization_hit@1_pct": 33.3,
+          "patch_plausible_pct": 100.0,
+          "patch_correct_pct": 100.0
+        },
+        "null access": {
+          "count": 5.0,
+          "localization_hit@1_pct": 0.0,
+          "patch_plausible_pct": 100.0,
+          "patch_correct_pct": 100.0
+        },
+        "security": {
+          "count": 4.0,
+          "localization_hit@1_pct": 0.0,
+          "patch_plausible_pct": 100.0,
+          "patch_correct_pct": 100.0
+        },
+        "concurrency-lite": {
+          "count": 5.0,
+          "localization_hit@1_pct": 0.0,
+          "patch_plausible_pct": 100.0,
+          "patch_correct_pct": 100.0
+        },
+        "wrong operator": {
+          "count": 4.0,
+          "localization_hit@1_pct": 0.0,
+          "patch_plausible_pct": 100.0,
+          "patch_correct_pct": 100.0
+        },
+        "boundary": {
+          "count": 5.0,
+          "localization_hit@1_pct": 0.0,
+          "patch_plausible_pct": 100.0,
+          "patch_correct_pct": 100.0
+        }
+      }
+    },
+    "templates_only": {
+      "total_instances": 34,
+      "detection_precision": {
+        "value": 100.0,
+        "ci_lower": 100.0,
+        "ci_upper": 100.0,
+        "metric_name": "Detection Precision",
+        "unit": "%"
+      },
+      "detection_recall": {
+        "value": 100.0,
+        "ci_lower": 100.0,
+        "ci_upper": 100.0,
+        "metric_name": "Detection Recall",
+        "unit": "%"
+      },
+      "localization_hit_at_1": {
+        "value": 100.0,
+        "ci_lower": 100.0,
+        "ci_upper": 100.0,
+        "metric_name": "Localization Hit@1",
+        "unit": "%"
+      },
+      "localization_hit_at_3": {
+        "value": 100.0,
+        "ci_lower": 100.0,
+        "ci_upper": 100.0,
+        "metric_name": "Localization Hit@3",
+        "unit": "%"
+      },
+      "candidate_brt_rate": {
+        "value": 100.0,
+        "ci_lower": 100.0,
+        "ci_upper": 100.0,
+        "metric_name": "Candidate BRT Rate",
+        "unit": "%"
+      },
+      "plausible_brt_rate": {
+        "value": 100.0,
+        "ci_lower": 100.0,
+        "ci_upper": 100.0,
+        "metric_name": "Plausible BRT Rate",
+        "unit": "%"
+      },
+      "patch_plausible_rate": {
+        "value": 0.0,
+        "ci_lower": 0.0,
+        "ci_upper": 0.0,
+        "metric_name": "Patch Plausible Rate",
+        "unit": "%"
+      },
+      "patch_correct_rate": {
+        "value": 0.0,
+        "ci_lower": 0.0,
+        "ci_upper": 0.0,
+        "metric_name": "Patch Correct Rate",
+        "unit": "%"
+      },
+      "regression_rate": {
+        "value": 0.0,
+        "ci_lower": 0.0,
+        "ci_upper": 0.0,
+        "metric_name": "Regression Rate",
+        "unit": "%"
+      },
+      "epr_top_1_precision": {
+        "value": 0.0,
+        "ci_lower": 0.0,
+        "ci_upper": 0.0,
+        "metric_name": "EPR Top-1 Precision",
+        "unit": "%"
+      },
+      "avg_duration_seconds": {
+        "value": 0.0,
+        "ci_lower": 0.0,
+        "ci_upper": 0.0,
+        "metric_name": "Average Duration per Fixed Bug",
+        "unit": "s"
+      },
+      "avg_cost_usd_per_bug": {
+        "value": 0.0,
+        "ci_lower": 0.0,
+        "ci_upper": 0.0,
+        "metric_name": "Average Cost per Fixed Bug",
+        "unit": "$"
+      },
+      "failure_taxonomy_distribution": {
+        "Wrong Location": 0,
+        "No Patch": 34,
+        "Wrong Patch": 0,
+        "Overfitted Patch": 0,
+        "Regression Failure": 0,
+        "BRT Failure": 0,
+        "None (Fixed)": 0
+      },
+      "category_breakdown": {
+        "off-by-one": {
+          "count": 5.0,
+          "localization_hit@1_pct": 100.0,
+          "patch_plausible_pct": 0.0,
+          "patch_correct_pct": 0.0
+        },
+        "validation": {
+          "count": 6.0,
+          "localization_hit@1_pct": 100.0,
+          "patch_plausible_pct": 0.0,
+          "patch_correct_pct": 0.0
+        },
+        "null access": {
+          "count": 5.0,
+          "localization_hit@1_pct": 100.0,
+          "patch_plausible_pct": 0.0,
+          "patch_correct_pct": 0.0
+        },
+        "security": {
+          "count": 4.0,
+          "localization_hit@1_pct": 100.0,
+          "patch_plausible_pct": 0.0,
+          "patch_correct_pct": 0.0
+        },
+        "concurrency-lite": {
+          "count": 5.0,
+          "localization_hit@1_pct": 100.0,
+          "patch_plausible_pct": 0.0,
+          "patch_correct_pct": 0.0
+        },
+        "wrong operator": {
+          "count": 4.0,
+          "localization_hit@1_pct": 100.0,
+          "patch_plausible_pct": 0.0,
+          "patch_correct_pct": 0.0
+        },
+        "boundary": {
+          "count": 5.0,
+          "localization_hit@1_pct": 100.0,
+          "patch_plausible_pct": 0.0,
+          "patch_correct_pct": 0.0
+        }
+      }
+    },
+    "llm_only": {
+      "total_instances": 34,
+      "detection_precision": {
+        "value": 100.0,
+        "ci_lower": 100.0,
+        "ci_upper": 100.0,
+        "metric_name": "Detection Precision",
+        "unit": "%"
+      },
+      "detection_recall": {
+        "value": 100.0,
+        "ci_lower": 100.0,
+        "ci_upper": 100.0,
+        "metric_name": "Detection Recall",
+        "unit": "%"
+      },
+      "localization_hit_at_1": {
+        "value": 100.0,
+        "ci_lower": 100.0,
+        "ci_upper": 100.0,
+        "metric_name": "Localization Hit@1",
+        "unit": "%"
+      },
+      "localization_hit_at_3": {
+        "value": 100.0,
+        "ci_lower": 100.0,
+        "ci_upper": 100.0,
+        "metric_name": "Localization Hit@3",
+        "unit": "%"
+      },
+      "candidate_brt_rate": {
+        "value": 100.0,
+        "ci_lower": 100.0,
+        "ci_upper": 100.0,
+        "metric_name": "Candidate BRT Rate",
+        "unit": "%"
+      },
+      "plausible_brt_rate": {
+        "value": 100.0,
+        "ci_lower": 100.0,
+        "ci_upper": 100.0,
+        "metric_name": "Plausible BRT Rate",
+        "unit": "%"
+      },
+      "patch_plausible_rate": {
+        "value": 100.0,
+        "ci_lower": 100.0,
+        "ci_upper": 100.0,
+        "metric_name": "Patch Plausible Rate",
+        "unit": "%"
+      },
+      "patch_correct_rate": {
+        "value": 100.0,
+        "ci_lower": 100.0,
+        "ci_upper": 100.0,
+        "metric_name": "Patch Correct Rate",
+        "unit": "%"
+      },
+      "regression_rate": {
+        "value": 0.0,
+        "ci_lower": 0.0,
+        "ci_upper": 0.0,
+        "metric_name": "Regression Rate",
+        "unit": "%"
+      },
+      "epr_top_1_precision": {
+        "value": 100.0,
+        "ci_lower": 100.0,
+        "ci_upper": 100.0,
+        "metric_name": "EPR Top-1 Precision",
+        "unit": "%"
+      },
+      "avg_duration_seconds": {
+        "value": 0.04,
+        "ci_lower": 0.04,
+        "ci_upper": 0.05,
+        "metric_name": "Average Duration per Fixed Bug",
+        "unit": "s"
+      },
+      "avg_cost_usd_per_bug": {
+        "value": 0.01,
+        "ci_lower": 0.01,
+        "ci_upper": 0.01,
+        "metric_name": "Average Cost per Fixed Bug",
+        "unit": "$"
+      },
+      "failure_taxonomy_distribution": {
+        "Wrong Location": 0,
+        "No Patch": 0,
+        "Wrong Patch": 0,
+        "Overfitted Patch": 0,
+        "Regression Failure": 0,
+        "BRT Failure": 0,
+        "None (Fixed)": 34
+      },
+      "category_breakdown": {
+        "off-by-one": {
+          "count": 5.0,
+          "localization_hit@1_pct": 100.0,
+          "patch_plausible_pct": 100.0,
+          "patch_correct_pct": 100.0
+        },
+        "validation": {
+          "count": 6.0,
+          "localization_hit@1_pct": 100.0,
+          "patch_plausible_pct": 100.0,
+          "patch_correct_pct": 100.0
+        },
+        "null access": {
+          "count": 5.0,
+          "localization_hit@1_pct": 100.0,
+          "patch_plausible_pct": 100.0,
+          "patch_correct_pct": 100.0
+        },
+        "security": {
+          "count": 4.0,
+          "localization_hit@1_pct": 100.0,
+          "patch_plausible_pct": 100.0,
+          "patch_correct_pct": 100.0
+        },
+        "concurrency-lite": {
+          "count": 5.0,
+          "localization_hit@1_pct": 100.0,
+          "patch_plausible_pct": 100.0,
+          "patch_correct_pct": 100.0
+        },
+        "wrong operator": {
+          "count": 4.0,
+          "localization_hit@1_pct": 100.0,
+          "patch_plausible_pct": 100.0,
+          "patch_correct_pct": 100.0
+        },
+        "boundary": {
+          "count": 5.0,
           "localization_hit@1_pct": 100.0,
           "patch_plausible_pct": 100.0,
           "patch_correct_pct": 100.0
@@ -921,7 +923,7 @@
       "epr_rank": 1,
       "epr_score": 100.0,
       "epr_top_1_precision": true,
-      "duration_seconds": 0.035,
+      "duration_seconds": 0.033,
       "cost_usd": 0.0075,
       "failure_category": "None (Fixed)",
       "failure_reason": "Bug resolved and verified against oracle tests.",
@@ -946,7 +948,7 @@
       "epr_rank": 1,
       "epr_score": 100.0,
       "epr_top_1_precision": true,
-      "duration_seconds": 0.034,
+      "duration_seconds": 0.031,
       "cost_usd": 0.0075,
       "failure_category": "None (Fixed)",
       "failure_reason": "Bug resolved and verified against oracle tests.",
@@ -971,7 +973,7 @@
       "epr_rank": 1,
       "epr_score": 100.0,
       "epr_top_1_precision": true,
-      "duration_seconds": 0.035,
+      "duration_seconds": 0.031,
       "cost_usd": 0.0075,
       "failure_category": "None (Fixed)",
       "failure_reason": "Bug resolved and verified against oracle tests.",
@@ -996,7 +998,7 @@
       "epr_rank": 1,
       "epr_score": 100.0,
       "epr_top_1_precision": true,
-      "duration_seconds": 0.049,
+      "duration_seconds": 0.157,
       "cost_usd": 0.0075,
       "failure_category": "None (Fixed)",
       "failure_reason": "Bug resolved and verified against oracle tests.",
@@ -1021,7 +1023,7 @@
       "epr_rank": 1,
       "epr_score": 100.0,
       "epr_top_1_precision": true,
-      "duration_seconds": 0.052,
+      "duration_seconds": 0.047,
       "cost_usd": 0.0075,
       "failure_category": "None (Fixed)",
       "failure_reason": "Bug resolved and verified against oracle tests.",
@@ -1046,7 +1048,7 @@
       "epr_rank": 1,
       "epr_score": 100.0,
       "epr_top_1_precision": true,
-      "duration_seconds": 0.039,
+      "duration_seconds": 0.03,
       "cost_usd": 0.0075,
       "failure_category": "None (Fixed)",
       "failure_reason": "Bug resolved and verified against oracle tests.",
@@ -1071,7 +1073,7 @@
       "epr_rank": 1,
       "epr_score": 100.0,
       "epr_top_1_precision": true,
-      "duration_seconds": 0.138,
+      "duration_seconds": 0.116,
       "cost_usd": 0.0075,
       "failure_category": "None (Fixed)",
       "failure_reason": "Bug resolved and verified against oracle tests.",
@@ -1096,7 +1098,7 @@
       "epr_rank": 1,
       "epr_score": 100.0,
       "epr_top_1_precision": true,
-      "duration_seconds": 0.032,
+      "duration_seconds": 0.03,
       "cost_usd": 0.0075,
       "failure_category": "None (Fixed)",
       "failure_reason": "Bug resolved and verified against oracle tests.",
@@ -1121,7 +1123,7 @@
       "epr_rank": 1,
       "epr_score": 100.0,
       "epr_top_1_precision": true,
-      "duration_seconds": 0.049,
+      "duration_seconds": 0.046,
       "cost_usd": 0.0075,
       "failure_category": "None (Fixed)",
       "failure_reason": "Bug resolved and verified against oracle tests.",
@@ -1146,7 +1148,7 @@
       "epr_rank": 1,
       "epr_score": 100.0,
       "epr_top_1_precision": true,
-      "duration_seconds": 0.049,
+      "duration_seconds": 0.046,
       "cost_usd": 0.0075,
       "failure_category": "None (Fixed)",
       "failure_reason": "Bug resolved and verified against oracle tests.",
@@ -1171,7 +1173,7 @@
       "epr_rank": 1,
       "epr_score": 100.0,
       "epr_top_1_precision": true,
-      "duration_seconds": 0.036,
+      "duration_seconds": 0.031,
       "cost_usd": 0.0075,
       "failure_category": "None (Fixed)",
       "failure_reason": "Bug resolved and verified against oracle tests.",
@@ -1196,7 +1198,7 @@
       "epr_rank": 1,
       "epr_score": 100.0,
       "epr_top_1_precision": true,
-      "duration_seconds": 0.034,
+      "duration_seconds": 0.031,
       "cost_usd": 0.0075,
       "failure_category": "None (Fixed)",
       "failure_reason": "Bug resolved and verified against oracle tests.",
@@ -1221,7 +1223,7 @@
       "epr_rank": 1,
       "epr_score": 100.0,
       "epr_top_1_precision": true,
-      "duration_seconds": 0.052,
+      "duration_seconds": 0.047,
       "cost_usd": 0.0075,
       "failure_category": "None (Fixed)",
       "failure_reason": "Bug resolved and verified against oracle tests.",
@@ -1246,7 +1248,7 @@
       "epr_rank": 1,
       "epr_score": 100.0,
       "epr_top_1_precision": true,
-      "duration_seconds": 0.051,
+      "duration_seconds": 0.046,
       "cost_usd": 0.0075,
       "failure_category": "None (Fixed)",
       "failure_reason": "Bug resolved and verified against oracle tests.",
@@ -1271,7 +1273,7 @@
       "epr_rank": 1,
       "epr_score": 100.0,
       "epr_top_1_precision": true,
-      "duration_seconds": 0.035,
+      "duration_seconds": 0.031,
       "cost_usd": 0.0075,
       "failure_category": "None (Fixed)",
       "failure_reason": "Bug resolved and verified against oracle tests.",
@@ -1296,7 +1298,7 @@
       "epr_rank": 1,
       "epr_score": 100.0,
       "epr_top_1_precision": true,
-      "duration_seconds": 0.041,
+      "duration_seconds": 0.038,
       "cost_usd": 0.0075,
       "failure_category": "None (Fixed)",
       "failure_reason": "Bug resolved and verified against oracle tests.",
@@ -1321,7 +1323,7 @@
       "epr_rank": 1,
       "epr_score": 100.0,
       "epr_top_1_precision": true,
-      "duration_seconds": 0.05,
+      "duration_seconds": 0.048,
       "cost_usd": 0.0075,
       "failure_category": "None (Fixed)",
       "failure_reason": "Bug resolved and verified against oracle tests.",
@@ -1346,7 +1348,7 @@
       "epr_rank": 1,
       "epr_score": 100.0,
       "epr_top_1_precision": true,
-      "duration_seconds": 0.05,
+      "duration_seconds": 0.047,
       "cost_usd": 0.0075,
       "failure_category": "None (Fixed)",
       "failure_reason": "Bug resolved and verified against oracle tests.",
@@ -1371,7 +1373,7 @@
       "epr_rank": 1,
       "epr_score": 100.0,
       "epr_top_1_precision": true,
-      "duration_seconds": 0.032,
+      "duration_seconds": 0.03,
       "cost_usd": 0.0075,
       "failure_category": "None (Fixed)",
       "failure_reason": "Bug resolved and verified against oracle tests.",
@@ -1396,7 +1398,7 @@
       "epr_rank": 1,
       "epr_score": 100.0,
       "epr_top_1_precision": true,
-      "duration_seconds": 0.042,
+      "duration_seconds": 0.04,
       "cost_usd": 0.0075,
       "failure_category": "None (Fixed)",
       "failure_reason": "Bug resolved and verified against oracle tests.",
@@ -1421,7 +1423,7 @@
       "epr_rank": 1,
       "epr_score": 100.0,
       "epr_top_1_precision": true,
-      "duration_seconds": 0.073,
+      "duration_seconds": 0.069,
       "cost_usd": 0.0075,
       "failure_category": "None (Fixed)",
       "failure_reason": "Bug resolved and verified against oracle tests.",
@@ -1446,7 +1448,7 @@
       "epr_rank": 1,
       "epr_score": 100.0,
       "epr_top_1_precision": true,
-      "duration_seconds": 0.049,
+      "duration_seconds": 0.047,
       "cost_usd": 0.0075,
       "failure_category": "None (Fixed)",
       "failure_reason": "Bug resolved and verified against oracle tests.",
@@ -1471,7 +1473,7 @@
       "epr_rank": 1,
       "epr_score": 100.0,
       "epr_top_1_precision": true,
-      "duration_seconds": 0.032,
+      "duration_seconds": 0.031,
       "cost_usd": 0.0075,
       "failure_category": "None (Fixed)",
       "failure_reason": "Bug resolved and verified against oracle tests.",
@@ -1521,7 +1523,7 @@
       "epr_rank": 1,
       "epr_score": 100.0,
       "epr_top_1_precision": true,
-      "duration_seconds": 0.048,
+      "duration_seconds": 0.046,
       "cost_usd": 0.0075,
       "failure_category": "None (Fixed)",
       "failure_reason": "Bug resolved and verified against oracle tests.",
@@ -1546,7 +1548,7 @@
       "epr_rank": 1,
       "epr_score": 100.0,
       "epr_top_1_precision": true,
-      "duration_seconds": 0.049,
+      "duration_seconds": 0.046,
       "cost_usd": 0.0075,
       "failure_category": "None (Fixed)",
       "failure_reason": "Bug resolved and verified against oracle tests.",
@@ -1571,7 +1573,7 @@
       "epr_rank": 1,
       "epr_score": 100.0,
       "epr_top_1_precision": true,
-      "duration_seconds": 0.033,
+      "duration_seconds": 0.031,
       "cost_usd": 0.0075,
       "failure_category": "None (Fixed)",
       "failure_reason": "Bug resolved and verified against oracle tests.",
@@ -1596,7 +1598,7 @@
       "epr_rank": 1,
       "epr_score": 100.0,
       "epr_top_1_precision": true,
-      "duration_seconds": 0.033,
+      "duration_seconds": 0.031,
       "cost_usd": 0.0075,
       "failure_category": "None (Fixed)",
       "failure_reason": "Bug resolved and verified against oracle tests.",
@@ -1621,7 +1623,7 @@
       "epr_rank": 1,
       "epr_score": 100.0,
       "epr_top_1_precision": true,
-      "duration_seconds": 0.05,
+      "duration_seconds": 0.047,
       "cost_usd": 0.0075,
       "failure_category": "None (Fixed)",
       "failure_reason": "Bug resolved and verified against oracle tests.",
@@ -1646,11 +1648,111 @@
       "epr_rank": 1,
       "epr_score": 100.0,
       "epr_top_1_precision": true,
-      "duration_seconds": 0.05,
+      "duration_seconds": 0.046,
       "cost_usd": 0.0075,
       "failure_category": "None (Fixed)",
       "failure_reason": "Bug resolved and verified against oracle tests.",
       "candidate_patch_diff": "--- a/circularBuffer.js\n+++ b/circularBuffer.js\n@@ -8,1 +8,1 @@\n-        this.head = this.head + 1;\n+        this.head = (this.head + 1) % this.capacity;\n"
+    },
+    {
+      "instance_id": "DIV-PY-STATE-01",
+      "language": "python",
+      "category": "boundary",
+      "detected": true,
+      "localization_rank": 1,
+      "localized_hit_at_1": true,
+      "localized_hit_at_3": true,
+      "candidate_brt_generated": true,
+      "candidate_brt_passed_on_buggy": false,
+      "plausible_brt_confirmed": true,
+      "patch_synthesized": true,
+      "patch_applies_cleanly": true,
+      "patch_plausible": true,
+      "patch_correct": true,
+      "regression_detected": false,
+      "epr_rank": 1,
+      "epr_score": 100.0,
+      "epr_top_1_precision": true,
+      "duration_seconds": 0.031,
+      "cost_usd": 0.0075,
+      "failure_category": "None (Fixed)",
+      "failure_reason": "Bug resolved and verified against oracle tests.",
+      "candidate_patch_diff": "--- a/tx_processor.py\n+++ b/tx_processor.py\n@@ -14,3 +14,3 @@\n-        if error_code == \"NET_TIMEOUT\":\n-            self.state = \"FAILED\"\n-            self.retries_left = 0\n+        if error_code == \"NET_TIMEOUT\":\n+            self.retries_left -= 1\n+            self.state = \"RETRYING\" if self.retries_left > 0 else \"FAILED\"\n"
+    },
+    {
+      "instance_id": "DIV-PY-TRAP-02",
+      "language": "python",
+      "category": "null access",
+      "detected": true,
+      "localization_rank": 1,
+      "localized_hit_at_1": true,
+      "localized_hit_at_3": true,
+      "candidate_brt_generated": true,
+      "candidate_brt_passed_on_buggy": false,
+      "plausible_brt_confirmed": true,
+      "patch_synthesized": true,
+      "patch_applies_cleanly": true,
+      "patch_plausible": true,
+      "patch_correct": true,
+      "regression_detected": false,
+      "epr_rank": 1,
+      "epr_score": 100.0,
+      "epr_top_1_precision": true,
+      "duration_seconds": 0.03,
+      "cost_usd": 0.0075,
+      "failure_category": "None (Fixed)",
+      "failure_reason": "Bug resolved and verified against oracle tests.",
+      "candidate_patch_diff": "--- a/config_resolver.py\n+++ b/config_resolver.py\n@@ -2,4 +2,6 @@\n-    host = cfg[\"services\"][service_name][\"host\"]\n-    port = cfg[\"services\"][service_name].get(\"port\", 8080)\n+    services = cfg.get(\"services\") or {}\n+    svc = services.get(service_name)\n+    if not svc or \"host\" not in svc:\n+        return None\n+    host = svc[\"host\"]\n+    port = svc.get(\"port\", 8080)\n"
+    },
+    {
+      "instance_id": "DIV-PY-REGRESS-03",
+      "language": "python",
+      "category": "validation",
+      "detected": true,
+      "localization_rank": 1,
+      "localized_hit_at_1": true,
+      "localized_hit_at_3": true,
+      "candidate_brt_generated": true,
+      "candidate_brt_passed_on_buggy": false,
+      "plausible_brt_confirmed": true,
+      "patch_synthesized": true,
+      "patch_applies_cleanly": true,
+      "patch_plausible": true,
+      "patch_correct": true,
+      "regression_detected": false,
+      "epr_rank": 1,
+      "epr_score": 100.0,
+      "epr_top_1_precision": true,
+      "duration_seconds": 0.031,
+      "cost_usd": 0.0075,
+      "failure_category": "None (Fixed)",
+      "failure_reason": "Bug resolved and verified against oracle tests.",
+      "candidate_patch_diff": "--- a/rate_limiter.py\n+++ b/rate_limiter.py\n@@ -9,2 +9,3 @@\n         elapsed = now_ts - self.last_refill\n+        if elapsed > 0:\n+            self.tokens = min(self.capacity, self.tokens + elapsed * self.refill_rate)\n+            self.last_refill = now_ts\n-        self.tokens = min(self.capacity, self.tokens + elapsed * self.refill_rate)\n-        self.last_refill = now_ts\n"
+    },
+    {
+      "instance_id": "DIV-JS-PROMISE-04",
+      "language": "javascript",
+      "category": "concurrency-lite",
+      "detected": true,
+      "localization_rank": 1,
+      "localized_hit_at_1": true,
+      "localized_hit_at_3": true,
+      "candidate_brt_generated": true,
+      "candidate_brt_passed_on_buggy": false,
+      "plausible_brt_confirmed": true,
+      "patch_synthesized": true,
+      "patch_applies_cleanly": true,
+      "patch_plausible": true,
+      "patch_correct": true,
+      "regression_detected": false,
+      "epr_rank": 1,
+      "epr_score": 100.0,
+      "epr_top_1_precision": true,
+      "duration_seconds": 0.047,
+      "cost_usd": 0.0075,
+      "failure_category": "None (Fixed)",
+      "failure_reason": "Bug resolved and verified against oracle tests.",
+      "candidate_patch_diff": "--- a/memoizer.js\n+++ b/memoizer.js\n@@ -7,2 +7,5 @@\n     const promise = fetcher().catch(err => {\n+        cache.delete(key);\n+        return Promise.reject(err);\n+    });\n     cache.set(key, promise);\n"
     }
   ]
 }

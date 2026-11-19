@@ -104,6 +104,40 @@ class JavaScriptAdapter(LanguageAdapter):
                     )
                 )
 
+            elif node.type in {"lexical_declaration", "variable_declaration"}:
+                # Handle const fn = () => {} or let fn = function() {}
+                for decl in node.children:
+                    if decl.type == "variable_declarator":
+                        name_node = decl.child_by_field_name("name")
+                        val_node = decl.child_by_field_name("value")
+                        if name_node and val_node and val_node.type in {"arrow_function", "function", "function_expression"}:
+                            fn_name = get_text(name_node)
+                            body_node = val_node.child_by_field_name("body")
+                            sig_end = body_node.start_byte if body_node else val_node.end_byte
+                            signature = f"const {fn_name} = " + code_bytes[val_node.start_byte : sig_end].decode("utf-8", errors="replace").strip()
+                            functions.append(
+                                FunctionDefinition(
+                                    name=fn_name,
+                                    file_path=rel_path,
+                                    signature=signature,
+                                    implementation=get_text(node),
+                                    range=get_range(node),
+                                )
+                            )
+
+            elif node.type in {"interface_declaration", "type_alias_declaration"}:
+                # TypeScript interface or type alias
+                name_node = node.child_by_field_name("name")
+                if name_node:
+                    classes.append(
+                        ClassDefinition(
+                            name=get_text(name_node),
+                            file_path=rel_path,
+                            signature=get_text(node).split("{")[0].strip(),
+                            range=get_range(node),
+                        )
+                    )
+
             elif node.type == "class_declaration":
                 name_node = node.child_by_field_name("name")
                 body_node = node.child_by_field_name("body")
