@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from autopatch.api.routes import router
 
@@ -27,7 +29,7 @@ app = FastAPI(
     openapi_url="/openapi.json",
 )
 
-# Enable CORS for Next.js frontend communication
+# Enable CORS for Next.js and external frontend communication
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -43,3 +45,16 @@ app.include_router(router)
 async def health_check():
     """Service health and uptime endpoint."""
     return {"status": "ok", "service": "AutoPatch", "version": "1.0.0"}
+
+
+# Mount Lumina Frontend static files (for unified full-stack web deployment)
+lumina_dir = os.environ.get("LUMINA_DIR")
+if not lumina_dir:
+    candidate = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "lumina"))
+    if os.path.isdir(candidate):
+        lumina_dir = candidate
+    elif os.path.isdir("/app/lumina"):
+        lumina_dir = "/app/lumina"
+
+if lumina_dir and os.path.isdir(lumina_dir):
+    app.mount("/", StaticFiles(directory=lumina_dir, html=True), name="lumina")

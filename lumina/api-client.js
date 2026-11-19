@@ -6,10 +6,18 @@
  * live SSE telemetry, and real human-in-the-loop decision recording.
  */
 
+const defaultBaseUrl = (typeof window !== 'undefined' && window.location.port !== '3000' && window.location.origin && window.location.origin.startsWith('http'))
+  ? `${window.location.origin}/api/v1`
+  : 'http://localhost:8000/api/v1';
+
+const defaultHealthUrl = (typeof window !== 'undefined' && window.location.port !== '3000' && window.location.origin && window.location.origin.startsWith('http'))
+  ? `${window.location.origin}/health`
+  : 'http://localhost:8000/health';
+
 const API_CONFIG = {
-  baseUrl: window.AUTOPATCH_API_URL || 'http://localhost:8000/api/v1',
-  healthUrl: window.AUTOPATCH_HEALTH_URL || 'http://localhost:8000/health',
-  authToken: window.AUTOPATCH_AUTH_TOKEN || 'dev_token_user_developer',
+  baseUrl: (typeof window !== 'undefined' && window.AUTOPATCH_API_URL) || defaultBaseUrl,
+  healthUrl: (typeof window !== 'undefined' && window.AUTOPATCH_HEALTH_URL) || defaultHealthUrl,
+  authToken: (typeof window !== 'undefined' && window.AUTOPATCH_AUTH_TOKEN) || 'dev_token_user_developer',
   timeoutMs: 4000,
 };
 

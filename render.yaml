@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: autopatch-platform
+    env: docker
+    dockerfilePath: ./Dockerfile.backend
+    plan: standard
+    envVars:
+      - key: AUTOPATCH_ENV
+        value: production
+      - key: AUTOPATCH_AUTH_TOKEN
+        generateValue: true
+      - key: PORT
+        value: 10000
+    healthCheckPath: /health
+    autoDeploy: true

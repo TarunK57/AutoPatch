@@ -6,6 +6,20 @@ Integrated with the **LuminaAI** web interface and native VS Code/Cursor extensi
 
 ---
 
+## 1-Click Cloud Deployment (Web)
+
+Deploy the complete AutoPatch platform (FastAPI backend + Lumina frontend + 3D Codebase Digital Twin) directly to the web with 1 click:
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/TarunK57/AutoPatch)
+&nbsp;&nbsp;
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?template=https://github.com/TarunK57/AutoPatch)
+
+### Cloud Setup Instructions
+* **Render:** Click "Deploy to Render" above. Render automatically reads [`render.yaml`](file:///Users/niharchavan/Downloads/AntoPatch/render.yaml) and provisions a unified web service hosting both the Lumina UI and the FastAPI sandbox engine.
+* **Railway:** Click "Deploy on Railway" above. Railway reads [`railway.json`](file:///Users/niharchavan/Downloads/AntoPatch/railway.json) and builds [`Dockerfile.backend`](file:///Users/niharchavan/Downloads/AntoPatch/Dockerfile.backend), provisioning your public HTTPS URL.
+
+---
+
 ## Autonomous Remediation Workflow
 
 ```
