@@ -208,10 +208,16 @@ class AutoPatchClient {
     if (!this._isOnline) {
       throw new Error('Backend is offline. Live human approval cannot be submitted without a running server.');
     }
+    const payload = {
+      decision: decision.decision || decision.status,
+      status: decision.status || decision.decision,
+      patch_id: decision.patch_id,
+      comment: decision.comment || '',
+    };
     const res = await fetch(`${this.config.baseUrl}/projects/${projectId}/bugs/${encodeURIComponent(bugId)}/decision`, {
       method: 'POST',
       headers: this.headers,
-      body: JSON.stringify(decision),
+      body: JSON.stringify(payload),
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({ detail: res.statusText }));

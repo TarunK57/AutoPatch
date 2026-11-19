@@ -388,11 +388,30 @@ async def start_scan(
             else:
                 job_record["status"] = "COMPLETED"
             job_record["progress"] = 100.0 if not cancel_token.is_cancelled else job_record["progress"]
+            JOBS_DB[job_id] = job_record
+            
+            # Persist findings to database for permanent storage
+            for r in results:
+                bid = r.get("bug_id")
+                if bid:
+                    state = event_store.reconstruct_bug_state(bid)
+                    f_data = state.get("finding") or {}
+                    if f_data:
+                        f_data["bug_id"] = bid
+                        f_data["project_id"] = project_id
+                        f_data["job_id"] = job_id
+                        f_data["line_end"] = f_data.get("line_end", f_data.get("line_start", 1))
+                        f_data["category"] = f_data.get("category", "LOGIC_ERROR")
+                        try:
+                            storage.save_finding(f_data)
+                        except Exception as fe:
+                            logger.warning(f"Could not persist finding {bid}: {fe}")
 
         except Exception as e:
             logger.error(f"Scan job {job_id} failed: {str(e)}")
             job_record["status"] = "FAILED"
             job_record["error"] = str(e)
+            JOBS_DB[job_id] = job_record
             event_store.append(
                 AuditEvent(
                     job_id=job_id,
@@ -672,6 +691,7 @@ async def list_bugs(
         project_id=project_id,
         total_bugs=len(bug_items),
         bugs=bug_items,
+        items=bug_items,
     )
 
 

@@ -49,19 +49,32 @@ class BugSummaryItem(BaseModel):
     category: str
     description: str
     severity_level: str
+    severity: Optional[str] = None
     confidence: float
     priority_score: float
     status: str
+    verification_status: Optional[str] = None
     rank: int = 1
     rank_explanation: Optional[str] = None
     cwe: Optional[str] = None
     symbol: Optional[str] = None
+
+    def model_post_init(self, __context: Any) -> None:
+        if self.severity is None:
+            self.severity = self.severity_level
+        if self.verification_status is None:
+            self.verification_status = self.status
 
 
 class BugListResponse(BaseModel):
     project_id: str
     total_bugs: int
     bugs: List[BugSummaryItem]
+    items: Optional[List[BugSummaryItem]] = None
+
+    def model_post_init(self, __context: Any) -> None:
+        if self.items is None:
+            self.items = self.bugs
 
 
 class BugDetailResponse(BaseModel):
@@ -87,9 +100,18 @@ class ValidationRequest(BaseModel):
 
 
 class DecisionRequest(BaseModel):
-    decision: str = Field(pattern="^(APPROVED|REJECTED|NEEDS_REVIEW)$")
+    decision: Optional[str] = Field(default=None, pattern="^(APPROVED|REJECTED|NEEDS_REVIEW)$")
+    status: Optional[str] = Field(default=None, pattern="^(APPROVED|REJECTED|NEEDS_REVIEW)$")
     comment: str = ""
     patch_id: Optional[str] = Field(default=None, description="Exact patch ID approved by reviewer")
+
+    def model_post_init(self, __context: Any) -> None:
+        if self.decision is None and self.status is not None:
+            self.decision = self.status
+        elif self.status is None and self.decision is not None:
+            self.status = self.decision
+        if self.decision is None:
+            self.decision = "REJECTED"
 
 
 class DecisionResponse(BaseModel):

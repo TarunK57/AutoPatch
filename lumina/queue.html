@@ -328,7 +328,7 @@
       try {
         const sevParam = currentSeverity === 'ALL' ? null : currentSeverity;
         const res = await window.autopatch.listBugs(activeProjectId, sevParam);
-        const bugs = res.items || [];
+        const bugs = res.bugs || res.items || [];
 
         if (bugs.length === 0) {
           issuesListEl.innerHTML = `
@@ -341,19 +341,20 @@
 
         issuesListEl.innerHTML = '';
         bugs.forEach(b => {
-          const sevClass = b.severity === 'CRITICAL' ? 'badge-critical' : (b.severity === 'HIGH' ? 'badge-high' : 'badge-medium');
-          const isVer = b.verification_status === 'VERIFIED';
+          const sev = b.severity || b.severity_level || 'MEDIUM';
+          const sevClass = sev === 'CRITICAL' ? 'badge-critical' : (sev === 'HIGH' ? 'badge-high' : 'badge-medium');
+          const isVer = b.verification_status === 'VERIFIED' || b.status === 'VERIFIED';
           const verClass = isVer ? 'badge-verified' : 'badge-warning';
-          const verText = isVer ? 'Verified' : (b.verification_status || 'Pending');
+          const verText = isVer ? 'Verified' : (b.verification_status || b.status || 'Pending');
 
           const row = document.createElement('div');
           row.className = 'issue-row';
-          row.setAttribute('data-sev', b.severity);
+          row.setAttribute('data-sev', sev);
           row.setAttribute('data-query', `${b.file_path} ${b.category} ${b.description}`);
 
           row.innerHTML = `
             <div>
-              <span class="badge ${sevClass}"><span class="badge-dot"></span>${b.severity}</span>
+              <span class="badge ${sevClass}"><span class="badge-dot"></span>${sev}</span>
             </div>
             <div>
               <div class="issue-title">${escapeHtml(b.description || b.category)}</div>
