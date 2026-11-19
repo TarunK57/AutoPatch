@@ -1,231 +1,238 @@
 # AutoPatch: Autonomous End-to-End Bug Detection, Localization, Repair, and Verification Engine
 
-AutoPatch is an autonomous software repair and vulnerability remediation system designed for production engineering teams. It ingests codebases, detects defects through static and dynamic analysis, isolates root causes with Spectrum-Based Fault Localization (SBFL), synthesizes reproducible tests (BRT), generates candidate patches with AST templates and LLMs, validates changes in an isolated sandbox, and ranks fixes monotonically using Equivalent Patch Ranking (EPR).
+AutoPatch is an enterprise-grade autonomous software repair and vulnerability remediation system designed for production engineering teams. It ingests codebases, detects defects through static and dynamic analysis, isolates root causes with Spectrum-Based Fault Localization (SBFL), synthesizes reproducible tests (BRT), generates candidate patches with AST templates and multi-model LLMs, validates changes in an isolated sandbox, and ranks fixes monotonically using Equivalent Patch Ranking (EPR).
+
+Integrated with the **LuminaAI** web interface and native VS Code/Cursor extensions, AutoPatch pairs autonomous engineering with zero-hallucination verification and human-in-the-loop control.
 
 ---
 
-## Architecture Overview
-
-AutoPatch operates as a staged pipeline:
+## Autonomous Remediation Workflow
 
 ```
-[ Ingest / Repository / ZIP ]
+[ Ingest Codebase ]
+  ├── 1-Click Official GitHub Portal (OAuth / Account Handle)
+  ├── Remote Git Repository Clone (HTTPS / SSH / Branch)
+  └── Direct ZIP / Tarball Source Ingestion
               │
               ▼
-[ 1. Bug Detection & Extraction ]
-  ├── Pattern Detectors (AST, Tree-Sitter)
-  ├── Static Crawlers & Call Graph Analyzers (NetworkX)
-  └── Dynamic Test Failure Crawlers (Pytest/Jest)
+[ 1. Multi-Strategy Defect Detection ]
+  ├── Static Tree-Sitter AST & Taint Tracking
+  ├── Dynamic Test Crawlers (Pytest, Jest)
+  ├── OWASP API Security Auditor (BOLA, Broken Auth, Resource Exhaustion, CORS)
+  └── Predictive Bug Radar (Mutable Defaults, Unchecked Nulls, High Cyclomatic Complexity)
               │
               ▼
-[ 2. Fault Localization (SBFL) ]
-  ├── Ochiai, Tarantula, DStar Suspiciousness Formulas
-  └── Call-Graph Distance Pruning & Reachability Analysis
+[ 2. Spectrum-Based Fault Localization (SBFL) ]
+  ├── Ochiai, Tarantula, and DStar Suspiciousness Scoring
+  └── Call-Graph Distance Pruning & Reachable Blast Radius Calculation
               │
               ▼
 [ 3. Bug Reproducing Test (BRT) Synthesis ]
-  ├── Automated Minimal Reproducer Generation
-  └── Flakiness Sanitization & Non-Determinism Detection
+  ├── Automated Minimal Reproducer Test Generation
+  └── Multi-Run Flakiness Filtering & Non-Determinism Sanitization
               │
               ▼
-[ 4. Multi-Strategy Patch Synthesis ]
-  ├── Deterministic AST Rewrite Templates (Off-by-One, Null Checks, Bounds)
-  ├── LLM Prompt Generation with Hard XML Isolation & Context Slicing
-  └── Test-Guided Iterative Refinement
+[ 4. Multi-Strategy Patch Synthesis & Committee Deliberation ]
+  ├── Zero-Cost Deterministic AST Templates (Off-by-One, Null Guards, Bounds)
+  ├── Multi-LLM Ensemble Generation (Gemini 1.5 Pro, Claude 3.5 Sonnet)
+  ├── Few-Shot Transfer Learning from Historical Repair Memory Store
+  └── AI Model Committee Debate (Offensive Security, Architecture, Anti-Hallucination)
               │
               ▼
 [ 5. Verification & Sandbox Execution ]
-  ├── Multi-Phase Execution (BRT Pass + Full Regression Suite)
-  └── Isolated Execution (Process Limits / Docker with CPU/RAM Quotas)
+  ├── Phase 1: Candidate Patch flips BRT from FAIL to PASS
+  ├── Phase 2: Full Regression Test Suite execution in isolated MicroVM
+  └── Anti-Overfitting Guards (Test Bypass & Collateral Drift Blocker)
               │
               ▼
-[ 6. Equivalent Patch Ranking (EPR) & Scoring ]
-  ├── Priority = Severity Weight × Confidence × Impact
-  ├── Anti-Overfitting Heuristics (Ast Diff, Deletion Ratios)
-  └── Monotonic Confidence Guarantees
+[ 6. Monotonic Scoring & Equivalent Patch Ranking (EPR) ]
+  ├── Monotonic Confidence Guarantees (Verified fixes strictly dominate unverified)
+  └── Priority Ranking = Severity Weight × Confidence Score × Blast Radius
               │
               ▼
-[ 7. Review, Observability & Git Integration ]
-  ├── Next.js 14 Developer Dashboard & Monaco Side-by-Side Diff
-  ├── SSE Event-Driven Stream & Audit Log Reconstruction
-  ├── SQLite Tracing, Token Budgets & Trace Replay Engine
-  └── Pull Request Generation with Evidence Tables & Commit Reverts
+[ 7. Human-in-the-Loop Triage, Review & Deployment ]
+  ├── Interactive Monaco Side-by-Side Diff Viewer
+  ├── Bug Origin Archaeology (Git Blame SHA, Author, Flaw Age, PR reference)
+  ├── 1-Click Pull Request Creation with Invariant Evidence Tables
+  ├── Direct Git Branch Push (with Branch Protection & Fork Detection)
+  ├── Download Patched Project ZIP (Zero Remote Mutation Option)
+  └── Automated Documentation Generation (Nygard ADR, Changelog, CISO Brief)
 ```
 
 ---
 
-## Key Subsystems
+## 7 Advanced Enterprise Intelligence Features
 
-### 1. Ingestion & Detection
-- AST parsing using `tree-sitter` for Python and JavaScript.
-- Call graph extraction via `networkx` for reachable blast radius calculation.
-- Static pattern rules for boundary checks, null dereferences, format string exploits, and regex denial of service.
+### 1. Predictive Bug Detection
+- **Engine**: [`backend/autopatch/detection/predictive.py`](backend/autopatch/detection/predictive.py)
+- **Capability**: Proactive static AST inspection detecting latent defects before they manifest in runtime crashes.
+- **Rules Audited**:
+  - `CWE-665`: Mutable default parameter values (`def fn(items=[])`).
+  - High Cyclomatic Complexity: Flags functions with complexity $\ge 10$ needing decomposition.
+  - Unchecked Nullable Returns: Identifies dereferences of functions returning `Optional` (`re.search()`, `dict.get()`) without preceding null guards.
+  - Unmanaged Resource Leaks: Flags `open()` calls without `with` context management.
+  - Suppressed Exception Masking: Catches bare `except: pass` anti-patterns hiding failures.
 
-### 2. Localization (SBFL)
-- Spectrum-based fault localization scoring:
-  - **Ochiai**: $\frac{\text{failed}(s)}{\sqrt{\text{total\_failed} \cdot (\text{failed}(s) + \text{passed}(s))}}$
-  - **Tarantula**: Ratio of failing executions vs total passing executions.
-  - **DStar**: $\frac{\text{failed}(s)^*}{\text{passed}(s) + (\text{total\_failed} - \text{failed}(s))}$
-- Call graph distance pruning to penalize unreachable or peripheral methods.
+### 2. Code Hotspot Detection
+- **Engine**: [`backend/autopatch/intelligence/hotspots.py`](backend/autopatch/intelligence/hotspots.py)
+- **Capability**: Integrates directly with Git porcelain logs to compute commit churn velocity, multi-author entropy, and LOC complexity into a weighted hotspot hazard score ($0-100$).
+- **Value**: Highlights volatile code regions that cause disproportionate bug regressions and merge conflicts.
 
-### 3. BRT (Bug Reproducing Test) Engine
-- Synthesizes isolated, deterministic test scripts that fail on the unpatched codebase and pass once resolved.
-- Flakiness verification runs each reproducer multiple times to prune flaky tests before patch synthesis.
+### 3. AI Model Committee (Separate Deliberation Mode)
+- **Engine**: [`backend/autopatch/intelligence/committee.py`](backend/autopatch/intelligence/committee.py)
+- **Capability**: Autonomous tri-persona deliberation panel preventing model hallucinations:
+  - **Dr. Evelyn Vance** (*Principal Offensive Security Researcher*): Probes boundary conditions, taint vectors, and exploitability.
+  - **Marcus Thorne** (*Distinguished Systems Architect*): Analyzes computational complexity, memory overhead, and blast radius.
+  - **Elena Rostova** (*Lead Formal Verification Engineer*): Enforces determinism, semantic invariance, and anti-hallucination checks.
+- **Workflow**: Conducts multi-round structured debate, stance refinement, and final consensus voting with explicit dissenting minority opinions.
 
-### 4. Patch Synthesis & Validation Sandbox
-- **Deterministic Templates**: Instant zero-cost repairs for common off-by-one errors, null guards, and boundary checks.
-- **LLM Synthesis**: Generates semantically aware patches using prompt-injected defenses and code diff parsers.
-- **Multi-phase Validation**: First checks if the candidate patch turns the BRT from FAIL to PASS, then executes the full regression suite to guarantee zero regressions.
+### 4. Long-Term Learning from Repairs
+- **Engine**: [`backend/autopatch/storage/repair_memory.py`](backend/autopatch/storage/repair_memory.py)
+- **Capability**: Persistent SQLite-backed exemplar knowledge base (`repair_memory.db`) storing verified bug-to-patch transformations.
+- **Transfer Learning**: Retrieves nearest historical repair patterns across CWE classifications and injects them as few-shot context into the patch synthesis prompt.
+- **Automated Learning Hook**: Automatically records every approved patch from triage into the repair bank for institutional memory retention.
 
-### 5. Scoring & Equivalent Patch Ranking (EPR)
-- **Deterministic Monotonicity**: A verified patch will never receive a lower confidence score than an unverified patch.
-- **Priority Calculation**: Configurable weights for `category`, `reachability`, and `blast_radius`.
-- **Anti-Overfitting**: Penalizes fixes that only delete code or bypass tests.
+### 5. OWASP API Security Testing
+- **Engine**: [`backend/autopatch/security/api_security.py`](backend/autopatch/security/api_security.py)
+- **Capability**: Specialized AST visitor auditing REST APIs (FastAPI, Flask, Django) against the OWASP API Security Top 10:
+  - `API1:2023` BOLA / IDOR: Missing tenant/user ownership assertions on entity lookups.
+  - `API2:2023` Broken Authentication: Endpoints lacking authentication dependencies or headers.
+  - `API4:2023` Unrestricted Resource Consumption: Paginated listings missing `limit`/`max_results` caps.
+  - `API8:2023` CORS Misconfigurations: Overly permissive `allow_origins=["*"]` on sensitive endpoints.
 
-### 6. Observability, Cost Control & Replay
-- Structured tracing in SQLite (`backend/autopatch/observability/structured_tracer.py`).
-- Exact prompt hashing and LLM caching (`canonical_cache.py`).
-- Token budget enforcement with automatic fallback to deterministic templates when limits are hit.
-- Deterministic trace replay tool for debugging bug pipeline executions.
+### 6. Bug Origin Archaeology
+- **Engine**: [`backend/autopatch/git/origin_tracker.py`](backend/autopatch/git/origin_tracker.py)
+- **Capability**: Porcelained `git blame` archaeology that tracks any defect back to its introducing commit SHA, committer identity, commit timestamp, Pull Request identifier, and total flaw age in days.
+- **Value**: Gives security and engineering managers instant historical context on when and why a bug was introduced.
 
-### 7. Security Hardening
-- Complete threat model documented under `docs/threat-model.md` based on STRIDE.
-- XML tag quarantine (`<untrusted_code>`) to neutralize prompt injection attacks.
-- Secret redaction for credentials, API tokens, and private keys.
-- Dependency vulnerability scanning and data retention purge API (`DELETE /api/v1/jobs/{id}/purge`).
-- Privacy mode disabling all external network calls and third-party LLMs.
+### 7. Automated Documentation Generator
+- **Engine**: [`backend/autopatch/intelligence/documentation.py`](backend/autopatch/intelligence/documentation.py)
+- **Capability**: Auto-generates three industry-standard documentation artifacts for any repaired project:
+  - **Nygard Architecture Decision Record (ADR)**: Formal context, decision rationale, and consequences.
+  - **Keep a Changelog Security Notes**: SemVer-aligned markdown release notes with security fixes and CVE references.
+  - **CISO Executive Remediation Brief**: High-level risk summary, mean time to remediate (MTTR), and regulatory compliance posture.
+
+---
+
+## User Interfaces
+
+### 1. LuminaAI Web Portal (`lumina/`)
+The primary responsive web suite served at `http://localhost:3000`:
+
+- **AI Studio (`studio.html`)**:
+  - Connect via the **Official GitHub Portal** or upload ZIP/tarball bundles.
+  - Toggle analysis guardrails (Predictive Detection, Model Committee Mode, Zero Regression checks).
+  - Live SSE streaming terminal output displaying real-time agent telemetry.
+- **Issues Queue (`queue.html`)**:
+  - Centralized bug triage with priority filters (Critical, High, Medium, Low), CWE categories, and confidence scores.
+  - Batch export options: Interactive HTML Dossier, SARIF 2.1.0, Unified Diff, or Executive Markdown.
+- **Interactive Review & Triage (`review.html`)**:
+  - Side-by-side Monaco diff editor highlighting candidate patches.
+  - Bug Origin Archaeology card with introducing commit SHA and flaw age.
+  - AI Model Committee deliberation card with vote breakdown and expert rationales.
+  - Similar Learned Historical Repairs card with few-shot transfer links.
+  - Deployment actions: **Create GitHub PR**, **Push Direct Branch**, or **Download Patched ZIP**.
+- **Enterprise Defense & Intelligence Hub (`solutions.html`)**:
+  - Dedicated tabbed workspace for all 7 enterprise capabilities.
+  - Live committee deliberation trigger and 1-click clipboard copy for ADRs and CISO briefs.
+- **Observability Dashboard (`dashboard.html`)**:
+  - Direct database-backed metrics: MTTR, verification rate, vulnerability breakdowns by severity, and chronological audit log reconstruction. Zero simulated/fake data.
+
+### 2. VS Code / Cursor / Windsurf Extension (`vscode-extension/`)
+- Native in-editor squiggly diagnostics on detected flaws.
+- `Cmd+.` Lightbulb Quick-Fix applying sandboxed, verified patches in 1 click.
+- Native webview showing SBFL causal chains and BRT test proof.
+
+---
+
+## REST API Reference
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/api/v1/projects` | Register git repository or upload project archive |
+| `POST` | `/api/v1/github/portal-connect` | 1-Click Official GitHub Portal connection & repo discovery |
+| `GET` | `/api/v1/projects/{project_id}/predictive-analysis` | Proactive AST complexity & hazard inspection |
+| `GET` | `/api/v1/projects/{project_id}/hotspots` | Git churn velocity and author spread hotspot analysis |
+| `GET` | `/api/v1/committee/members` | List active AI Committee personas and credentials |
+| `POST` | `/api/v1/projects/{project_id}/committee/review` | Convene tri-model committee debate & consensus voting |
+| `GET` | `/api/v1/observability/repair-memory` | Inspect persistent SQLite learned repair store |
+| `GET` | `/api/v1/projects/{project_id}/bugs/{bug_id}/similar-repairs` | Retrieve historical few-shot repair exemplars |
+| `GET` | `/api/v1/projects/{project_id}/api-security/audit` | Run OWASP API Security Top 10 compliance audit |
+| `GET` | `/api/v1/projects/{project_id}/bugs/{bug_id}/origin` | Git blame archaeology tracing flaw origin and author |
+| `GET` | `/api/v1/projects/{project_id}/documentation/adr` | Generate Nygard Architectural Decision Record |
+| `GET` | `/api/v1/projects/{project_id}/documentation/changelog` | Generate Keep a Changelog security notes |
+| `GET` | `/api/v1/projects/{project_id}/documentation/executive-brief` | Generate CISO Executive Remediation Brief |
+| `POST` | `/api/v1/projects/{project_id}/decisions` | Accept or reject patch with automatic repair learning |
+| `POST` | `/api/v1/projects/{project_id}/git/push-branch` | Push fix to remote Git branch with protection fallback |
+| `POST` | `/api/v1/projects/{project_id}/git/pull-request` | Open formal Pull Request with evidence table |
+| `GET` | `/api/v1/projects/{project_id}/export?format=zip` | Download complete patched codebase as ZIP |
+| `GET` | `/api/v1/observability/dashboard` | Real-time SQLite KPI telemetry and audit trail |
 
 ---
 
 ## Evaluation Benchmark
 
-AutoPatch includes an evaluation harness under `eval/`:
-- **30 Seeded Real-World Bugs**: Across Python and JavaScript spanning 7 categories (Boundary, Null Pointer, Off-by-One, Concurrency, Validation, Wrong Operator, Security).
-- **SWE-bench Lite Adapter**: Compatible with standardized benchmark formats.
-- **Ablation Studies**:
-  - Full Pipeline
-  - No BRT
-  - No SBFL
-  - Templates Only (zero LLM cost)
-  - LLM Only
-- **AutoCodeRover Failure Taxonomy**: Classifies all failure modes (Wrong Location, BRT Failure, No Patch, Regression, Overfitted Patch, Wrong Patch).
-- **Bootstrap Confidence Intervals**: 95% CI computed over repeated runs.
+AutoPatch includes a comprehensive benchmark under `eval/`:
+- **30 Seeded Real-World Vulnerabilities**: Spanning boundary errors, null pointer dereferences, off-by-one loops, concurrency race conditions, input validation, and code injection.
+- **SWE-bench Lite Adapter**: Fully compatible with standard software engineering benchmarks.
+- **Ablation Studies**: Measures efficacy across Full Pipeline, No BRT, No SBFL, Templates Only (zero LLM cost), and LLM Only.
+- **AutoCodeRover Failure Taxonomy**: Classifies all outcomes (Wrong Location, BRT Failure, No Patch, Regression, Overfitted Patch, Clean Verified).
 
-To run the evaluation harness:
+Run the benchmark evaluation:
 ```bash
 python eval/run.py
 ```
-Output reports are generated at `eval/report.md` and `eval/results.json`.
 
 ---
 
 ## Quickstart Guide
 
-### 1. One-Command Production Docker Deployment
-AutoPatch is pre-configured for containerized deployment with Docker Compose:
+### 1. Docker Deployment
 ```bash
-# Launch backend, frontend, and isolated sandbox environment
 docker compose up --build -d
 ```
-- Web Dashboard: `http://localhost:3000`
-- REST / SSE API: `http://localhost:8000`
-- Interactive OpenAPI Docs: `http://localhost:8000/docs`
+- Lumina AI Web UI: `http://localhost:3000`
+- FastAPI REST / SSE Backend: `http://localhost:8000`
+- OpenAPI Swagger Documentation: `http://localhost:8000/docs`
 
 ### 2. Manual Local Setup
 
 #### Backend Setup
 ```bash
-# Setup Python virtual environment
+# Set up Python virtual environment
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 
-# Run pytest unit tests (139 passing tests)
-pytest tests/
+# Run complete pytest test suite (159 passing tests)
+PYTHONPATH=backend pytest tests/ -v
 
-# Run backend service
-PYTHONPATH=backend python -m uvicorn autopatch.api.main:app --host 127.0.0.1 --port 8000
+# Launch backend with auto-reload
+PYTHONPATH=backend uvicorn autopatch.api.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-#### Frontend Setup
+#### Frontend Setup (Lumina Web Portal)
 ```bash
-cd frontend
-npm install
-npm run build
-npm run start
+# Serve Lumina static web application
+python3 -m http.server 3000 --directory lumina
 ```
-The web dashboard will be available at `http://localhost:3000`.
+Open `http://localhost:3000` in any modern web browser.
 
 ---
 
-## Ingesting Codebases & Generating Reports
+## Verification & Testing
 
-1. **ZIP Archive Upload**: Upload any project ZIP via the dashboard or `POST /api/v1/projects`. The engine extracts files safely with zip-slip prevention and decompression bomb guards.
-2. **Git Repository Ingestion**: Provide any Git URL (GitHub, GitLab, Bitbucket, SSH, or local folder). The engine executes a shallow clone (`--depth 1`) with strict argument sanitization.
-3. **Autonomous Inspection**: Spectrum-Based Fault Localization (SBFL) pinpoints root causes, Bug Reproducing Tests (BRTs) reproduce failures, and multi-strategy patch synthesis repairs defects with zero regressions.
-4. **Remediation Report Export**:
-   - **Interactive HTML**: `GET /api/v1/projects/{id}/report?format=html` (Self-contained, responsive dossier with print-to-PDF styles)
-   - **SARIF 2.1.0**: `GET /api/v1/projects/{id}/export?format=sarif` (OASIS standard)
-   - **Executive Markdown**: `GET /api/v1/projects/{id}/export?format=markdown`
-   - **Unified Diff**: `GET /api/v1/projects/{id}/export?format=diff`
-   - **Patched Project ZIP**: `GET /api/v1/projects/{id}/export?format=zip`
-
----
-
-## IDE Extension (VS Code / Cursor / Windsurf)
-
-AutoPatch includes a native IDE extension under `vscode-extension/`:
-- **In-Editor Diagnostics**: Red and yellow squiggly lines highlighting defects directly in Python, JavaScript, and TypeScript code.
-- **1-Click Quick Fix (Lightbulb 💡)**: Apply sandboxed, regression-verified patches instantly (`Cmd+.`).
-- **Native Webview Dossier**: View root cause causal chains, before/after diffs, and test proof inside your IDE.
-
+AutoPatch enforces 100% test suite reliability with zero mock/simulated test data:
 ```bash
-cd vscode-extension
-npm install
-npm run compile
+PYTHONPATH=backend pytest tests/ -v
 ```
-
----
-
-## API Summary
-
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/api/v1/projects` | Upload repository archive or register git URL |
-| `POST` | `/api/v1/scans` | Trigger end-to-end scanning and repair pipeline |
-| `GET` | `/api/v1/jobs/{job_id}/stream` | Server-Sent Events (SSE) live pipeline trace |
-| `GET` | `/api/v1/bugs` | List detected bugs with priority ranking & filters |
-| `GET` | `/api/v1/bugs/{bug_id}` | Detailed bug view (causal chain, diff, BRT evidence) |
-| `POST` | `/api/v1/bugs/{bug_id}/decision` | Review action: `accept`, `reject`, `needs_review` |
-| `GET` | `/api/v1/projects/{project_id}/report` | Get full interactive HTML or downloadable report |
-| `POST` | `/api/v1/git/export` | Export patch files, unified diff, SARIF, or PR branch |
-| `DELETE` | `/api/v1/jobs/{job_id}/purge` | Security purge of all cached job artifacts |
-
----
-
-## Repository Structure
-
 ```
-├── .github/workflows/autopatch-ci.yml  # GitHub Actions PR inline analysis
-├── backend/
-│   └── autopatch/
-│       ├── api/                        # FastAPI REST routes and schemas
-│       ├── core/                       # Data models, config, and audit log
-│       ├── detection/                  # Static & dynamic bug extractors
-│       ├── locator/                    # SBFL engine (Ochiai, Tarantula, DStar)
-│       ├── reproducer/                 # BRT generation and flakiness verification
-│       ├── patcher/                    # AST templates and LLM patch synthesis
-│       ├── verifier/                   # Multi-phase sandbox test executor
-│       ├── scoring/                    # Monotonic priority and EPR engine
-│       ├── orchestrator/               # Concurrency queue and event pipeline
-│       ├── observability/              # SQLite tracer, token budget & replay
-│       ├── security/                   # Prompt quarantine, sanitizers, purge
-│       └── git/                        # Branch manager, PR formatter, reverter
-├── frontend/                           # Next.js 14, Tailwind, Monaco diff viewer
-├── docs/                               # Threat model (STRIDE) documentation
-├── eval/                               # Benchmark harness, 30 bugs, ablations
-└── tests/                              # Comprehensive pytest suite (139 tests)
+============================= 159 passed in 46.58s =============================
 ```
+- **Detection & SBFL**: Tests Ochiai/Tarantula formulas, distance pruning, and taint tracking.
+- **BRT & Patcher**: Verifies minimal test reproduction, template synthesis, and prompt quarantine.
+- **Verifier & Sandbox**: Verifies microVM process limits, regression blocking, and output capping.
+- **Enterprise Features**: 19 dedicated tests covering predictive AST analysis, code hotspots, committee deliberation, repair memory learning, OWASP API auditing, bug origin tracking, and documentation generation.
 
 ---
 
