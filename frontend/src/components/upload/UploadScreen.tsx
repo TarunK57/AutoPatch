@@ -101,12 +101,12 @@ export const UploadScreen: React.FC<UploadScreenProps> = ({
     <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 space-y-8">
       {/* Title */}
       <div className="border-b border-slate-200 dark:border-slate-800 pb-4">
-        <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-          Upload & Autonomous Scan Setup
+        <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+          Project Ingestion & Autonomous Scan Setup
         </h1>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-          AutoPatch extracts code safely with zip-slip protection, indexes ASTs with Tree-sitter,
-          builds call graphs, and isolates reproduction execution in Docker sandboxes.
+          AutoPatch safely ingests codebases with Zip-Slip path traversal defense, parses ASTs with Tree-sitter,
+          builds call graphs, and executes test reproduction in isolated sandboxes.
         </p>
       </div>
 

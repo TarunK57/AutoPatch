@@ -10,17 +10,25 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        brand: {
-          50: "#eef2ff",
-          100: "#e0e7ff",
-          500: "#6366f1",
-          600: "#4f46e5",
-          700: "#4338ca",
-          900: "#312e81",
+        sentry: {
+          bg: "#0a0c10",
+          card: "#161922",
+          cardHover: "#1f2330",
+          border: "#262c3a",
+          subtle: "#1c212c",
+          purple: "#7c3aed",
+          purpleHover: "#6d28d9",
+          red: "#f85149",
+          orange: "#f0883e",
+          amber: "#d29922",
+          green: "#3fb950",
+          blue: "#58a6ff",
+          muted: "#8b949e",
         },
         slate: {
-          850: "#151e2e",
-          950: "#0b0f19",
+          850: "#131722",
+          900: "#0f1117",
+          950: "#0a0c10",
         },
       },
       fontFamily: {

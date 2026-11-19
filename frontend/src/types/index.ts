@@ -88,7 +88,8 @@ export interface PriorityScore {
 }
 
 export interface CandidatePatch {
-  id: string;
+  id?: string;
+  patch_id?: string;
   file: string;
   original_snippet: string;
   patched_snippet: string;
@@ -97,6 +98,8 @@ export interface CandidatePatch {
   lines_added?: number;
   lines_deleted?: number;
   ensemble_pass_rate?: number;
+  strategy?: string;
+  confidence?: number;
 }
 
 export interface BugItem {

@@ -15,6 +15,7 @@ import {
   X,
   Archive,
   ArrowRight,
+  Sparkles,
 } from "lucide-react";
 
 interface ExportModalProps {
@@ -48,7 +49,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   const approvedBugs = bugs.filter((b) => b.decision?.status === "APPROVED");
   const countToExport = approvedBugs.length > 0 ? approvedBugs.length : bugs.length;
 
-  const handleDownload = async (format: "diff" | "markdown" | "sarif" | "zip") => {
+  const handleDownload = async (format: "diff" | "markdown" | "sarif" | "zip" | "html") => {
     setIsDownloading(format);
     try {
       const blob = await ApiService.exportArtifact(project.project_id, format);
@@ -60,6 +61,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         markdown: "md",
         sarif: "sarif",
         zip: "zip",
+        html: "html",
       };
       a.download = `autopatch_${project.name.toLowerCase().replace(/\s+/g, "_")}_fixes.${extensions[format]}`;
       document.body.appendChild(a);
@@ -186,6 +188,41 @@ export const ExportModal: React.FC<ExportModalProps> = ({
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* Standalone Interactive HTML Dossier */}
+                <div className="sm:col-span-2 p-4 rounded-xl border border-purple-200 dark:border-purple-800/60 bg-purple-50/50 dark:bg-purple-950/20 hover:border-purple-500/80 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="space-y-1">
+                    <div className="flex items-center space-x-2 text-slate-900 dark:text-white font-bold text-xs">
+                      <Sparkles className="w-4 h-4 text-purple-500" />
+                      <span>Interactive HTML Remediation Dossier (.html)</span>
+                      <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20 font-semibold">
+                        Sentry-Calibrated
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                      Standalone single-page audit report with KPI charts, filterable cards, code diffs, and print-to-PDF styles.
+                    </p>
+                  </div>
+                  <div className="flex items-center space-x-2 shrink-0">
+                    <a
+                      href={ApiService.getReportUrl(project.project_id, "html")}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center space-x-1.5 py-1.5 px-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-xs font-semibold shadow-sm transition-colors"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      <span>Open in Browser</span>
+                    </a>
+                    <button
+                      onClick={() => handleDownload("html")}
+                      disabled={isDownloading === "html"}
+                      className="flex items-center space-x-1.5 py-1.5 px-3 bg-white dark:bg-sentry-card hover:bg-slate-100 dark:hover:bg-sentry-cardHover border border-slate-200 dark:border-sentry-border rounded-lg text-xs font-semibold text-slate-800 dark:text-slate-200 shadow-sm transition-colors"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>{isDownloading === "html" ? "Generating..." : "Save HTML"}</span>
+                    </button>
+                  </div>
+                </div>
+
                 {/* Unified Diff */}
                 <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 hover:border-indigo-500/40 transition-colors flex flex-col justify-between">
                   <div>

@@ -48,7 +48,7 @@ export default function Home() {
     },
     created_at: new Date().toISOString(),
   });
-  const [currentScreen, setCurrentScreen] = useState<NavScreen>("dashboard");
+  const [currentScreen, setCurrentScreen] = useState<NavScreen>("queue");
   const [isLoading, setIsLoading] = useState(false);
 
   // Drawer & Modals state
@@ -276,7 +276,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-[#090d16] text-slate-900 dark:text-slate-100 font-sans transition-colors">
+    <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-sentry-bg text-slate-900 dark:text-slate-100 font-sans transition-colors">
       {/* Top Header */}
       <Header
         currentProject={currentProject}

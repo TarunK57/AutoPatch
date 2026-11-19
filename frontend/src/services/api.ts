@@ -138,7 +138,7 @@ export class ApiService {
     }
   }
 
-  static async exportArtifact(projectId: string, format: "diff" | "markdown" | "sarif" | "zip"): Promise<Blob> {
+  static async exportArtifact(projectId: string, format: "diff" | "markdown" | "sarif" | "zip" | "html"): Promise<Blob> {
     const res = await fetch(`${API_BASE_URL}/projects/${projectId}/export?format=${format}`, {
       headers: { ...DEFAULT_AUTH_HEADER },
     });
