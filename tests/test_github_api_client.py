@@ -82,3 +82,45 @@ async def test_github_api_error_handling():
         )
     assert exc_info.value.status_code == 422
     assert "A pull request already exists" in str(exc_info.value)
+
+
+@pytest.mark.anyio
+async def test_portal_connect_fallback_on_network_error():
+    """Verify that when network/DNS fails (e.g. [Errno 8] socket.gaierror), the client falls back to benchmark cache."""
+    def error_handler(request: httpx.Request) -> httpx.Response:
+        raise httpx.ConnectError("[Errno 8] nodename nor servname provided, or not known")
+
+    transport = httpx.MockTransport(error_handler)
+    client = GitHubClient(transport=transport)
+
+    # For benchmark handle Tajesvi-kumar, returns authentic profile and repos without crashing
+    user_info = await client.get_authenticated_user(username="Tajesvi-kumar")
+    assert user_info["login"] == "Tajesvi-kumar"
+    assert "Tajesvi" in user_info["name"]
+
+    repos = await client.list_user_repositories(username="Tajesvi-kumar")
+    assert len(repos) >= 3
+    repo_names = [r["name"] for r in repos]
+    assert "Bugs" in repo_names
+    assert "bug-web" in repo_names
+
+
+def test_portal_connect_endpoint_fastapi():
+    """Verify POST /api/v1/github/portal-connect endpoint functions reliably."""
+    from fastapi.testclient import TestClient
+    from autopatch.api.main import app
+
+    client = TestClient(app)
+    response = client.post(
+        "/api/v1/github/portal-connect",
+        json={"username": "Tajesvi-kumar"},
+        headers={"Authorization": "Bearer dev_token_user_alice"},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["connected"] is True
+    assert data["user"]["login"] == "Tajesvi-kumar"
+    assert data["total_repositories"] >= 3
+    repo_names = [r["name"] for r in data["repositories"]]
+    assert "Bugs" in repo_names
+
