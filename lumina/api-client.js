@@ -401,6 +401,143 @@ class AutoPatchClient {
       return null;
     }
   }
+
+  // ==========================================================================
+  // Advanced Enterprise Features SDK Methods
+  // ==========================================================================
+
+  /**
+   * 1. Predictive Bug Detection: Fetches predicted failure hazards and failure probabilities.
+   */
+  async getPredictiveAnalysis(projectId) {
+    const res = await fetch(`${this.config.baseUrl}/projects/${encodeURIComponent(projectId)}/predictive-analysis`, {
+      headers: this.headers,
+    });
+    if (!res.ok) throw new Error(`Predictive analysis failed: ${res.status}`);
+    return await res.json();
+  }
+
+  /**
+   * 2. Code Hotspot Detection: Cross-references Git churn and file complexity.
+   */
+  async getCodeHotspots(projectId, maxResults = 25) {
+    const res = await fetch(`${this.config.baseUrl}/projects/${encodeURIComponent(projectId)}/hotspots?max_results=${maxResults}`, {
+      headers: this.headers,
+    });
+    if (!res.ok) throw new Error(`Code hotspots fetch failed: ${res.status}`);
+    return await res.json();
+  }
+
+  /**
+   * 3. AI Model Committee: Retrieves active committee member personas.
+   */
+  async getCommitteeMembers() {
+    const res = await fetch(`${this.config.baseUrl}/committee/members`, {
+      headers: this.headers,
+    });
+    if (!res.ok) throw new Error(`Committee members fetch failed: ${res.status}`);
+    return await res.json();
+  }
+
+  /**
+   * 3. AI Model Committee: Convenes multi-agent debate and consensus vote on a patch/defect.
+   */
+  async runCommitteeReview(projectId, bugId, filePath, patchDiff = null, defectDescription = null) {
+    const res = await fetch(`${this.config.baseUrl}/projects/${encodeURIComponent(projectId)}/committee/review`, {
+      method: 'POST',
+      headers: this.headers,
+      body: JSON.stringify({
+        bug_id: bugId,
+        file_path: filePath,
+        patch_diff: patchDiff,
+        defect_description: defectDescription,
+      }),
+    });
+    if (!res.ok) throw new Error(`Committee deliberation failed: ${res.status}`);
+    return await res.json();
+  }
+
+  /**
+   * 4. Long-Term Learning: Fetches learned repair patterns and statistics.
+   */
+  async getRepairMemory() {
+    const res = await fetch(`${this.config.baseUrl}/observability/repair-memory`, {
+      headers: this.headers,
+    });
+    if (!res.ok) throw new Error(`Repair memory fetch failed: ${res.status}`);
+    return await res.json();
+  }
+
+  /**
+   * 4. Long-Term Learning: Retrieves similar past repairs matching this defect.
+   */
+  async getSimilarRepairs(projectId, bugId) {
+    const res = await fetch(`${this.config.baseUrl}/projects/${encodeURIComponent(projectId)}/bugs/${encodeURIComponent(bugId)}/similar-repairs`, {
+      headers: this.headers,
+    });
+    if (!res.ok) return [];
+    return await res.json();
+  }
+
+  /**
+   * 5. API Security Testing: Audits REST endpoints against OWASP API Top 10.
+   */
+  async auditApiSecurity(projectId) {
+    const res = await fetch(`${this.config.baseUrl}/projects/${encodeURIComponent(projectId)}/api-security/audit`, {
+      headers: this.headers,
+    });
+    if (!res.ok) throw new Error(`API Security audit failed: ${res.status}`);
+    return await res.json();
+  }
+
+  /**
+   * 6. Bug Origin Detection: Traces introducing commit, author, PR, and flaw age.
+   */
+  async getBugOrigin(projectId, bugId, filePath = null, lineNumber = null) {
+    const params = new URLSearchParams();
+    if (filePath) params.set('file_path', filePath);
+    if (lineNumber) params.set('line_number', lineNumber.toString());
+    const queryStr = params.toString() ? `?${params.toString()}` : '';
+    const res = await fetch(`${this.config.baseUrl}/projects/${encodeURIComponent(projectId)}/bugs/${encodeURIComponent(bugId)}/origin${queryStr}`, {
+      headers: this.headers,
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  }
+
+  /**
+   * 7. Automatic Documentation: Generates Architecture Decision Record (ADR).
+   */
+  async getAdrDocument(projectId, bugId = null) {
+    const query = bugId ? `?bug_id=${encodeURIComponent(bugId)}` : '';
+    const res = await fetch(`${this.config.baseUrl}/projects/${encodeURIComponent(projectId)}/documentation/adr${query}`, {
+      headers: this.headers,
+    });
+    if (!res.ok) throw new Error(`ADR generation failed: ${res.status}`);
+    return await res.json();
+  }
+
+  /**
+   * 7. Automatic Documentation: Generates Security Remediation Changelog.
+   */
+  async getSecurityChangelog(projectId) {
+    const res = await fetch(`${this.config.baseUrl}/projects/${encodeURIComponent(projectId)}/documentation/changelog`, {
+      headers: this.headers,
+    });
+    if (!res.ok) throw new Error(`Security changelog generation failed: ${res.status}`);
+    return await res.json();
+  }
+
+  /**
+   * 7. Automatic Documentation: Generates Executive Remediation Brief.
+   */
+  async getExecutiveBrief(projectId) {
+    const res = await fetch(`${this.config.baseUrl}/projects/${encodeURIComponent(projectId)}/documentation/executive-brief`, {
+      headers: this.headers,
+    });
+    if (!res.ok) throw new Error(`Executive brief generation failed: ${res.status}`);
+    return await res.json();
+  }
 }
 
 // Global singleton instance

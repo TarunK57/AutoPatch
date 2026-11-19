@@ -322,5 +322,40 @@ class DashboardTelemetryResponse(BaseModel):
     projects_list: List[ProjectSelectItem] = Field(default_factory=list)
 
 
+# ============================================================================
+# Advanced Intelligence Models
+# ============================================================================
+
+class PredictiveFindingItem(BaseModel):
+    file: str
+    line_start: int
+    line_end: int
+    symbol: Optional[str] = None
+    hazard_type: str
+    cwe: Optional[str] = None
+    probability: float
+    confidence: float
+    description: str
+    evidence: str
+    recommendation: str
+
+
+class PredictiveAnalysisResponse(BaseModel):
+    project_id: str
+    total_hazards_predicted: int
+    high_probability_hazards_count: int
+    average_failure_probability: float
+    findings: List[PredictiveFindingItem] = Field(default_factory=list)
+
+
+class CommitteeReviewRequest(BaseModel):
+    bug_id: str
+    file_path: str
+    patch_diff: Optional[str] = None
+    defect_description: Optional[str] = None
+    root_cause_summary: Optional[str] = None
+
+
+
 
 

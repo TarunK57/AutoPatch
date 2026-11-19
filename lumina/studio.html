@@ -515,28 +515,42 @@
               <label class="form-label">Analysis Guardrails & Verification Level</label>
               <div class="options-grid">
                 <label class="option-card">
-                  <input type="checkbox" checked>
+                  <input type="checkbox" id="chkAstTaint" checked>
                   <div>
                     <div class="option-title">AST Taint Flow</div>
                     <div class="option-desc">Deterministic static taint tracking & symbol resolution.</div>
                   </div>
                 </label>
                 <label class="option-card">
-                  <input type="checkbox" checked>
+                  <input type="checkbox" id="chkMultiModel" checked>
                   <div>
                     <div class="option-title">Multi-Model Patching</div>
                     <div class="option-desc">Gemini 1.5 Pro & Claude 3.5 Sonnet ensemble.</div>
                   </div>
                 </label>
                 <label class="option-card">
-                  <input type="checkbox" checked>
+                  <input type="checkbox" id="chkPredictive" checked>
+                  <div>
+                    <div class="option-title">Predictive Bug Detection</div>
+                    <div class="option-desc">Proactive AST hazards (mutable defaults, unchecked nulls, leaks).</div>
+                  </div>
+                </label>
+                <label class="option-card">
+                  <input type="checkbox" id="chkCommittee" checked>
+                  <div>
+                    <div class="option-title">AI Model Committee</div>
+                    <div class="option-desc">Multi-LLM debate, consensus voting & anti-hallucination guard.</div>
+                  </div>
+                </label>
+                <label class="option-card">
+                  <input type="checkbox" id="chkSandbox" checked>
                   <div>
                     <div class="option-title">Sandbox Verification</div>
                     <div class="option-desc">Executes BRT harness tests in isolated microVMs.</div>
                   </div>
                 </label>
                 <label class="option-card">
-                  <input type="checkbox" checked>
+                  <input type="checkbox" id="chkRegression" checked>
                   <div>
                     <div class="option-title">Zero Regression Check</div>
                     <div class="option-desc">Ensures 100% test suite stability across repo.</div>

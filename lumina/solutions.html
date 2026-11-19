@@ -3,127 +3,165 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>LuminaAI — Solutions & Architecture</title>
+  <title>LuminaAI — Enterprise Intelligence & Solutions</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <style>
-    .solutions-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-      margin-top: 24px;
-    }
-    .solution-card {
-      background: rgba(255, 255, 255, 0.6);
-      border-radius: 20px;
-      border: 1px solid rgba(100, 75, 60, 0.12);
-      padding: 24px;
+    .hub-header {
       display: flex;
-      flex-direction: column;
       justify-content: space-between;
-      transition: all 0.25s ease;
-      position: relative;
-      overflow: hidden;
-    }
-    .solution-card:hover {
-      background: rgba(255, 255, 255, 0.92);
-      transform: translateY(-4px);
-      box-shadow: 0 16px 32px rgba(50, 30, 20, 0.08);
-      border-color: var(--accent-gold);
-    }
-    .sol-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      background: rgba(194, 131, 64, 0.15);
-      color: var(--accent-gold);
-      display: flex;
       align-items: center;
-      justify-content: center;
-      margin-bottom: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 16px;
     }
-    .sol-title {
-      font-size: 18px;
-      font-weight: 600;
-      color: var(--ink);
-      margin-bottom: 8px;
-      letter-spacing: -0.015em;
-    }
-    .sol-desc {
-      font-size: 13.5px;
-      color: var(--sub);
-      line-height: 1.55;
-      margin-bottom: 16px;
-    }
-    .sol-features {
-      list-style: none;
-      font-size: 12.5px;
-      color: #3b322f;
+    .feature-tabs {
       display: flex;
-      flex-direction: column;
-      gap: 6px;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid rgba(100, 75, 60, 0.12);
     }
-    .sol-features li {
+    .feature-tab {
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--sub);
+      background: rgba(255, 255, 255, 0.5);
+      border: 1px solid rgba(100, 75, 60, 0.12);
+      cursor: pointer;
       display: flex;
       align-items: center;
       gap: 8px;
+      white-space: nowrap;
+      transition: all 0.2s ease;
     }
-    .sol-features svg {
-      color: var(--success);
-      flex-shrink: 0;
+    .feature-tab:hover {
+      background: rgba(255, 255, 255, 0.85);
+      color: var(--ink);
+    }
+    .feature-tab.active {
+      background: var(--ink);
+      color: #f7efe8;
+      border-color: var(--ink);
+    }
+    .feature-panel {
+      display: none;
+    }
+    .feature-panel.active {
+      display: block;
+      animation: fadeIn 0.25s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Workflow Banner */
-    .workflow-banner {
-      margin-top: 32px;
-      background: #181412;
-      border-radius: 20px;
-      padding: 32px;
-      color: #f7efe8;
-      border: 1px solid rgba(255, 255, 255, 0.12);
+    /* Cards & Grids */
+    .feature-card {
+      background: rgba(255, 255, 255, 0.7);
+      border-radius: 18px;
+      border: 1px solid rgba(100, 75, 60, 0.12);
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 16px rgba(50, 30, 20, 0.03);
+    }
+    .member-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .member-card {
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid rgba(100, 75, 60, 0.12);
+      border-radius: 14px;
+      padding: 18px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 10px;
     }
-    .pipeline-steps {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-      margin-top: 12px;
-      position: relative;
-    }
-    .pipeline-step {
-      background: #241e1b;
+    .debate-transcript-box {
+      background: #181412;
+      color: #f7efe8;
       border-radius: 14px;
-      padding: 16px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-    .step-number {
+      padding: 20px;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      color: var(--accent-gold);
-      font-weight: 700;
-      margin-bottom: 6px;
+      font-size: 12.5px;
+      line-height: 1.6;
+      max-height: 400px;
+      overflow-y: auto;
+      margin-top: 16px;
     }
-    .step-name {
+    .debate-turn-item {
+      margin-bottom: 14px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .debate-turn-item:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+    .table-container {
+      overflow-x: auto;
+      margin-top: 16px;
+    }
+    .custom-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      text-align: left;
+    }
+    .custom-table th {
+      background: rgba(100, 75, 60, 0.06);
+      padding: 10px 14px;
+      color: var(--sub);
       font-weight: 600;
-      font-size: 14px;
-      color: #fff;
-      margin-bottom: 4px;
+      font-size: 11.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      border-bottom: 1px solid rgba(100, 75, 60, 0.12);
     }
-    .step-detail {
-      font-size: 12px;
-      color: #a3958f;
-      line-height: 1.45;
+    .custom-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(100, 75, 60, 0.08);
+      color: var(--ink);
     }
-
+    .custom-table tr:hover td {
+      background: rgba(255, 255, 255, 0.5);
+    }
+    .markdown-preview-box {
+      background: #ffffff;
+      border: 1px solid rgba(100, 75, 60, 0.15);
+      border-radius: 12px;
+      padding: 24px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12.5px;
+      line-height: 1.65;
+      color: #2b2320;
+      white-space: pre-wrap;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+    .select-dropdown {
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink);
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid rgba(100, 75, 60, 0.2);
+      border-radius: 10px;
+      outline: none;
+      cursor: pointer;
+      font-family: inherit;
+    }
     @media (max-width: 992px) {
-      .solutions-grid {
-        grid-template-columns: 1fr;
-      }
-      .pipeline-steps {
+      .member-grid {
         grid-template-columns: 1fr;
       }
     }
@@ -154,165 +192,334 @@
       </nav>
 
       <div class="header-actions">
+        <div id="backendStatusPill"></div>
         <button class="fs-toggle" id="fsBtn" title="Toggle Fullscreen" aria-label="Toggle Fullscreen">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
           </svg>
         </button>
         <a class="btn try-btn" href="studio.html">
-          Try AI Studio
+          New Scan
         </a>
       </div>
     </header>
 
-    <!-- Main Solutions Content -->
+    <!-- Main Content Hub -->
     <main class="main-content">
       <div class="glass-panel">
-        <div class="section-head">
+        <div class="hub-header">
           <div>
-            <h1 class="section-title"><em>Autonomous</em> Solutions & Architecture</h1>
-            <p class="section-desc">Lumina transforms vulnerability patching from weeks of manual developer triage into guaranteed, regression-verified fixes delivered in minutes.</p>
+            <h1 class="section-title"><em>Enterprise</em> Intelligence & Advanced Defense Hub</h1>
+            <p class="section-desc">Next-generation autonomous program repair modules: predictive defect radar, multi-LLM committee consensus, long-term learning memory, code hotspots, and OWASP API audits.</p>
           </div>
-          <a href="studio.html" class="btn" style="padding: 0 22px; height: 42px; font-size: 13.5px;">
-            Open AI Studio &rarr;
-          </a>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <select id="hubProjectSelect" class="select-dropdown" aria-label="Target Project">
+              <option value="">Select Project Workspace</option>
+            </select>
+          </div>
         </div>
 
-        <!-- Solutions Grid -->
-        <div class="solutions-grid">
-          <!-- Card 1 -->
-          <div class="solution-card">
-            <div>
-              <div class="sol-icon">
-                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
-                  <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
-                  <polyline points="2 17 12 22 22 17"></polyline>
-                  <polyline points="2 12 12 17 22 12"></polyline>
-                </svg>
-              </div>
-              <div class="sol-title">Deterministic AST Taint Analysis</div>
-              <div class="sol-desc">Mathematical dataflow tracking across complex symbol trees. Identifies untrusted user input sinks before exploit execution occurs.</div>
-              <ul class="sol-features">
-                <li>
-                  <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 8 7 12 13 4"></polyline></svg>
-                  Cross-procedural symbol propagation
-                </li>
-                <li>
-                  <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 8 7 12 13 4"></polyline></svg>
-                  Zero false positives on dead code branches
-                </li>
-                <li>
-                  <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 8 7 12 13 4"></polyline></svg>
-                  Supports Python, Go, C/C++, TypeScript
-                </li>
-              </ul>
-            </div>
-            <div style="margin-top: 20px;">
-              <a href="queue.html" class="btn btn-secondary" style="width: 100%; height: 36px; font-size: 12.5px;">
-                Explore Detected CVEs
-              </a>
-            </div>
-          </div>
+        <!-- 7 Feature Tabs -->
+        <div class="feature-tabs" role="tablist">
+          <button class="feature-tab active" data-tab="tab-committee">
+            <span>🏛️</span> AI Model Committee
+          </button>
+          <button class="feature-tab" data-tab="tab-predictive">
+            <span>🔮</span> Predictive Bug Detection
+          </button>
+          <button class="feature-tab" data-tab="tab-hotspots">
+            <span>🌋</span> Code Hotspot Detection
+          </button>
+          <button class="feature-tab" data-tab="tab-memory">
+            <span>🧠</span> Long-term Repair Learning
+          </button>
+          <button class="feature-tab" data-tab="tab-apisec">
+            <span>🛡️</span> API Security Testing
+          </button>
+          <button class="feature-tab" data-tab="tab-origin">
+            <span>🔍</span> Bug Origin Detection
+          </button>
+          <button class="feature-tab" data-tab="tab-docs">
+            <span>📝</span> Automatic Documentation
+          </button>
+        </div>
 
-          <!-- Card 2 -->
-          <div class="solution-card">
-            <div>
-              <div class="sol-icon">
-                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                </svg>
+        <!-- TAB 1: AI Model Committee -->
+        <div class="feature-panel active" id="tab-committee">
+          <div class="feature-card">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
+              <div>
+                <h2 style="font-size: 18px; font-weight: 700; color: var(--ink); margin: 0 0 4px 0;">AI Model Committee (Separate Consensus Mode)</h2>
+                <p style="font-size: 13px; color: var(--sub); margin: 0;">Multi-agent round-robin debate between specialized LLM evaluators to eliminate single-model hallucinations before human review.</p>
               </div>
-              <div class="sol-title">Formal Verification Sandboxing</div>
-              <div class="sol-desc">Every candidate patch is executed inside ephemeral microVM containers. Validates that the exploit payload is neutralized with 0 side regressions.</div>
-              <ul class="sol-features">
-                <li>
-                  <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 8 7 12 13 4"></polyline></svg>
-                  Automated BRT test harness generation
-                </li>
-                <li>
-                  <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 8 7 12 13 4"></polyline></svg>
-                  Full repository regression test execution
-                </li>
-                <li>
-                  <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 8 7 12 13 4"></polyline></svg>
-                  Kernel-level namespace isolation
-                </li>
-              </ul>
+              <button class="btn" id="runCommitteeBtn" style="padding: 0 18px; height: 38px; font-size: 13px;">
+                Convene Committee Review
+              </button>
             </div>
-            <div style="margin-top: 20px;">
-              <a href="review.html?id=cve-2024-4112" class="btn btn-secondary" style="width: 100%; height: 36px; font-size: 12.5px;">
-                Inspect Live Verification
-              </a>
-            </div>
-          </div>
 
-          <!-- Card 3 -->
-          <div class="solution-card">
-            <div>
-              <div class="sol-icon">
-                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="18" cy="5" r="3"></circle>
-                  <circle cx="6" cy="12" r="3"></circle>
-                  <circle cx="18" cy="19" r="3"></circle>
-                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-                  <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-                </svg>
+            <!-- Committee Members -->
+            <div class="member-grid" id="committeeMembersGrid">
+              <div class="member-card">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <span class="badge-dot" style="background: #eb5757; width: 10px; height: 10px;"></span>
+                  <strong>Dr. Evelyn Vance</strong>
+                </div>
+                <div style="font-size: 11.5px; color: var(--sub);">Principal Security Auditor</div>
+                <div style="font-size: 12px; color: var(--ink);">Strict CWE invariant verification, exploit neutralization & defense-in-depth sanitization.</div>
               </div>
-              <div class="sol-title">Multi-Model Agent Ensemble</div>
-              <div class="sol-desc">Leverages Gemini 1.5 Pro and Claude 3.5 Sonnet in consensus loops to synthesize the most idiomatic, minimal, and secure patch.</div>
-              <ul class="sol-features">
-                <li>
-                  <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 8 7 12 13 4"></polyline></svg>
-                  Temperature-controlled invariant sampling
-                </li>
-                <li>
-                  <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 8 7 12 13 4"></polyline></svg>
-                  Style-preserving code patch generation
-                </li>
-                <li>
-                  <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 8 7 12 13 4"></polyline></svg>
-                  Automated Git pull requests with full audit
-                </li>
-              </ul>
+
+              <div class="member-card">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <span class="badge-dot" style="background: #c28340; width: 10px; height: 10px;"></span>
+                  <strong>Marcus Thorne</strong>
+                </div>
+                <div style="font-size: 11.5px; color: var(--sub);">Principal Systems Architect</div>
+                <div style="font-size: 12px; color: var(--ink);">API stability, concurrency safety, zero downstream side-effects, and minimal computational overhead.</div>
+              </div>
+
+              <div class="member-card">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <span class="badge-dot" style="background: #4a90e2; width: 10px; height: 10px;"></span>
+                  <strong>Elena Rostova</strong>
+                </div>
+                <div style="font-size: 11.5px; color: var(--sub);">Defect & Determinism Critic</div>
+                <div style="font-size: 12px; color: var(--ink);">Off-by-one shifts, NoneType safe navigation, anti-hallucination syntax audit & behavioral proofs.</div>
+              </div>
             </div>
-            <div style="margin-top: 20px;">
-              <a href="dashboard.html" class="btn btn-secondary" style="width: 100%; height: 36px; font-size: 12.5px;">
-                View System Metrics
-              </a>
+
+            <!-- Deliberation Results Output -->
+            <div id="committeeOutputArea" style="margin-top: 20px; display: none;">
+              <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(100,75,60,0.08); padding: 12px 18px; border-radius: 12px; margin-bottom: 12px;">
+                <div>
+                  <span style="font-size: 12px; color: var(--sub);">Consensus Verdict:</span>
+                  <strong id="committeeVerdictBadge" style="font-size: 14px; margin-left: 6px; color: var(--success);">CONSENSUS_APPROVED</strong>
+                </div>
+                <div style="font-size: 12.5px; color: var(--ink); font-weight: 600;">
+                  Agreement: <span id="committeeRatio" style="color: var(--accent-gold);">3/3</span> &bull; Confidence: <span id="committeeScore">95.8%</span>
+                </div>
+              </div>
+              <div style="font-size: 13px; color: var(--ink); margin-bottom: 8px;" id="committeeSummaryText"></div>
+              <div class="debate-transcript-box" id="debateTranscriptBox"></div>
             </div>
           </div>
         </div>
 
-        <!-- Workflow Banner -->
-        <div class="workflow-banner">
-          <div>
-            <span class="badge" style="background: rgba(194, 131, 64, 0.2); color: #e9ba7e; margin-bottom: 10px;">END-TO-END AUTONOMY</span>
-            <h2 style="font-size: 22px; font-weight: 600;">How Lumina Heals Repositories in 4 Stages</h2>
+        <!-- TAB 2: Predictive Bug Detection -->
+        <div class="feature-panel" id="tab-predictive">
+          <div class="feature-card">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
+              <div>
+                <h2 style="font-size: 18px; font-weight: 700; color: var(--ink); margin: 0 0 4px 0;">Predictive Bug Detection & Hazard Radar</h2>
+                <p style="font-size: 13px; color: var(--sub); margin: 0;">Analyzes deep AST structural complexity, unchecked null dereferencing, and mutable state drifts to prevent production outages.</p>
+              </div>
+              <button class="btn" id="runPredictiveBtn" style="padding: 0 18px; height: 38px; font-size: 13px;">
+                Scan for Predicted Hazards
+              </button>
+            </div>
+
+            <div id="predictiveResultsArea" style="margin-top: 16px;">
+              <div class="table-container">
+                <table class="custom-table" id="predictiveTable">
+                  <thead>
+                    <tr>
+                      <th>Failure Probability</th>
+                      <th>Hazard Type</th>
+                      <th>File & Location</th>
+                      <th>Structural Description</th>
+                      <th>Preventive Recommendation</th>
+                    </tr>
+                  </thead>
+                  <tbody id="predictiveTableBody">
+                    <tr>
+                      <td colspan="5" style="text-align: center; color: var(--sub); padding: 24px;">Click 'Scan for Predicted Hazards' to analyze the codebase AST.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
+        </div>
 
-          <div class="pipeline-steps">
-            <div class="pipeline-step">
-              <div class="step-number">PHASE 01</div>
-              <div class="step-name">Scan & Taint Model</div>
-              <div class="step-detail">Indexes source AST, maps dataflow routes, and marks all unescaped vulnerability sinks.</div>
+        <!-- TAB 3: Code Hotspot Detection -->
+        <div class="feature-panel" id="tab-hotspots">
+          <div class="feature-card">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
+              <div>
+                <h2 style="font-size: 18px; font-weight: 700; color: var(--ink); margin: 0 0 4px 0;">Code Hotspot Detection (Git Churn & Complexity Radar)</h2>
+                <p style="font-size: 13px; color: var(--sub); margin: 0;">Cross-references Git commit frequency, author dispersion, and file complexity to isolate defect-prone zones.</p>
+              </div>
+              <button class="btn" id="runHotspotsBtn" style="padding: 0 18px; height: 38px; font-size: 13px;">
+                Analyze Repository Hotspots
+              </button>
             </div>
 
-            <div class="pipeline-step">
-              <div class="step-number">PHASE 02</div>
-              <div class="step-name">Synthesize Candidates</div>
-              <div class="step-detail">Ensemble agents generate candidate patches satisfying formal security invariants.</div>
+            <div id="hotspotsResultsArea" style="margin-top: 16px;">
+              <div class="table-container">
+                <table class="custom-table" id="hotspotsTable">
+                  <thead>
+                    <tr>
+                      <th>Hotspot Score</th>
+                      <th>Risk Tier</th>
+                      <th>File Path</th>
+                      <th>Git Commits</th>
+                      <th>Unique Authors</th>
+                      <th>LOC</th>
+                      <th>Recommended Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="hotspotsTableBody">
+                    <tr>
+                      <td colspan="7" style="text-align: center; color: var(--sub); padding: 24px;">Click 'Analyze Repository Hotspots' to inspect Git churn patterns.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 4: Long-term Learning from Repairs -->
+        <div class="feature-panel" id="tab-memory">
+          <div class="feature-card">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
+              <div>
+                <h2 style="font-size: 18px; font-weight: 700; color: var(--ink); margin: 0 0 4px 0;">Repair Memory Bank (Cross-Session Transfer Learning)</h2>
+                <p style="font-size: 13px; color: var(--sub); margin: 0;">Persistent SQLite pattern repository that memorizes verified repairs to accelerate future patch generation and prevent repeating mistakes.</p>
+              </div>
+              <button class="btn btn-secondary" id="refreshMemoryBtn" style="padding: 0 18px; height: 38px; font-size: 13px;">
+                Refresh Memory Bank
+              </button>
             </div>
 
-            <div class="pipeline-step">
-              <div class="step-number">PHASE 03</div>
-              <div class="step-name">Sandbox Verification</div>
-              <div class="step-detail">Executes exploit test and full regression suite in isolated microVMs to verify safety.</div>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 18px 0;">
+              <div style="background: rgba(255,255,255,0.7); border: 1px solid rgba(100,75,60,0.12); padding: 14px 18px; border-radius: 12px;">
+                <div style="font-size: 11.5px; color: var(--sub);">Learned Repair Patterns</div>
+                <div style="font-size: 24px; font-weight: 700; color: var(--ink); margin-top: 4px;" id="memoryTotalPatterns">--</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.7); border: 1px solid rgba(100,75,60,0.12); padding: 14px 18px; border-radius: 12px;">
+                <div style="font-size: 11.5px; color: var(--sub);">Times Reused In Repositories</div>
+                <div style="font-size: 24px; font-weight: 700; color: var(--accent-gold); margin-top: 4px;" id="memoryTimesReused">--</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.7); border: 1px solid rgba(100,75,60,0.12); padding: 14px 18px; border-radius: 12px;">
+                <div style="font-size: 11.5px; color: var(--sub);">Average Verification Pass Rate</div>
+                <div style="font-size: 24px; font-weight: 700; color: var(--success); margin-top: 4px;" id="memoryAvgPassRate">100.0%</div>
+              </div>
             </div>
 
-            <div class="pipeline-step">
-              <div class="step-number">PHASE 04</div>
-              <div class="step-name">Human Review & PR</div>
-              <div class="step-detail">Developer audits rich diff dossier with one click; automatically opens production PR.</div>
+            <div class="table-container">
+              <table class="custom-table" id="memoryTable">
+                <thead>
+                  <tr>
+                    <th>Memory ID</th>
+                    <th>CWE / Category</th>
+                    <th>Pattern Title</th>
+                    <th>Times Applied</th>
+                    <th>Learned Diff Transformation</th>
+                  </tr>
+                </thead>
+                <tbody id="memoryTableBody">
+                  <tr>
+                    <td colspan="5" style="text-align: center; color: var(--sub); padding: 24px;">Loading persistent repair exemplars...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 5: API Security Testing -->
+        <div class="feature-panel" id="tab-apisec">
+          <div class="feature-card">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
+              <div>
+                <h2 style="font-size: 18px; font-weight: 700; color: var(--ink); margin: 0 0 4px 0;">API Security Testing (OWASP API Security Top 10)</h2>
+                <p style="font-size: 13px; color: var(--sub); margin: 0;">Audits discovered REST API endpoints for Broken Object Level Auth (BOLA), Broken Authentication, Resource Exhaustion, and CORS leaks.</p>
+              </div>
+              <button class="btn" id="runApiSecBtn" style="padding: 0 18px; height: 38px; font-size: 13px;">
+                Audit API Endpoints
+              </button>
+            </div>
+
+            <div id="apiSecResultsArea" style="margin-top: 16px;">
+              <div class="table-container">
+                <table class="custom-table" id="apiSecTable">
+                  <thead>
+                    <tr>
+                      <th>Severity</th>
+                      <th>Method & Route</th>
+                      <th>OWASP Classification</th>
+                      <th>Vulnerability Description</th>
+                      <th>Proposed Invariant Fix</th>
+                    </tr>
+                  </thead>
+                  <tbody id="apiSecTableBody">
+                    <tr>
+                      <td colspan="5" style="text-align: center; color: var(--sub); padding: 24px;">Click 'Audit API Endpoints' to analyze REST route handlers.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 6: Bug Origin Detection -->
+        <div class="feature-panel" id="tab-origin">
+          <div class="feature-card">
+            <div>
+              <h2 style="font-size: 18px; font-weight: 700; color: var(--ink); margin: 0 0 4px 0;">Bug Origin Detection (Git Blame & Commit Archaeology)</h2>
+              <p style="font-size: 13px; color: var(--sub); margin: 0;">Traces code defects directly back to their introducing commit SHA, author email, date, pull request, and introducing diff.</p>
+            </div>
+
+            <div style="display: flex; gap: 12px; margin-top: 18px; align-items: center; flex-wrap: wrap;">
+              <input type="text" id="originFilePath" class="input-glass" placeholder="File path (e.g. backend/autopatch/api/routes.py)" style="flex: 2; height: 38px;">
+              <input type="number" id="originLineNumber" class="input-glass" placeholder="Line number (e.g. 390)" style="width: 160px; height: 38px;">
+              <button class="btn" id="traceOriginBtn" style="height: 38px; padding: 0 18px; font-size: 13px;">
+                Trace Flaw Origin
+              </button>
+            </div>
+
+            <div id="originResultCard" style="display: none; margin-top: 20px; background: rgba(255,255,255,0.8); border: 1px solid rgba(100,75,60,0.15); border-radius: 14px; padding: 20px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div>
+                  <span style="font-size: 11.5px; color: var(--sub);">Introducing Commit:</span>
+                  <code id="originCommitSha" style="font-size: 13px; margin-left: 6px; font-weight: 700; color: var(--accent-gold);">--</code>
+                </div>
+                <span id="originClassificationBadge" class="badge badge-verified">RECENT_REGRESSION</span>
+              </div>
+              <div style="font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 6px;" id="originCommitSummary">--</div>
+              <div style="font-size: 12.5px; color: var(--sub); margin-bottom: 14px;">
+                Committed by <strong id="originAuthor">--</strong> &bull; <span id="originDate">--</span> (<span id="originAge">0</span> days in codebase)
+              </div>
+              <div>
+                <span style="font-size: 11.5px; color: var(--sub); display: block; margin-bottom: 4px;">Culprit Source Code Line:</span>
+                <pre style="background: #181412; color: #f7efe8; padding: 12px 16px; border-radius: 8px; font-size: 12px; margin: 0; overflow-x: auto;"><code id="originCodeLine">--</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 7: Automatic Documentation -->
+        <div class="feature-panel" id="tab-docs">
+          <div class="feature-card">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
+              <div>
+                <h2 style="font-size: 18px; font-weight: 700; color: var(--ink); margin: 0 0 4px 0;">Automatic Documentation Generator</h2>
+                <p style="font-size: 13px; color: var(--sub); margin: 0;">Generates production-ready Architecture Decision Records (ADR), Keep a Changelog security release notes, and CISO Executive Briefs.</p>
+              </div>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button class="btn btn-secondary" id="genAdrBtn" style="padding: 0 14px; height: 38px; font-size: 12.5px;">Generate ADR</button>
+                <button class="btn btn-secondary" id="genChangelogBtn" style="padding: 0 14px; height: 38px; font-size: 12.5px;">Security Changelog</button>
+                <button class="btn" id="genBriefBtn" style="padding: 0 14px; height: 38px; font-size: 12.5px;">Executive Brief</button>
+              </div>
+            </div>
+
+            <div style="margin-top: 20px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <strong style="font-size: 13px; color: var(--ink);" id="docTypeTitle">Generated Documentation Artifact</strong>
+                <button class="btn btn-secondary" id="copyDocBtn" style="padding: 2px 10px; height: 28px; font-size: 11.5px;">Copy Markdown</button>
+              </div>
+              <div class="markdown-preview-box" id="docPreviewBox">Select an artifact to generate (Architecture Decision Record, Security Changelog, or Executive Brief).</div>
             </div>
           </div>
         </div>
@@ -320,25 +527,325 @@
     </main>
   </div>
 
+  <script src="api-client.js"></script>
   <script>
-    // Fullscreen toggle handler
-    const fsBtn = document.getElementById('fsBtn');
-    if (fsBtn) {
-      fsBtn.addEventListener('click', () => {
-        if (!document.fullscreenElement) {
-          document.documentElement.requestFullscreen().catch(err => console.log(err));
-        } else {
-          document.exitFullscreen();
-        }
+    if (window.autopatch) {
+      window.autopatch.renderStatusPill('backendStatusPill');
+    }
+
+    // Tab Switching Logic
+    const tabs = document.querySelectorAll('.feature-tab');
+    const panels = document.querySelectorAll('.feature-panel');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        panels.forEach(p => p.classList.remove('active'));
+
+        tab.classList.add('active');
+        const targetId = tab.getAttribute('data-tab');
+        const targetPanel = document.getElementById(targetId);
+        if (targetPanel) targetPanel.classList.add('active');
       });
-      document.addEventListener('fullscreenchange', () => {
-        if (document.fullscreenElement) {
-          fsBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>';
-        } else {
-          fsBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>';
+    });
+
+    let activeProjectId = '';
+
+    async function initProjects() {
+      try {
+        const projs = await window.autopatch.listProjects();
+        const sel = document.getElementById('hubProjectSelect');
+        if (projs && projs.length > 0) {
+          sel.innerHTML = '';
+          projs.forEach((p, idx) => {
+            const opt = document.createElement('option');
+            opt.value = p.project_id;
+            opt.textContent = `${p.name} (${p.project_id.substring(0, 8)})`;
+            if (idx === 0) {
+              opt.selected = true;
+              activeProjectId = p.project_id;
+            }
+            sel.appendChild(opt);
+          });
+        }
+      } catch (e) {
+        console.error('Project init error:', e);
+      }
+    }
+
+    const projSel = document.getElementById('hubProjectSelect');
+    if (projSel) {
+      projSel.addEventListener('change', (e) => {
+        activeProjectId = e.target.value;
+      });
+    }
+
+    // Feature 1: Predictive Bug Detection
+    const runPredBtn = document.getElementById('runPredictiveBtn');
+    if (runPredBtn) {
+      runPredBtn.addEventListener('click', async () => {
+        if (!activeProjectId) return alert('Please select a project first.');
+        runPredBtn.innerText = 'Scanning AST...';
+        runPredBtn.disabled = true;
+        try {
+          const res = await window.autopatch.getPredictiveAnalysis(activeProjectId);
+          const tbody = document.getElementById('predictiveTableBody');
+          if (res.findings && res.findings.length > 0) {
+            let html = '';
+            res.findings.forEach(f => {
+              const probPct = Math.round(f.probability * 100);
+              const color = probPct >= 80 ? 'var(--danger)' : 'var(--warning)';
+              html += `
+                <tr>
+                  <td><span class="badge" style="background: rgba(235,87,87,0.15); color: ${color}; font-weight: 700;">${probPct}% Risk</span></td>
+                  <td><code>${f.hazard_type}</code></td>
+                  <td><strong>${f.file}</strong>:${f.line_start}</td>
+                  <td>${f.description}</td>
+                  <td style="font-size: 12px; color: var(--sub);">${f.recommendation}</td>
+                </tr>
+              `;
+            });
+            tbody.innerHTML = html;
+          } else {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--success); padding: 20px;">Zero structural hazards predicted. Codebase invariants are robust.</td></tr>';
+          }
+        } catch (e) {
+          alert('Predictive scan failed: ' + e.message);
+        } finally {
+          runPredBtn.innerText = 'Scan for Predicted Hazards';
+          runPredBtn.disabled = false;
         }
       });
     }
+
+    // Feature 2: Code Hotspot Detection
+    const runHotBtn = document.getElementById('runHotspotsBtn');
+    if (runHotBtn) {
+      runHotBtn.addEventListener('click', async () => {
+        if (!activeProjectId) return alert('Please select a project first.');
+        runHotBtn.innerText = 'Analyzing Churn...';
+        runHotBtn.disabled = true;
+        try {
+          const res = await window.autopatch.getCodeHotspots(activeProjectId);
+          const tbody = document.getElementById('hotspotsTableBody');
+          if (res.hotspots && res.hotspots.length > 0) {
+            let html = '';
+            res.hotspots.forEach(h => {
+              const badgeColor = h.risk_tier === 'CRITICAL' ? 'var(--danger)' : (h.risk_tier === 'HIGH' ? '#d96b24' : 'var(--warning)');
+              html += `
+                <tr>
+                  <td><strong style="font-size: 14px; color: var(--ink);">${h.hotspot_score}</strong>/100</td>
+                  <td><span class="badge" style="background: rgba(100,75,60,0.1); color: ${badgeColor}; font-weight: 700;">${h.risk_tier}</span></td>
+                  <td><code>${h.file_path}</code></td>
+                  <td>${h.commit_count} commits</td>
+                  <td>${h.unique_authors_count} authors</td>
+                  <td>${h.lines_of_code} LOC</td>
+                  <td style="font-size: 12px; color: var(--sub);">${h.recommendation}</td>
+                </tr>
+              `;
+            });
+            tbody.innerHTML = html;
+          } else {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--sub); padding: 20px;">No source files found for hotspot evaluation.</td></tr>';
+          }
+        } catch (e) {
+          alert('Hotspot analysis failed: ' + e.message);
+        } finally {
+          runHotBtn.innerText = 'Analyze Repository Hotspots';
+          runHotBtn.disabled = false;
+        }
+      });
+    }
+
+    // Feature 3: AI Model Committee
+    const runCommBtn = document.getElementById('runCommitteeBtn');
+    if (runCommBtn) {
+      runCommBtn.addEventListener('click', async () => {
+        if (!activeProjectId) return alert('Please select a project first.');
+        runCommBtn.innerText = 'Convening Deliberation...';
+        runCommBtn.disabled = true;
+        try {
+          const report = await window.autopatch.runCommitteeReview(
+            activeProjectId,
+            'cm-review-01',
+            'src/auth/service.py',
+            '--- a/src/auth/service.py\\n+++ b/src/auth/service.py\\n@@ -10,1 +10,2 @@\\n- query = f"SELECT * FROM users WHERE u = {username}"\\n+ query = "SELECT * FROM users WHERE u = :u", {"u": username}\\n',
+            'SQL Injection vulnerability via unsanitized f-string parameterization'
+          );
+
+          document.getElementById('committeeOutputArea').style.display = 'block';
+          document.getElementById('committeeVerdictBadge').innerText = report.verdict.verdict;
+          document.getElementById('committeeRatio').innerText = report.verdict.agreement_ratio;
+          document.getElementById('committeeScore').innerText = `${report.verdict.consensus_score}%`;
+          document.getElementById('committeeSummaryText').innerText = report.verdict.consensus_summary;
+
+          let transcriptHtml = '';
+          report.debate_transcript.forEach(turn => {
+            transcriptHtml += `
+              <div class="debate-turn-item">
+                <span style="color: var(--accent-gold); font-weight: 700;">[${turn.speaker_name}]</span>
+                <span style="color: #a3958f; font-size: 11px;">(${turn.role_title})</span>:
+                <div>${turn.statement}</div>
+              </div>
+            `;
+          });
+          document.getElementById('debateTranscriptBox').innerHTML = transcriptHtml;
+        } catch (e) {
+          alert('Committee deliberation failed: ' + e.message);
+        } finally {
+          runCommBtn.innerText = 'Convene Committee Review';
+          runCommBtn.disabled = false;
+        }
+      });
+    }
+
+    // Feature 4: Long-Term Repair Learning Memory
+    async function loadRepairMemory() {
+      try {
+        const data = await window.autopatch.getRepairMemory();
+        if (data.stats) {
+          document.getElementById('memoryTotalPatterns').innerText = data.stats.total_learned_patterns;
+          document.getElementById('memoryTimesReused').innerText = `${data.stats.total_times_reused}x`;
+        }
+        const tbody = document.getElementById('memoryTableBody');
+        if (data.repairs && data.repairs.length > 0) {
+          let html = '';
+          data.repairs.forEach(r => {
+            html += `
+              <tr>
+                <td><code>${r.memory_id}</code></td>
+                <td><span class="badge" style="background: rgba(194,131,64,0.15); color: var(--accent-gold);">${r.cwe || r.category}</span></td>
+                <td><strong>${r.title}</strong><div style="font-size: 11.5px; color: var(--sub);">${r.description}</div></td>
+                <td><strong style="color: var(--success);">${r.times_applied}x applied</strong></td>
+                <td><pre style="background: #181412; color: #f7efe8; padding: 6px 10px; border-radius: 6px; font-size: 11px; margin: 0; max-width: 320px; overflow-x: auto;"><code>${r.diff_pattern}</code></pre></td>
+              </tr>
+            `;
+          });
+          tbody.innerHTML = html;
+        }
+      } catch (e) {
+        console.error('Failed to load repair memory:', e);
+      }
+    }
+    const refMemBtn = document.getElementById('refreshMemoryBtn');
+    if (refMemBtn) refMemBtn.addEventListener('click', loadRepairMemory);
+    loadRepairMemory();
+
+    // Feature 5: API Security Testing
+    const runApiSecBtn = document.getElementById('runApiSecBtn');
+    if (runApiSecBtn) {
+      runApiSecBtn.addEventListener('click', async () => {
+        if (!activeProjectId) return alert('Please select a project first.');
+        runApiSecBtn.innerText = 'Auditing OWASP Top 10...';
+        runApiSecBtn.disabled = true;
+        try {
+          const res = await window.autopatch.auditApiSecurity(activeProjectId);
+          const tbody = document.getElementById('apiSecTableBody');
+          if (res.findings && res.findings.length > 0) {
+            let html = '';
+            res.findings.forEach(f => {
+              const sevColor = f.severity === 'CRITICAL' ? 'var(--danger)' : 'var(--warning)';
+              html += `
+                <tr>
+                  <td><span class="badge" style="background: rgba(235,87,87,0.12); color: ${sevColor}; font-weight: 700;">${f.severity}</span></td>
+                  <td><strong>${f.http_method}</strong> <code>${f.route_path}</code></td>
+                  <td><span style="font-size: 12px; font-weight: 600;">${f.owasp_category}</span></td>
+                  <td>${f.description}</td>
+                  <td><code style="font-size: 11.5px; color: var(--success);">${f.suggested_fix}</code></td>
+                </tr>
+              `;
+            });
+            tbody.innerHTML = html;
+          } else {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--success); padding: 20px;">Zero OWASP API vulnerabilities discovered. Grade A+ Posture.</td></tr>';
+          }
+        } catch (e) {
+          alert('API audit failed: ' + e.message);
+        } finally {
+          runApiSecBtn.innerText = 'Audit API Endpoints';
+          runApiSecBtn.disabled = false;
+        }
+      });
+    }
+
+    // Feature 6: Bug Origin Detection
+    const traceBtn = document.getElementById('traceOriginBtn');
+    if (traceBtn) {
+      traceBtn.addEventListener('click', async () => {
+        if (!activeProjectId) return alert('Please select a project first.');
+        const filePath = document.getElementById('originFilePath').value.trim() || 'backend/autopatch/api/routes.py';
+        const lineNum = parseInt(document.getElementById('originLineNumber').value, 10) || 390;
+
+        traceBtn.innerText = 'Tracing Blame...';
+        traceBtn.disabled = true;
+        try {
+          const origin = await window.autopatch.getBugOrigin(activeProjectId, 'trace-query', filePath, lineNum);
+          if (origin) {
+            document.getElementById('originResultCard').style.display = 'block';
+            document.getElementById('originCommitSha').innerText = origin.short_sha;
+            document.getElementById('originCommitSummary').innerText = origin.commit_summary;
+            document.getElementById('originAuthor').innerText = `${origin.author_name} <${origin.author_email}>`;
+            document.getElementById('originDate').innerText = origin.commit_date.substring(0, 10);
+            document.getElementById('originAge').innerText = origin.age_in_days;
+            document.getElementById('originCodeLine').innerText = origin.culprit_code_line;
+            document.getElementById('originClassificationBadge').innerText = origin.origin_classification;
+          }
+        } catch (e) {
+          alert('Origin trace failed: ' + e.message);
+        } finally {
+          traceBtn.innerText = 'Trace Flaw Origin';
+          traceBtn.disabled = false;
+        }
+      });
+    }
+
+    // Feature 7: Automatic Documentation
+    let activeMarkdownDoc = '';
+    const previewBox = document.getElementById('docPreviewBox');
+    const docTitle = document.getElementById('docTypeTitle');
+
+    document.getElementById('genAdrBtn').addEventListener('click', async () => {
+      if (!activeProjectId) return alert('Please select a project first.');
+      try {
+        const adr = await window.autopatch.getAdrDocument(activeProjectId);
+        docTitle.innerText = adr.title;
+        previewBox.innerText = adr.markdown_content;
+        activeMarkdownDoc = adr.markdown_content;
+      } catch (e) {
+        alert('ADR generation failed: ' + e.message);
+      }
+    });
+
+    document.getElementById('genChangelogBtn').addEventListener('click', async () => {
+      if (!activeProjectId) return alert('Please select a project first.');
+      try {
+        const chg = await window.autopatch.getSecurityChangelog(activeProjectId);
+        docTitle.innerText = `Security Remediation Changelog (${chg.version})`;
+        previewBox.innerText = chg.markdown_content;
+        activeMarkdownDoc = chg.markdown_content;
+      } catch (e) {
+        alert('Changelog generation failed: ' + e.message);
+      }
+    });
+
+    document.getElementById('genBriefBtn').addEventListener('click', async () => {
+      if (!activeProjectId) return alert('Please select a project first.');
+      try {
+        const brief = await window.autopatch.getExecutiveBrief(activeProjectId);
+        docTitle.innerText = `Executive Remediation Brief: ${brief.project_name}`;
+        previewBox.innerText = brief.executive_summary_markdown;
+        activeMarkdownDoc = brief.executive_summary_markdown;
+      } catch (e) {
+        alert('Executive brief generation failed: ' + e.message);
+      }
+    });
+
+    document.getElementById('copyDocBtn').addEventListener('click', () => {
+      if (!activeMarkdownDoc) return alert('No document generated yet.');
+      navigator.clipboard.writeText(activeMarkdownDoc).then(() => alert('Markdown copied to clipboard!'));
+    });
+
+    initProjects();
   </script>
 </body>
 </html>
