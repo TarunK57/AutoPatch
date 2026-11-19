@@ -12,6 +12,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 from uuid import uuid4
+from pydantic import BaseModel, Field
 
 from fastapi import (
     APIRouter,
@@ -415,6 +416,37 @@ async def start_scan(
     )
 
 
+class StartJobDirectRequest(BaseModel):
+    project_id: str
+    concurrency_limit: int = 3
+    token_budget: int = 25000
+    fast_path_templates: bool = True
+
+
+@router.post(
+    "/jobs",
+    response_model=ScanJobResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+    summary="Start Scan Job (Direct)",
+    description="Alias to launch a scan job by passing project_id in JSON body.",
+)
+async def start_scan_job_direct(
+    body: StartJobDirectRequest,
+    background_tasks: BackgroundTasks = BackgroundTasks(),
+    current_user: User = Depends(get_current_user),
+) -> ScanJobResponse:
+    return await start_scan(
+        project_id=body.project_id,
+        request=StartScanRequest(
+            concurrency_limit=body.concurrency_limit,
+            token_budget=body.token_budget,
+            fast_path_templates=body.fast_path_templates,
+        ),
+        background_tasks=background_tasks,
+        current_user=current_user,
+    )
+
+
 @router.get(
     "/jobs/{job_id}",
     response_model=ScanJobResponse,
@@ -470,11 +502,11 @@ async def stream_job_events(
             events = event_store.get_events(job_id=job_id, after_sequence=last_seq)
             for ev in events:
                 last_seq = ev.sequence_number
-                sse_data = f"event: {ev.event_type.value}\ndata: {json.dumps(ev.to_sse_dict())}\n\n"
+                sse_data = f"data: {json.dumps(ev.to_sse_dict())}\n\n"
                 yield sse_data
 
             if job.get("status") in {"COMPLETED", "FAILED", "CANCELLED"} and not events:
-                yield "event: DONE\ndata: {\"status\": \"STREAM_CLOSED\"}\n\n"
+                yield "data: {\"event\": \"DONE\", \"status\": \"STREAM_CLOSED\"}\n\n"
                 break
 
             await asyncio.sleep(0.5)

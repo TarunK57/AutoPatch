@@ -111,11 +111,22 @@ class AutoPatchClient {
     if (!this._isOnline) {
       throw new Error('Backend is offline. Cannot initiate autonomous scan job.');
     }
-    const res = await fetch(`${this.config.baseUrl}/jobs`, {
+    // Try primary project scan endpoint first
+    let res = await fetch(`${this.config.baseUrl}/projects/${encodeURIComponent(projectId)}/scan`, {
       method: 'POST',
       headers: this.headers,
-      body: JSON.stringify({ project_id: projectId }),
+      body: JSON.stringify({}),
     });
+
+    if (res.status === 404) {
+      // Fallback to /jobs alias endpoint
+      res = await fetch(`${this.config.baseUrl}/jobs`, {
+        method: 'POST',
+        headers: this.headers,
+        body: JSON.stringify({ project_id: projectId }),
+      });
+    }
+
     if (!res.ok) {
       const err = await res.json().catch(() => ({ detail: res.statusText }));
       throw new Error(err.detail || `Failed to start scan job: ${res.status}`);
@@ -131,7 +142,8 @@ class AutoPatchClient {
       this._activeEventSource.close();
     }
 
-    const url = `${this.config.baseUrl}/jobs/${jobId}/events`;
+    const tokenParam = encodeURIComponent(this.config.authToken);
+    const url = `${this.config.baseUrl}/jobs/${encodeURIComponent(jobId)}/events?token=${tokenParam}`;
     const es = new EventSource(url);
     this._activeEventSource = es;
 
@@ -139,7 +151,7 @@ class AutoPatchClient {
       try {
         const data = JSON.parse(e.data);
         if (onEvent) onEvent(data);
-        if (data.event === 'JOB_COMPLETED' || data.event === 'JOB_FAILED' || data.event === 'JOB_CANCELLED') {
+        if (data.event === 'DONE' || data.event === 'JOB_COMPLETED' || data.event === 'JOB_FAILED' || data.event === 'JOB_CANCELLED') {
           es.close();
           this._activeEventSource = null;
           if (onComplete) onComplete(data);

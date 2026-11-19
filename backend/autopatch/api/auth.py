@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from typing import Optional
-from fastapi import Header, HTTPException, Security, status
+from fastapi import Header, HTTPException, Query, Security, status
 from pydantic import BaseModel, Field
 
 from autopatch.core.exceptions import UnauthorizedPatchApplicationError
@@ -20,13 +20,18 @@ class User(BaseModel):
 def get_current_user(
     authorization: Optional[str] = Header(None),
     x_api_key: Optional[str] = Header(None),
+    token_param: Optional[str] = Query(None, alias="token"),
 ) -> User:
-    """Extracts and validates current authenticated user from Bearer token or X-API-Key header."""
+    """Extracts and validates current authenticated user from Bearer token, X-API-Key, or Query token."""
     token = None
     if authorization and authorization.startswith("Bearer "):
         token = authorization[7:].strip()
     elif x_api_key:
         token = x_api_key.strip()
+    elif token_param:
+        token = token_param.strip()
+        if token.startswith("Bearer "):
+            token = token[7:].strip()
 
     if not token:
         raise HTTPException(
