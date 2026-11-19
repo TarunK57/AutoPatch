@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <script src="digital-twin-visualizer.js"></script>
   <style>
     .hub-header {
       display: flex;
@@ -219,9 +220,12 @@
           </div>
         </div>
 
-        <!-- 7 Feature Tabs -->
+        <!-- Feature Tabs -->
         <div class="feature-tabs" role="tablist">
-          <button class="feature-tab active" data-tab="tab-committee">
+          <button class="feature-tab active" data-tab="tab-digitaltwin">
+            <span>🌐</span> Codebase Digital Twin (3D)
+          </button>
+          <button class="feature-tab" data-tab="tab-committee">
             <span>🏛️</span> AI Model Committee
           </button>
           <button class="feature-tab" data-tab="tab-predictive">
@@ -244,8 +248,116 @@
           </button>
         </div>
 
+        <!-- TAB 0: Codebase Digital Twin (3D) -->
+        <div class="feature-panel active" id="tab-digitaltwin">
+          <div class="feature-card">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
+              <div>
+                <h2 style="font-size: 18px; font-weight: 700; color: var(--ink); margin: 0 0 4px 0; display: flex; align-items: center; gap: 8px;">
+                  Codebase Digital Twin (3D Dependency & Blast Radius Topology)
+                  <span class="digital-twin-badge">HIGH IMPACT</span>
+                </h2>
+                <p style="font-size: 13px; color: var(--sub); margin: 0;">Interactive 3D model of functions, dependencies, APIs, and tests. Before applying a patch, visualize which components could break.</p>
+              </div>
+              <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                <button class="btn" id="simulateBlastBtn" style="padding: 0 18px; height: 38px; font-size: 13px; background: linear-gradient(180deg, #d9534f 0%, #b33927 100%);">
+                  💥 Simulate Patch Blast Radius
+                </button>
+                <button class="btn btn-secondary" id="refreshTwinBtn" style="padding: 0 14px; height: 38px; font-size: 13px;">
+                  🔄 Reload Model
+                </button>
+              </div>
+            </div>
+
+            <!-- 3D Canvas Visualizer Frame -->
+            <div class="digital-twin-wrapper">
+              <div class="digital-twin-header">
+                <div class="digital-twin-title">
+                  <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #34d399; box-shadow: 0 0 8px #34d399;"></span>
+                  <span>Interactive 3D Repository Topology</span>
+                  <span style="font-size: 11px; font-weight: 500; color: #a89a91;">(Drag to Orbit • Scroll to Zoom)</span>
+                </div>
+                <div style="display: flex; gap: 6px; align-items: center;">
+                  <button class="dt-control-btn active" data-filter="all">All</button>
+                  <button class="dt-control-btn" data-filter="api">APIs</button>
+                  <button class="dt-control-btn" data-filter="function">Functions</button>
+                  <button class="dt-control-btn" data-filter="test">Tests</button>
+                  <button class="dt-control-btn" data-filter="affected" style="color: #ff7a00;">Blast Radius Only</button>
+                </div>
+              </div>
+
+              <div class="digital-twin-canvas-container" id="solutionsTwinContainer">
+                <canvas id="solutionsTwinCanvas" class="digital-twin-canvas"></canvas>
+
+                <!-- Floating HUD Overlay -->
+                <div class="digital-twin-hud">
+                  <div style="font-size: 11px; font-weight: 700; color: #a3958f; text-transform: uppercase; letter-spacing: 0.05em;">SYSTEM TOPOLOGY METRICS</div>
+                  <div class="hud-stat-grid">
+                    <div class="hud-stat-box">
+                      <div class="hud-stat-val" id="dtStatTotalNodes">--</div>
+                      <div class="hud-stat-lbl">Components</div>
+                    </div>
+                    <div class="hud-stat-box">
+                      <div class="hud-stat-val" id="dtStatTotalEdges" style="color: #38bdf8;">--</div>
+                      <div class="hud-stat-lbl">Call Edges</div>
+                    </div>
+                    <div class="hud-stat-box">
+                      <div class="hud-stat-val" id="dtStatBlastPct" style="color: #ff4b2b;">0.0%</div>
+                      <div class="hud-stat-lbl">Blast Radius</div>
+                    </div>
+                    <div class="hud-stat-box">
+                      <div class="hud-stat-val" id="dtStatRiskLevel" style="color: #34d399;">NORMAL</div>
+                      <div class="hud-stat-lbl">System Risk</div>
+                    </div>
+                  </div>
+                  <div id="dtBlastSummaryText" style="margin-top: 10px; font-size: 11.5px; color: #d1c7c2; line-height: 1.45;">
+                    Ready. Click <strong>'Simulate Patch Blast Radius'</strong> to light up affected modules, call chains, and risk scores.
+                  </div>
+                </div>
+
+                <!-- 3D Controls -->
+                <div class="digital-twin-controls">
+                  <button class="dt-control-btn" id="dtAutoRotateBtn">⏸ Pause Orbit</button>
+                  <button class="dt-control-btn" id="dtResetViewBtn">⟲ Reset Camera</button>
+                </div>
+
+                <!-- Tooltip -->
+                <div id="solutionsTwinTooltip" class="digital-twin-tooltip"></div>
+              </div>
+            </div>
+
+            <!-- Downstream Impact Matrix -->
+            <div id="blastDetailMatrix" style="margin-top: 18px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;">
+              <div style="background: rgba(255,255,255,0.7); border: 1px solid rgba(100,75,60,0.12); padding: 14px 16px; border-radius: 12px;">
+                <div style="font-size: 11.5px; font-weight: 700; color: #b33927; text-transform: uppercase; display: flex; align-items: center; gap: 6px;">
+                  <span>🚨</span> Critical APIs at Risk
+                </div>
+                <div id="dtApisAtRiskList" style="margin-top: 8px; font-size: 12px; color: var(--ink);">
+                  <span style="color: var(--sub);">No simulated patch active.</span>
+                </div>
+              </div>
+              <div style="background: rgba(255,255,255,0.7); border: 1px solid rgba(100,75,60,0.12); padding: 14px 16px; border-radius: 12px;">
+                <div style="font-size: 11.5px; font-weight: 700; color: #287a4c; text-transform: uppercase; display: flex; align-items: center; gap: 6px;">
+                  <span>🧪</span> Verification Tests Exercised
+                </div>
+                <div id="dtTestsExercisedList" style="margin-top: 8px; font-size: 12px; color: var(--ink);">
+                  <span style="color: var(--sub);">No tests currently impacted.</span>
+                </div>
+              </div>
+              <div style="background: rgba(255,255,255,0.7); border: 1px solid rgba(100,75,60,0.12); padding: 14px 16px; border-radius: 12px;">
+                <div style="font-size: 11.5px; font-weight: 700; color: #bd7b1a; text-transform: uppercase; display: flex; align-items: center; gap: 6px;">
+                  <span>⚡</span> Downstream Functions Impacted
+                </div>
+                <div id="dtFunctionsAffectedList" style="margin-top: 8px; font-size: 12px; color: var(--ink);">
+                  <span style="color: var(--sub);">Clean system state.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- TAB 1: AI Model Committee -->
-        <div class="feature-panel active" id="tab-committee">
+        <div class="feature-panel" id="tab-committee">
           <div class="feature-card">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
               <div>
@@ -845,6 +957,160 @@
       navigator.clipboard.writeText(activeMarkdownDoc).then(() => alert('Markdown copied to clipboard!'));
     });
 
+    // ==========================================
+    // Codebase Digital Twin 3D Visualizer Logic
+    // ==========================================
+    let digitalTwinVisualizer = null;
+    let currentTwinData = null;
+
+    function initDigitalTwin() {
+      const canvas = document.getElementById('solutionsTwinCanvas');
+      const tooltip = document.getElementById('solutionsTwinTooltip');
+      if (!canvas) return;
+
+      digitalTwinVisualizer = new CodebaseDigitalTwinVisualizer(canvas, {
+        onHover: (node, mx, my) => {
+          if (!tooltip) return;
+          if (node) {
+            tooltip.style.display = 'block';
+            tooltip.style.left = mx + 'px';
+            tooltip.style.top = my + 'px';
+            tooltip.innerHTML = `
+              <div style="font-weight:700; color: #f7efe8; margin-bottom: 2px;">${node.name}</div>
+              <div style="font-size:10px; color:#c28340; text-transform:uppercase; margin-bottom:4px;">${node.type} &bull; ${node.category || 'core'}</div>
+              <div style="font-size:10.5px; color:#ab9c94;">File: <code>${node.file_path}</code> (line ${node.line})</div>
+              <div style="display:flex; justify-content:space-between; margin-top:6px; padding-top:4px; border-top:1px solid rgba(255,255,255,0.1);">
+                <span>Complexity: <strong>${node.complexity}</strong></span>
+                <span>Risk: <strong style="color:${node.risk_score > 60 ? '#ff4b2b' : '#34d399'}">${node.risk_score}</strong></span>
+              </div>
+            `;
+          } else {
+            tooltip.style.display = 'none';
+          }
+        }
+      });
+
+      // Filter buttons
+      document.querySelectorAll('.digital-twin-header .dt-control-btn[data-filter]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.digital-twin-header .dt-control-btn[data-filter]').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          if (digitalTwinVisualizer) {
+            digitalTwinVisualizer.activeFilter = btn.dataset.filter;
+          }
+        });
+      });
+
+      // Auto-rotate toggle
+      const autoRotateBtn = document.getElementById('dtAutoRotateBtn');
+      if (autoRotateBtn) {
+        autoRotateBtn.addEventListener('click', () => {
+          if (digitalTwinVisualizer) {
+            digitalTwinVisualizer.autoRotate = !digitalTwinVisualizer.autoRotate;
+            autoRotateBtn.innerText = digitalTwinVisualizer.autoRotate ? '⏸ Pause Orbit' : '▶ Auto Orbit';
+          }
+        });
+      }
+
+      // Reset Camera
+      const resetViewBtn = document.getElementById('dtResetViewBtn');
+      if (resetViewBtn) {
+        resetViewBtn.addEventListener('click', () => {
+          if (digitalTwinVisualizer) digitalTwinVisualizer.resetView();
+        });
+      }
+
+      // Reload Model
+      const refreshTwinBtn = document.getElementById('refreshTwinBtn');
+      if (refreshTwinBtn) {
+        refreshTwinBtn.addEventListener('click', () => loadProjectDigitalTwin());
+      }
+
+      // Simulate Blast Radius
+      const simulateBlastBtn = document.getElementById('simulateBlastBtn');
+      if (simulateBlastBtn) {
+        simulateBlastBtn.addEventListener('click', async () => {
+          simulateBlastBtn.disabled = true;
+          simulateBlastBtn.innerText = 'Simulating Blast...';
+          try {
+            const impact = await window.autopatch.getBugDigitalTwinImpact(activeProjectId, 'simulated-target-1');
+            if (digitalTwinVisualizer && impact) {
+              digitalTwinVisualizer.setBlastRadius(impact.blast_radius);
+              updateBlastHud(impact.blast_radius);
+            }
+          } catch (e) {
+            alert('Blast simulation failed: ' + e.message);
+          } finally {
+            simulateBlastBtn.disabled = false;
+            simulateBlastBtn.innerText = '💥 Simulate Patch Blast Radius';
+          }
+        });
+      }
+    }
+
+    async function loadProjectDigitalTwin() {
+      if (!activeProjectId) return;
+      try {
+        const data = await window.autopatch.getDigitalTwin(activeProjectId);
+        currentTwinData = data;
+        if (digitalTwinVisualizer) {
+          digitalTwinVisualizer.setData(data);
+        }
+        if (data.metrics) {
+          document.getElementById('dtStatTotalNodes').innerText = data.metrics.total_nodes;
+          document.getElementById('dtStatTotalEdges').innerText = data.metrics.total_edges;
+        }
+      } catch (e) {
+        console.error('Failed to load digital twin:', e);
+      }
+    }
+
+    function updateBlastHud(blast) {
+      if (!blast) return;
+      document.getElementById('dtStatBlastPct').innerText = `${blast.blast_radius_pct}%`;
+      const riskEl = document.getElementById('dtStatRiskLevel');
+      riskEl.innerText = blast.overall_risk_level;
+      if (blast.overall_risk_level === 'CRITICAL' || blast.overall_risk_level === 'HIGH') {
+        riskEl.style.color = '#ff4b2b';
+      } else if (blast.overall_risk_level === 'MODERATE') {
+        riskEl.style.color = '#eab308';
+      } else {
+        riskEl.style.color = '#34d399';
+      }
+
+      document.getElementById('dtBlastSummaryText').innerText = blast.summary;
+
+      // Update detail boxes
+      const apisEl = document.getElementById('dtApisAtRiskList');
+      if (apisEl) {
+        apisEl.innerHTML = (blast.critical_apis_at_risk && blast.critical_apis_at_risk.length)
+          ? blast.critical_apis_at_risk.map(a => `<div style="padding: 2px 0;">🔴 <code>${a}</code></div>`).join('')
+          : '<span style="color:var(--success);">✅ Zero public APIs exposed to regression.</span>';
+      }
+
+      const testsEl = document.getElementById('dtTestsExercisedList');
+      if (testsEl) {
+        testsEl.innerHTML = (blast.tests_exercised && blast.tests_exercised.length)
+          ? blast.tests_exercised.map(t => `<div style="padding: 2px 0;">🧪 <code>${t}</code></div>`).join('')
+          : '<span style="color:var(--sub);">No linked regression tests found.</span>';
+      }
+
+      const funcsEl = document.getElementById('dtFunctionsAffectedList');
+      if (funcsEl) {
+        funcsEl.innerHTML = (blast.functions_affected && blast.functions_affected.length)
+          ? blast.functions_affected.slice(0, 5).map(f => `<div style="padding: 2px 0;">⚡ <code>${f}</code></div>`).join('')
+          : '<span style="color:var(--sub);">No downstream callers.</span>';
+      }
+    }
+
+    // Trigger Digital Twin load when active project changes
+    const origSelectProject = selectProject;
+    selectProject = function(projId) {
+      origSelectProject(projId);
+      loadProjectDigitalTwin();
+    };
+
+    initDigitalTwin();
     initProjects();
   </script>
 </body>

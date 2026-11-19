@@ -538,6 +538,28 @@ class AutoPatchClient {
     if (!res.ok) throw new Error(`Executive brief generation failed: ${res.status}`);
     return await res.json();
   }
+
+  /**
+   * Codebase Digital Twin: Topological dependency model.
+   */
+  async getDigitalTwin(projectId) {
+    const res = await fetch(`${this.config.baseUrl}/projects/${encodeURIComponent(projectId)}/digital-twin`, {
+      headers: this.headers,
+    });
+    if (!res.ok) throw new Error(`Digital Twin query failed: ${res.status}`);
+    return await res.json();
+  }
+
+  /**
+   * Codebase Digital Twin: Simulate patch blast radius & downstream impact.
+   */
+  async getBugDigitalTwinImpact(projectId, bugId) {
+    const res = await fetch(`${this.config.baseUrl}/projects/${encodeURIComponent(projectId)}/bugs/${encodeURIComponent(bugId)}/digital-twin-impact`, {
+      headers: this.headers,
+    });
+    if (!res.ok) throw new Error(`Digital Twin impact simulation failed: ${res.status}`);
+    return await res.json();
+  }
 }
 
 // Global singleton instance

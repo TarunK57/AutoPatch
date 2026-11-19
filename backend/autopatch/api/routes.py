@@ -71,7 +71,13 @@ from autopatch.api.models import (
     PredictiveAnalysisResponse,
     PredictiveFindingItem,
     CommitteeReviewRequest,
+    DigitalTwinResponse,
+    DigitalTwinNode,
+    DigitalTwinEdge,
+    DigitalTwinMetrics,
+    PatchBlastRadius,
 )
+from autopatch.intelligence.digital_twin import CodebaseDigitalTwinBuilder
 from autopatch.detection.predictive import PredictiveDetector
 from autopatch.intelligence.hotspots import CodeHotspotAnalyzer, HotspotAnalysisReport
 from autopatch.intelligence.committee import (
@@ -888,6 +894,59 @@ async def get_similar_repairs(
 
     matches = global_repair_memory.find_similar_repairs(category=cat, cwe=cwe, limit=5)
     return matches
+
+
+@router.get(
+    "/projects/{project_id}/digital-twin",
+    response_model=DigitalTwinResponse,
+    summary="Codebase Digital Twin Dependency & Topology Model",
+    description="Builds an interactive topological graph of functions, modules, API endpoints, and tests.",
+)
+async def get_project_digital_twin(
+    project_id: str,
+    current_user: User = Depends(get_current_user),
+) -> DigitalTwinResponse:
+    project = PROJECTS_DB.get(project_id)
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found.")
+    assert_project_ownership(project["owner_id"], current_user)
+
+    repo_path = Path(project.get("path", "."))
+    builder = CodebaseDigitalTwinBuilder(repo_path)
+    model = builder.build_model()
+    return DigitalTwinResponse(**model)
+
+
+@router.get(
+    "/projects/{project_id}/bugs/{bug_id:path}/digital-twin-impact",
+    response_model=DigitalTwinResponse,
+    summary="Simulate Patch Blast Radius in Digital Twin",
+    description="Simulates candidate patch blast radius across repository functions, APIs, and tests.",
+)
+async def get_bug_digital_twin_impact(
+    project_id: str,
+    bug_id: str,
+    current_user: User = Depends(get_current_user),
+) -> DigitalTwinResponse:
+    project = PROJECTS_DB.get(project_id)
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found.")
+    assert_project_ownership(project["owner_id"], current_user)
+
+    state = event_store.reconstruct_bug_state(bug_id)
+    finding = state.get("finding") or {}
+    f_file = finding.get("file") or state.get("file_path") or ""
+    f_line = finding.get("line") or state.get("line_number")
+    f_symbol = finding.get("symbol")
+
+    repo_path = Path(project.get("path", "."))
+    builder = CodebaseDigitalTwinBuilder(repo_path)
+    impact_data = builder.analyze_patch_blast_radius(
+        target_file=f_file,
+        line_number=f_line,
+        function_hint=f_symbol,
+    )
+    return DigitalTwinResponse(**impact_data)
 
 
 @router.get(

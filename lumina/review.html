@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <script src="digital-twin-visualizer.js"></script>
   <style>
     .breadcrumb {
       display: flex;
@@ -332,6 +333,67 @@
                   </div>
                 </div>
                 <div class="diff-container">
+                </div>
+              </div>
+
+              <!-- Codebase Digital Twin: 3D Pre-Patch Blast Radius Visualizer -->
+              <div class="diff-wrapper" style="margin-top: 18px;" id="reviewTwinSection">
+                <div class="diff-header" style="display: flex; justify-content: space-between; align-items: center;">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 14px;">🌐</span>
+                    <span style="font-weight: 700; color: #fff; font-size: 13px;">Codebase Digital Twin & Pre-Patch Blast Radius</span>
+                    <span class="digital-twin-badge">HIGH IMPACT</span>
+                  </div>
+                  <div style="display: flex; gap: 8px; align-items: center;">
+                    <span id="reviewBlastRiskBadge" class="badge badge-verified" style="font-size: 9.5px; padding: 2px 7px;">ANALYZING</span>
+                    <button type="button" class="btn btn-secondary" id="toggleReviewTwinBtn" style="padding: 0 10px; height: 26px; font-size: 11px;">
+                      Toggle 3D View
+                    </button>
+                  </div>
+                </div>
+
+                <div id="reviewTwinBody" style="display: block;">
+                  <div class="digital-twin-canvas-container" style="height: 380px;" id="reviewTwinContainer">
+                    <canvas id="reviewTwinCanvas" class="digital-twin-canvas"></canvas>
+
+                    <!-- Floating HUD Overlay -->
+                    <div class="digital-twin-hud" style="top: 12px; left: 12px; padding: 10px 14px; max-width: 270px;">
+                      <div style="font-size: 9.5px; font-weight: 700; color: #a3958f; text-transform: uppercase;">DOWNSTREAM IMPACT PREVIEW</div>
+                      <div class="hud-stat-grid" style="grid-template-columns: repeat(2, 1fr); gap: 6px; margin-top: 6px;">
+                        <div class="hud-stat-box" style="padding: 5px 8px;">
+                          <div class="hud-stat-val" id="reviewTwinBlastPct" style="font-size: 14px; color: #ff4b2b;">--%</div>
+                          <div class="hud-stat-lbl" style="font-size: 9px;">Blast Radius</div>
+                        </div>
+                        <div class="hud-stat-box" style="padding: 5px 8px;">
+                          <div class="hud-stat-val" id="reviewTwinRiskLevel" style="font-size: 14px; color: #34d399;">LOW</div>
+                          <div class="hud-stat-lbl" style="font-size: 9px;">Risk Level</div>
+                        </div>
+                      </div>
+                      <div id="reviewTwinSummary" style="font-size: 10.5px; color: #d1c7c2; margin-top: 6px; line-height: 1.35;">
+                        Interactive 3D dependency model. Lights up directly modified functions, affected callers, APIs, and tests.
+                      </div>
+                    </div>
+
+                    <!-- 3D Controls -->
+                    <div class="digital-twin-controls" style="bottom: 12px; right: 12px;">
+                      <button type="button" class="dt-control-btn" id="reviewTwinRotateBtn" style="font-size: 11px; padding: 4px 10px;">⏸ Pause Orbit</button>
+                      <button type="button" class="dt-control-btn" id="reviewTwinResetBtn" style="font-size: 11px; padding: 4px 10px;">⟲ Reset</button>
+                    </div>
+
+                    <div id="reviewTwinTooltip" class="digital-twin-tooltip"></div>
+                  </div>
+
+                  <!-- Downstream APIs and Tests breakdown -->
+                  <div style="padding: 12px 16px; background: #181412; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; font-size: 11.5px; color: #ab9c94;">
+                    <div>
+                      <span style="color: #ff4b2b; font-weight: 600;">Public APIs at Risk:</span>
+                      <span id="reviewTwinApisAtRisk" style="color: #f7efe8; margin-left: 4px;">None</span>
+                    </div>
+                    <div>
+                      <span style="color: #34d399; font-weight: 600;">Verification Tests Exercised:</span>
+                      <span id="reviewTwinTestsExercised" style="color: #f7efe8; margin-left: 4px;">None</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -817,6 +879,92 @@
             commBtn.innerText = 'Re-convene';
             commBtn.disabled = false;
           }
+        };
+      }
+
+      // Codebase Digital Twin: 3D Pre-Patch Blast Radius
+      (async () => {
+        try {
+          const impact = await window.autopatch.getBugDigitalTwinImpact(projectId, bug.bug_id);
+          if (impact && impact.blast_radius) {
+            const b = impact.blast_radius;
+            document.getElementById('reviewTwinBlastPct').innerText = `${b.blast_radius_pct}%`;
+            const riskEl = document.getElementById('reviewTwinRiskLevel');
+            riskEl.innerText = b.overall_risk_level;
+            riskEl.style.color = (b.overall_risk_level === 'CRITICAL' || b.overall_risk_level === 'HIGH') ? '#ff4b2b' : ((b.overall_risk_level === 'MODERATE') ? '#eab308' : '#34d399');
+
+            const badge = document.getElementById('reviewBlastRiskBadge');
+            badge.innerText = `BLAST RISK: ${b.overall_risk_level}`;
+            badge.className = `badge ${(b.overall_risk_level === 'CRITICAL' || b.overall_risk_level === 'HIGH') ? 'badge-critical' : 'badge-verified'}`;
+
+            document.getElementById('reviewTwinSummary').innerText = b.summary;
+
+            const apisEl = document.getElementById('reviewTwinApisAtRisk');
+            if (apisEl) {
+              apisEl.innerHTML = (b.critical_apis_at_risk && b.critical_apis_at_risk.length)
+                ? b.critical_apis_at_risk.map(a => `<code style="color:#ff7a00;">${escapeHtml(a)}</code>`).join(', ')
+                : '<span style="color:#34d399;">None (0 exposed APIs)</span>';
+            }
+
+            const testsEl = document.getElementById('reviewTwinTestsExercised');
+            if (testsEl) {
+              testsEl.innerHTML = (b.tests_exercised && b.tests_exercised.length)
+                ? b.tests_exercised.map(t => `<code style="color:#34d399;">${escapeHtml(t)}</code>`).join(', ')
+                : '<span style="color:#ab9c94;">BRT harness verifies patch</span>';
+            }
+
+            // Initialize review canvas visualizer
+            const canvas = document.getElementById('reviewTwinCanvas');
+            const tooltip = document.getElementById('reviewTwinTooltip');
+            if (canvas && window.CodebaseDigitalTwinVisualizer) {
+              const viz = new CodebaseDigitalTwinVisualizer(canvas, {
+                onHover: (node, mx, my) => {
+                  if (!tooltip) return;
+                  if (node) {
+                    tooltip.style.display = 'block';
+                    tooltip.style.left = mx + 'px';
+                    tooltip.style.top = my + 'px';
+                    tooltip.innerHTML = `
+                      <div style="font-weight:700; color: #f7efe8;">${escapeHtml(node.name)}</div>
+                      <div style="font-size:10px; color:#c28340; text-transform:uppercase;">${node.type} &bull; ${node.category || 'core'}</div>
+                      <div style="font-size:10.5px; color:#ab9c94;">${escapeHtml(node.file_path)}:${node.line}</div>
+                      <div style="margin-top:4px; font-size:10.5px; color:${node.is_direct_target ? '#ff4b2b' : (node.is_affected ? '#ff7a00' : '#34d399')}; font-weight:600;">
+                        ${node.is_direct_target ? '🔴 DIRECT TARGET OF PATCH' : (node.is_affected ? '⚠️ IN DOWNSTREAM BLAST RADIUS' : '✅ SAFE / UNAFFECTED')}
+                      </div>
+                    `;
+                  } else {
+                    tooltip.style.display = 'none';
+                  }
+                }
+              });
+              viz.setData(impact);
+              viz.setBlastRadius(b);
+
+              const rotateBtn = document.getElementById('reviewTwinRotateBtn');
+              if (rotateBtn) {
+                rotateBtn.onclick = () => {
+                  viz.autoRotate = !viz.autoRotate;
+                  rotateBtn.innerText = viz.autoRotate ? '⏸ Pause Orbit' : '▶ Auto Orbit';
+                };
+              }
+              const resetBtn = document.getElementById('reviewTwinResetBtn');
+              if (resetBtn) {
+                resetBtn.onclick = () => viz.resetView();
+              }
+            }
+          }
+        } catch (e) {
+          console.warn('Digital twin blast radius error:', e);
+        }
+      })();
+
+      const toggleTwinBtn = document.getElementById('toggleReviewTwinBtn');
+      const reviewTwinBody = document.getElementById('reviewTwinBody');
+      if (toggleTwinBtn && reviewTwinBody) {
+        toggleTwinBtn.onclick = () => {
+          const isHidden = reviewTwinBody.style.display === 'none';
+          reviewTwinBody.style.display = isHidden ? 'block' : 'none';
+          toggleTwinBtn.innerText = isHidden ? 'Collapse 3D View' : 'Expand 3D View';
         };
       }
 

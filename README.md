@@ -112,6 +112,12 @@ Integrated with the **LuminaAI** web interface and native VS Code/Cursor extensi
   - **Keep a Changelog Security Notes**: SemVer-aligned markdown release notes with security fixes and CVE references.
   - **CISO Executive Remediation Brief**: High-level risk summary, mean time to remediate (MTTR), and regulatory compliance posture.
 
+### 8. Codebase Digital Twin & 3D Blast Radius Visualizer (High Impact)
+- **Engine**: [`backend/autopatch/intelligence/digital_twin.py`](backend/autopatch/intelligence/digital_twin.py) & [`lumina/digital-twin-visualizer.js`](lumina/digital-twin-visualizer.js)
+- **Capability**: Builds an interactive 3D topological model of the repository's functions, dependencies, APIs, and tests.
+- **Pre-Patch Impact Analysis**: Before applying any candidate patch, visualizes which downstream components could break.
+- **The Wow Moment**: An interactive 3D dependency graph lights up the directly modified functions with a pulsing fire aura, tracing laser energy pulses through affected callers and public API endpoints, calculating downstream blast radius percentage, critical APIs at risk, and tests exercised.
+
 ---
 
 ## User Interfaces
@@ -128,12 +134,14 @@ The primary responsive web suite served at `http://localhost:3000`:
   - Batch export options: Interactive HTML Dossier, SARIF 2.1.0, Unified Diff, or Executive Markdown.
 - **Interactive Review & Triage (`review.html`)**:
   - Side-by-side Monaco diff editor highlighting candidate patches.
+  - **3D Codebase Digital Twin & Pre-Patch Blast Radius panel**: Rotates in 3D, highlights directly modified symbols, and computes downstream risk.
   - Bug Origin Archaeology card with introducing commit SHA and flaw age.
   - AI Model Committee deliberation card with vote breakdown and expert rationales.
   - Similar Learned Historical Repairs card with few-shot transfer links.
   - Deployment actions: **Create GitHub PR**, **Push Direct Branch**, or **Download Patched ZIP**.
 - **Enterprise Defense & Intelligence Hub (`solutions.html`)**:
-  - Dedicated tabbed workspace for all 7 enterprise capabilities.
+  - Dedicated tabbed workspace for all 8 enterprise capabilities.
+  - Interactive full-page **3D Codebase Digital Twin** with orbit controls, type filtering, and patch blast simulator.
   - Live committee deliberation trigger and 1-click clipboard copy for ADRs and CISO briefs.
 - **Observability Dashboard (`dashboard.html`)**:
   - Direct database-backed metrics: MTTR, verification rate, vulnerability breakdowns by severity, and chronological audit log reconstruction. Zero simulated/fake data.
@@ -153,6 +161,8 @@ The primary responsive web suite served at `http://localhost:3000`:
 | `POST` | `/api/v1/github/portal-connect` | 1-Click Official GitHub Portal connection & repo discovery |
 | `GET` | `/api/v1/projects/{project_id}/predictive-analysis` | Proactive AST complexity & hazard inspection |
 | `GET` | `/api/v1/projects/{project_id}/hotspots` | Git churn velocity and author spread hotspot analysis |
+| `GET` | `/api/v1/projects/{project_id}/digital-twin` | Codebase Digital Twin 3D topological model & metrics |
+| `GET` | `/api/v1/projects/{project_id}/bugs/{bug_id}/digital-twin-impact` | Pre-patch blast radius & downstream impact simulation |
 | `GET` | `/api/v1/committee/members` | List active AI Committee personas and credentials |
 | `POST` | `/api/v1/projects/{project_id}/committee/review` | Convene tri-model committee debate & consensus voting |
 | `GET` | `/api/v1/observability/repair-memory` | Inspect persistent SQLite learned repair store |

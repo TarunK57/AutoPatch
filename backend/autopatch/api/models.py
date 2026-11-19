@@ -356,6 +356,58 @@ class CommitteeReviewRequest(BaseModel):
     root_cause_summary: Optional[str] = None
 
 
+class DigitalTwinNode(BaseModel):
+    id: str
+    name: str
+    full_id: Optional[str] = None
+    type: str  # module | function | api_endpoint | test
+    file_path: str
+    line: int = 1
+    loc: int = 0
+    complexity: int = 1
+    risk_score: int = 10
+    category: str = "core"
+    is_direct_target: bool = False
+    is_affected: bool = False
+
+
+class DigitalTwinEdge(BaseModel):
+    source: str
+    target: str
+    relationship: str = "calls"
+    is_blast_path: bool = False
+
+
+class DigitalTwinMetrics(BaseModel):
+    total_nodes: int = 0
+    total_edges: int = 0
+    modules_count: int = 0
+    functions_count: int = 0
+    api_endpoints_count: int = 0
+    tests_count: int = 0
+    avg_risk_score: float = 0.0
+
+
+class PatchBlastRadius(BaseModel):
+    direct_targets: List[str] = Field(default_factory=list)
+    affected_node_ids: List[str] = Field(default_factory=list)
+    total_affected: int = 0
+    blast_radius_pct: float = 0.0
+    overall_risk_level: str = "LOW"
+    critical_apis_at_risk: List[str] = Field(default_factory=list)
+    tests_exercised: List[str] = Field(default_factory=list)
+    functions_affected: List[str] = Field(default_factory=list)
+    summary: str = ""
+
+
+class DigitalTwinResponse(BaseModel):
+    nodes: List[DigitalTwinNode] = Field(default_factory=list)
+    edges: List[DigitalTwinEdge] = Field(default_factory=list)
+    metrics: DigitalTwinMetrics = Field(default_factory=DigitalTwinMetrics)
+    blast_radius: Optional[PatchBlastRadius] = None
+
+
+
 
 
 

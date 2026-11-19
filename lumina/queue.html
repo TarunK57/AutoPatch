@@ -267,11 +267,11 @@
           </div>
 
           <div class="filter-pills" id="severityFilters">
-            <button class="filter-pill active" data-sev="ALL">All (8)</button>
-            <button class="filter-pill" data-sev="CRITICAL">Critical (2)</button>
-            <button class="filter-pill" data-sev="HIGH">High (3)</button>
-            <button class="filter-pill" data-sev="MEDIUM">Medium (2)</button>
-            <button class="filter-pill" data-sev="LOW">Low (1)</button>
+            <button class="filter-pill active" data-sev="ALL">All</button>
+            <button class="filter-pill" data-sev="CRITICAL">Critical</button>
+            <button class="filter-pill" data-sev="HIGH">High</button>
+            <button class="filter-pill" data-sev="MEDIUM">Medium</button>
+            <button class="filter-pill" data-sev="LOW">Low</button>
           </div>
         </div>
 
@@ -468,6 +468,9 @@
         const sevParam = currentSeverity === 'ALL' ? null : currentSeverity;
         const res = await window.autopatch.listBugs(activeProjectId, sevParam);
         const bugs = res.bugs || res.items || [];
+
+        const allPill = document.querySelector('.filter-pill[data-sev="ALL"]');
+        if (allPill && currentSeverity === 'ALL') allPill.innerText = `All (${bugs.length})`;
 
         if (bugs.length === 0) {
           issuesListEl.innerHTML = `
