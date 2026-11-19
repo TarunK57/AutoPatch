@@ -387,9 +387,54 @@ class ReproducerAgent:
         )
 
     def _test_against_reference_fix(self, test_file_path: str, patch_diff: str) -> bool:
-        """Simulates testing against reference fix to confirm Plausible BRT status."""
-        # When reference fix diff is present, Plausible BRT status requires test to pass
-        return True
+        """Executes the test against the reference fix in an ephemeral sandbox to confirm Plausible BRT status."""
+        try:
+            import re
+            import shutil
+            import subprocess
+            import tempfile
+            from autopatch.reproducer.sandbox_runner import SandboxedBRTRunner
+            with tempfile.TemporaryDirectory() as td:
+                sandbox_dir = Path(td)
+                shutil.copytree(str(self.project_root), str(sandbox_dir), dirs_exist_ok=True)
+                
+                # Try git apply first
+                subprocess.run(["git", "init"], cwd=str(sandbox_dir), capture_output=True)
+                apply_res = subprocess.run(
+                    ["git", "apply", "--whitespace=nowarn"],
+                    input=patch_diff,
+                    cwd=str(sandbox_dir),
+                    text=True,
+                    capture_output=True,
+                )
+                if apply_res.returncode != 0:
+                    # Fallback to direct hunk line replacement
+                    file_match = re.search(r"\+\+\+ [ab]/(.+)", patch_diff)
+                    if file_match:
+                        target_file = sandbox_dir / file_match.group(1).strip()
+                        if target_file.is_file():
+                            removed = [line[1:].strip() for line in patch_diff.splitlines() if line.startswith("-") and not line.startswith("---")]
+                            added = [line[1:].strip() for line in patch_diff.splitlines() if line.startswith("+") and not line.startswith("+++")]
+                            content = target_file.read_text(encoding="utf-8")
+                            for r, a in zip(removed, added):
+                                new_lines = []
+                                replaced = False
+                                for line in content.splitlines():
+                                    if not replaced and r in line:
+                                        indent = line[:line.find(line.strip())]
+                                        new_lines.append(indent + a)
+                                        replaced = True
+                                    else:
+                                        new_lines.append(line)
+                                content = "\n".join(new_lines) + "\n"
+                            target_file.write_text(content, encoding="utf-8")
+                
+                runner = SandboxedBRTRunner(timeout_seconds=10)
+                res = runner.run_test_file(sandbox_dir, test_file_path)
+                return res.status == TestRunStatus.PASS
+        except Exception as e:
+            logger.debug(f"Reference fix test execution failed: {e}")
+            return False
 
     def _build_agent_prompt(
         self,

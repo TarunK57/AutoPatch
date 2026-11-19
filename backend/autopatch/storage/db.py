@@ -22,15 +22,13 @@ def get_default_db_path() -> Path:
     if env_path:
         p = Path(env_path)
     else:
-        # Default to user home or fallback to /tmp
+        # Default to /tmp/autopatch or local .autopatch to stay sandbox-compliant and accessible
         try:
-            home = Path.home() / ".autopatch"
-            home.mkdir(parents=True, exist_ok=True)
-            p = home / "autopatch.db"
-        except Exception:
             tmp = Path("/tmp/autopatch")
             tmp.mkdir(parents=True, exist_ok=True)
             p = tmp / "autopatch.db"
+        except Exception:
+            p = Path.cwd() / ".autopatch" / "autopatch.db"
 
     p.parent.mkdir(parents=True, exist_ok=True)
     return p
