@@ -1,0 +1,26 @@
+[
+  {
+    "instance_id": "pytest-dev__pytest-5227",
+    "repo": "pytest-dev/pytest",
+    "base_commit": "a1b2c3d4e5f6071829",
+    "problem_statement": "Logging format ignores default when no format is specified. Expected DEFAULT_LOG_FORMAT to be used when log_format option is empty.",
+    "patch": "--- a/src/_pytest/logging.py\n+++ b/src/_pytest/logging.py\n@@ -15,1 +15,1 @@\n-    return log_format\n+    return log_format or DEFAULT_LOG_FORMAT\n",
+    "test_patch": "def test_default_logging_format():\n    assert get_log_format(None) == DEFAULT_LOG_FORMAT\n",
+    "FAIL_TO_PASS": ["testing/test_logging.py::test_default_logging_format"],
+    "PASS_TO_PASS": ["testing/test_logging.py::test_custom_logging_format"],
+    "buggy_code": "DEFAULT_LOG_FORMAT = '%(levelname)s: %(message)s'\ndef get_log_format(log_format):\n    return log_format\n",
+    "ground_truth_code": "DEFAULT_LOG_FORMAT = '%(levelname)s: %(message)s'\ndef get_log_format(log_format):\n    return log_format or DEFAULT_LOG_FORMAT\n"
+  },
+  {
+    "instance_id": "django__django-11099",
+    "repo": "django/django",
+    "base_commit": "f0e1d2c3b4a5",
+    "problem_statement": "Username validator regex allows trailing newline in ASCIIUsernameValidator. Should reject trailing newlines.",
+    "patch": "--- a/django/contrib/auth/validators.py\n+++ b/django/contrib/auth/validators.py\n@@ -10,1 +10,1 @@\n-    regex = r'^[\\w.@+-]+$'\n+    regex = r'\\A[\\w.@+-]+\\Z'\n",
+    "test_patch": "def test_trailing_newline_rejected():\n    assert not validate_username('admin\\n')\n",
+    "FAIL_TO_PASS": ["tests/auth_tests/test_validators.py::test_trailing_newline_rejected"],
+    "PASS_TO_PASS": ["tests/auth_tests/test_validators.py::test_valid_usernames"],
+    "buggy_code": "import re\ndef validate_username(u):\n    return bool(re.match(r'^[\\w.@+-]+$', u))\n",
+    "ground_truth_code": "import re\ndef validate_username(u):\n    return bool(re.match(r'\\A[\\w.@+-]+\\Z', u))\n"
+  }
+]
