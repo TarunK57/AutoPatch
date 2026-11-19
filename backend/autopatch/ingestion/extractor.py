@@ -214,20 +214,41 @@ class SafeExtractor:
         shutil.copy2(file_path, dst_file)
         return destination
 
-    def clone_github_repo(self, repo_url: str, destination: Path) -> Path:
-        """Shallow clones a public repository using git --depth 1.
+    def clone_git_repo(self, repo_url: str, destination: Path) -> Path:
+        """Clones a git repository (remote URL or local directory) into destination.
 
-        Validates URL format to prevent command injection.
+        Guarantees:
+        - Prevents command injection and parameter injection
+        - Handles GitHub, GitLab, Bitbucket, HTTPS, SSH, and local directory paths
+        - Enforces clone timeout
         """
-        # Strict URL validation: HTTPS or GIT over SSH
-        pattern = re.compile(r"^(https://github\.com/[a-zA-Z0-9_.-]+/[a-zA-Z0-9_.-]+(?:\.git)?)$")
-        if not pattern.match(repo_url):
-            raise IngestionError(f"Invalid or unsupported GitHub repository URL: {repo_url}")
+        # 1. Check if it's a local filesystem path
+        local_cand = Path(repo_url.replace("file://", "")).expanduser()
+        if local_cand.exists() and local_cand.is_dir():
+            return self.ingest_folder(local_cand, destination)
+
+        # 2. Prevent argument injection (flags starting with -)
+        clean_url = repo_url.strip()
+        if clean_url.startswith("-"):
+            raise IngestionError(f"Invalid git repository URL (cannot start with a dash): {repo_url}")
+
+        # Check for shell metacharacters
+        for char in [";", "&", "|", "`", "$", "\n", "\r", ">", "<"]:
+            if char in clean_url:
+                raise IngestionError(f"Potentially malicious git repository URL contains illegal characters: {repo_url}")
+
+        # Validate URL scheme
+        valid_schemes = ("https://", "http://", "git@", "ssh://", "git://")
+        if not clean_url.startswith(valid_schemes):
+            raise IngestionError(
+                f"Unsupported repository URL or path: '{repo_url}'. "
+                "Must be a valid Git URL (https://..., git@...) or an existing local directory path."
+            )
 
         destination = destination.resolve()
         destination.mkdir(parents=True, exist_ok=True)
 
-        cmd = ["git", "clone", "--depth", "1", repo_url, str(destination)]
+        cmd = ["git", "clone", "--depth", "1", clean_url, str(destination)]
         try:
             result = subprocess.run(
                 cmd,
@@ -241,9 +262,13 @@ class SafeExtractor:
         except subprocess.TimeoutExpired:
             raise IngestionError(f"Git clone timed out after {CLONE_TIMEOUT_SECONDS}s")
 
-        # Remove the .git directory to treat cloned project cleanly
+        # Clean .git directory if needed to treat cloned project cleanly
         git_dir = destination / ".git"
         if git_dir.exists():
             shutil.rmtree(git_dir, ignore_errors=True)
 
         return destination
+
+    def clone_github_repo(self, repo_url: str, destination: Path) -> Path:
+        """Alias for clone_git_repo for backward compatibility."""
+        return self.clone_git_repo(repo_url, destination)

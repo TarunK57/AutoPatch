@@ -12,8 +12,10 @@ import {
   Terminal,
   ShieldCheck,
   FolderArchive,
+  Loader2,
 } from "lucide-react";
 import { Project } from "@/types";
+import { ApiService } from "@/services/api";
 
 interface UploadScreenProps {
   onProjectCreated: (project: Project) => void;
@@ -33,6 +35,7 @@ export const UploadScreen: React.FC<UploadScreenProps> = ({
   const [createdProject, setCreatedProject] = useState<Project | null>(null);
   const [concurrency, setConcurrency] = useState(3);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -69,22 +72,23 @@ export const UploadScreen: React.FC<UploadScreenProps> = ({
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
+    setIsSubmitting(true);
 
     const name = projectName.trim() || (selectedFile ? selectedFile.name.replace(/\.[^/.]+$/, "") : "Project Repo");
     
-    // Simulate or call creation
-    const project: Project = {
-      project_id: `proj-${Date.now()}`,
-      name,
-      owner_id: "user_developer",
-      total_files: selectedFile ? 24 : 16,
-      languages: ["Python", "TypeScript"],
-      created_at: new Date().toISOString(),
-      test_command: "pytest -v tests/",
-    };
-
-    setCreatedProject(project);
-    onProjectCreated(project);
+    try {
+      const project = await ApiService.createProject(
+        name,
+        selectedFile || undefined,
+        githubUrl.trim() || undefined
+      );
+      setCreatedProject(project);
+      onProjectCreated(project);
+    } catch (err: any) {
+      setErrorMsg(err.message || "Failed to create project");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleLaunch = () => {
@@ -219,10 +223,17 @@ export const UploadScreen: React.FC<UploadScreenProps> = ({
 
           <button
             type="submit"
-            disabled={isLoading || (!selectedFile && !githubUrl && !projectName)}
-            className="w-full py-2.5 px-4 rounded-md text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 transition-colors shadow-sm"
+            disabled={isSubmitting || isLoading || (!selectedFile && !githubUrl && !projectName)}
+            className="w-full py-2.5 px-4 rounded-md text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 transition-colors shadow-sm flex items-center justify-center space-x-2"
           >
-            {isLoading ? "Extracting & Indexing..." : "Process Codebase & Generate Project Map"}
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Extracting & Indexing Codebase...</span>
+              </>
+            ) : (
+              <span>Process Codebase & Generate Project Map</span>
+            )}
           </button>
         </form>
       ) : (

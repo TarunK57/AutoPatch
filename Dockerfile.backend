@@ -1,0 +1,48 @@
+# AutoPatch Backend - Production Container
+FROM python:3.11-slim AS builder
+
+WORKDIR /app
+
+# Install system build dependencies and git for code ingestion
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    git \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir --user -r requirements.txt
+
+# Final Runtime Stage
+FROM python:3.11-slim AS runner
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy installed wheels from builder
+COPY --from=builder /root/.local /root/.local
+ENV PATH=/root/.local/bin:$PATH
+ENV PYTHONPATH=/app/backend
+
+# Copy backend source code and config
+COPY backend /app/backend
+COPY docs /app/docs
+
+# Security: Create non-root application user
+RUN useradd -u 10001 -m -s /bin/bash autopatch && \
+    mkdir -p /tmp/autopatch && \
+    chown -R autopatch:autopatch /app /tmp/autopatch
+
+USER autopatch
+
+EXPOSE 8000
+
+HEALTHCHECK --interval=20s --timeout=5s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:8000/api/v1/openapi.json || exit 1
+
+CMD ["python", "-m", "uvicorn", "autopatch.api.main:app", "--host", "0.0.0.0", "--port", "8000"]

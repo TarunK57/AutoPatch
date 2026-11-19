@@ -8,7 +8,9 @@ const DEFAULT_AUTH_HEADER = {
 export class ApiService {
   static async createProject(name: string, file?: File, githubUrl?: string): Promise<Project> {
     const formData = new FormData();
-    formData.append("name", name);
+    if (name) {
+      formData.append("name", name);
+    }
     if (file) {
       formData.append("file", file);
     }
@@ -16,63 +18,38 @@ export class ApiService {
       formData.append("github_url", githubUrl);
     }
 
-    try {
-      const res = await fetch(`${API_BASE_URL}/projects`, {
-        method: "POST",
-        headers: {
-          ...DEFAULT_AUTH_HEADER,
-        },
-        body: formData,
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.detail || "Failed to create project");
-      }
-      return await res.json();
-    } catch (e: any) {
-      // Standalone fallback for frontend testing when backend isn't actively running
-      return {
-        project_id: "demo-proj-1",
-        name: name || "E-Commerce Core",
-        owner_id: "user_developer",
-        total_files: file ? 24 : 18,
-        languages: ["Python", "TypeScript"],
-        created_at: new Date().toISOString(),
-        test_command: "pytest tests/ -v",
-      };
+    const res = await fetch(`${API_BASE_URL}/projects`, {
+      method: "POST",
+      headers: {
+        ...DEFAULT_AUTH_HEADER,
+      },
+      body: formData,
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || "Failed to create project");
     }
+    return await res.json();
   }
 
-  static async startScan(projectId: string): Promise<ScanJob> {
-    try {
-      const res = await fetch(`${API_BASE_URL}/projects/${projectId}/scan`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...DEFAULT_AUTH_HEADER,
-        },
-        body: JSON.stringify({ concurrency_limit: 3 }),
-      });
-      if (!res.ok) throw new Error("Failed to start scan");
-      return await res.json();
-    } catch {
-      return {
-        job_id: "demo-job-101",
-        project_id: projectId,
-        status: "RUNNING",
-        progress: 15.0,
-        total_bugs: 5,
-        completed_bugs: 1,
-        token_metrics: {
-          prompt_tokens: 3500,
-          completion_tokens: 820,
-          total_tokens: 4320,
-          estimated_cost_usd: 0.0228,
-          llm_calls_count: 3,
-        },
-        created_at: new Date().toISOString(),
-      };
+  static async startScan(projectId: string, concurrency: number = 3): Promise<ScanJob> {
+    const res = await fetch(`${API_BASE_URL}/projects/${projectId}/scan`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...DEFAULT_AUTH_HEADER,
+      },
+      body: JSON.stringify({ concurrency_limit: concurrency }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || "Failed to start scan");
     }
+    return await res.json();
+  }
+
+  static getReportUrl(projectId: string, format: string = "html"): string {
+    return `${API_BASE_URL}/projects/${projectId}/export?format=${format}`;
   }
 
   static async getJobStatus(jobId: string): Promise<ScanJob> {

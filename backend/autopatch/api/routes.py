@@ -26,7 +26,7 @@ from fastapi import (
     UploadFile,
     status,
 )
-from fastapi.responses import JSONResponse, PlainTextResponse, StreamingResponse
+from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, StreamingResponse
 
 from autopatch.api.auth import User, assert_project_ownership, get_current_user
 from autopatch.api.export import ProjectExporter
@@ -139,9 +139,14 @@ async def create_project(
         # Safe extraction
         safe_extractor.extract_zip_bytes(file_bytes, project_dir)
     elif url:
-        # Mock shallow clone for GitHub URL
-        (project_dir / "src").mkdir(parents=True, exist_ok=True)
-        (project_dir / "src" / "app.py").write_text("# Cloned from " + url + "\n")
+        try:
+            safe_extractor.clone_git_repo(url, project_dir)
+        except Exception as clone_err:
+            shutil.rmtree(project_dir, ignore_errors=True)
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Failed to ingest git repository: {str(clone_err)}",
+            )
     else:
         # Default empty initialized project workspace
         (project_dir / "src").mkdir(parents=True, exist_ok=True)
@@ -241,14 +246,20 @@ async def start_scan(
         try:
             intel_service.index_project(project_id, proj_dir)
 
-            # Build file indices
+            # Build file indices across all supported languages (Python, JS, TS)
             file_indices = []
-            for p in proj_dir.rglob("*.py"):
-                if not any(x in p.parts for x in [".git", "__pycache__", ".venv"]):
-                    adapter = intel_service.get_adapter_for_path(p)
-                    if adapter:
-                        rel = str(p.relative_to(proj_dir))
+            for p in proj_dir.rglob("*"):
+                if not p.is_file():
+                    continue
+                if any(x in p.parts for x in [".git", "__pycache__", ".venv", "node_modules", "dist", "build"]):
+                    continue
+                adapter = intel_service.get_adapter_for_path(p)
+                if adapter:
+                    rel = str(p.relative_to(proj_dir))
+                    try:
                         file_indices.append(adapter.parse_file(rel, p.read_text(encoding="utf-8", errors="replace")))
+                    except Exception as pe:
+                        logger.warning(f"Error indexing {rel}: {pe}")
 
             pipeline = DetectionPipeline()
             report = pipeline.run(project_id, proj_dir, file_indices, cancel_token=cancel_token)
@@ -695,11 +706,11 @@ async def revert_patch(
 @router.get(
     "/projects/{project_id}/export",
     summary="Export Artifacts",
-    description="Exports project results in diff, markdown, sarif, or zip format.",
+    description="Exports project results in diff, markdown, sarif, html, json, or zip format.",
 )
 async def export_artifacts(
     project_id: str,
-    format: str = Query("markdown", pattern="^(diff|markdown|sarif|zip)$"),
+    format: str = Query("markdown", pattern="^(diff|markdown|sarif|zip|html|json)$"),
     current_user: User = Depends(get_current_user),
 ):
     project = PROJECTS_DB.get(project_id)
@@ -733,6 +744,20 @@ async def export_artifacts(
         sarif_json = ProjectExporter.export_sarif_json(project["name"], bug_states)
         return JSONResponse(sarif_json, media_type="application/sarif+json")
 
+    elif format == "html":
+        html_text = ProjectExporter.export_interactive_html_report(project["name"], bug_states)
+        return HTMLResponse(content=html_text, media_type="text/html")
+
+    elif format == "json":
+        return JSONResponse(
+            {
+                "project_id": project_id,
+                "project_name": project["name"],
+                "total_bugs": len(bug_states),
+                "bugs": bug_states,
+            }
+        )
+
     elif format == "zip":
         proj_dir = Path(project["project_dir"])
         zip_bytes = ProjectExporter.export_patched_project_zip(proj_dir)
@@ -741,6 +766,19 @@ async def export_artifacts(
             media_type="application/zip",
             headers={"Content-Disposition": f"attachment; filename={project['name']}_patched.zip"},
         )
+
+
+@router.get(
+    "/projects/{project_id}/report",
+    summary="Get Full Inspection Report",
+    description="Returns the full interactive HTML report or downloadable report for a project.",
+)
+async def get_project_report(
+    project_id: str,
+    format: str = Query("html", pattern="^(html|markdown|sarif|json|diff)$"),
+    current_user: User = Depends(get_current_user),
+):
+    return await export_artifacts(project_id=project_id, format=format, current_user=current_user)
 
 
 @router.get(

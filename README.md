@@ -121,17 +121,20 @@ Output reports are generated at `eval/report.md` and `eval/results.json`.
 
 ## Quickstart Guide
 
-### Prerequisites
-- Python 3.9+
-- Node.js 18+ & npm
-- Docker (optional, for containerized sandbox isolation)
-
-### 1. Backend Setup
+### 1. One-Command Production Docker Deployment
+AutoPatch is pre-configured for containerized deployment with Docker Compose:
 ```bash
-# Clone the repository
-git clone -b MainPrompt https://github.com/TarunK57/AutoPatch.git
-cd AutoPatch
+# Launch backend, frontend, and isolated sandbox environment
+docker compose up --build -d
+```
+- Web Dashboard: `http://localhost:3000`
+- REST / SSE API: `http://localhost:8000`
+- Interactive OpenAPI Docs: `http://localhost:8000/docs`
 
+### 2. Manual Local Setup
+
+#### Backend Setup
+```bash
 # Setup Python virtual environment
 python3 -m venv .venv
 source .venv/bin/activate
@@ -139,9 +142,12 @@ pip install -r requirements.txt
 
 # Run pytest unit tests (139 passing tests)
 pytest tests/
+
+# Run backend service
+PYTHONPATH=backend python -m uvicorn autopatch.api.main:app --host 127.0.0.1 --port 8000
 ```
 
-### 2. Frontend Setup
+#### Frontend Setup
 ```bash
 cd frontend
 npm install
@@ -150,11 +156,34 @@ npm run start
 ```
 The web dashboard will be available at `http://localhost:3000`.
 
-### 3. Running Backend Services
+---
+
+## Ingesting Codebases & Generating Reports
+
+1. **ZIP Archive Upload**: Upload any project ZIP via the dashboard or `POST /api/v1/projects`. The engine extracts files safely with zip-slip prevention and decompression bomb guards.
+2. **Git Repository Ingestion**: Provide any Git URL (GitHub, GitLab, Bitbucket, SSH, or local folder). The engine executes a shallow clone (`--depth 1`) with strict argument sanitization.
+3. **Autonomous Inspection**: Spectrum-Based Fault Localization (SBFL) pinpoints root causes, Bug Reproducing Tests (BRTs) reproduce failures, and multi-strategy patch synthesis repairs defects with zero regressions.
+4. **Remediation Report Export**:
+   - **Interactive HTML**: `GET /api/v1/projects/{id}/report?format=html` (Self-contained, responsive dossier with print-to-PDF styles)
+   - **SARIF 2.1.0**: `GET /api/v1/projects/{id}/export?format=sarif` (OASIS standard)
+   - **Executive Markdown**: `GET /api/v1/projects/{id}/export?format=markdown`
+   - **Unified Diff**: `GET /api/v1/projects/{id}/export?format=diff`
+   - **Patched Project ZIP**: `GET /api/v1/projects/{id}/export?format=zip`
+
+---
+
+## IDE Extension (VS Code / Cursor / Windsurf)
+
+AutoPatch includes a native IDE extension under `vscode-extension/`:
+- **In-Editor Diagnostics**: Red and yellow squiggly lines highlighting defects directly in Python, JavaScript, and TypeScript code.
+- **1-Click Quick Fix (Lightbulb 💡)**: Apply sandboxed, regression-verified patches instantly (`Cmd+.`).
+- **Native Webview Dossier**: View root cause causal chains, before/after diffs, and test proof inside your IDE.
+
 ```bash
-PYTHONPATH=backend python -m uvicorn autopatch.api.main:app --host 127.0.0.1 --port 8000
+cd vscode-extension
+npm install
+npm run compile
 ```
-Swagger OpenAPI docs will be available at `http://127.0.0.1:8000/docs`.
 
 ---
 
@@ -168,6 +197,7 @@ Swagger OpenAPI docs will be available at `http://127.0.0.1:8000/docs`.
 | `GET` | `/api/v1/bugs` | List detected bugs with priority ranking & filters |
 | `GET` | `/api/v1/bugs/{bug_id}` | Detailed bug view (causal chain, diff, BRT evidence) |
 | `POST` | `/api/v1/bugs/{bug_id}/decision` | Review action: `accept`, `reject`, `needs_review` |
+| `GET` | `/api/v1/projects/{project_id}/report` | Get full interactive HTML or downloadable report |
 | `POST` | `/api/v1/git/export` | Export patch files, unified diff, SARIF, or PR branch |
 | `DELETE` | `/api/v1/jobs/{job_id}/purge` | Security purge of all cached job artifacts |
 
