@@ -1,0 +1,122 @@
+{
+  "name": "autopatch",
+  "displayName": "AutoPatch: Autonomous Bug Detection & Repair",
+  "description": "Autonomous software bug detection, root-cause localization (SBFL), test-guided repair (BRT), and verified patching directly inside your IDE.",
+  "version": "1.0.0",
+  "publisher": "autopatch-ai",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Linters",
+    "Programming Languages",
+    "Testing"
+  ],
+  "keywords": [
+    "bug-fix",
+    "security",
+    "repair",
+    "automated-testing",
+    "linter"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onStartupFinished",
+    "onLanguage:python",
+    "onLanguage:javascript",
+    "onLanguage:typescript",
+    "onLanguage:javascriptreact",
+    "onLanguage:typescriptreact"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "autopatch.scanWorkspace",
+        "title": "AutoPatch: Scan Entire Workspace for Bugs",
+        "category": "AutoPatch"
+      },
+      {
+        "command": "autopatch.scanActiveFile",
+        "title": "AutoPatch: Scan Active File",
+        "category": "AutoPatch"
+      },
+      {
+        "command": "autopatch.showBugReport",
+        "title": "AutoPatch: Show Bug Report & Verified Patch",
+        "category": "AutoPatch"
+      },
+      {
+        "command": "autopatch.applyPatch",
+        "title": "AutoPatch: Apply Verified Patch",
+        "category": "AutoPatch"
+      },
+      {
+        "command": "autopatch.openDashboard",
+        "title": "AutoPatch: Open Web Remediation Dashboard",
+        "category": "AutoPatch"
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "AutoPatch Configuration",
+      "properties": {
+        "autopatch.serverUrl": {
+          "type": "string",
+          "default": "http://127.0.0.1:8000",
+          "description": "Base URL of the running AutoPatch backend engine."
+        },
+        "autopatch.apiToken": {
+          "type": "string",
+          "default": "dev_token_user_developer",
+          "description": "Authentication bearer token for the AutoPatch REST API."
+        },
+        "autopatch.scanOnSave": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically trigger an AutoPatch inspection when a source file is saved."
+        },
+        "autopatch.concurrencyLimit": {
+          "type": "number",
+          "default": 3,
+          "description": "Maximum number of parallel bug repair pipelines."
+        }
+      }
+    },
+    "menus": {
+      "editor/context": [
+        {
+          "command": "autopatch.scanActiveFile",
+          "group": "AutoPatch@1"
+        },
+        {
+          "command": "autopatch.showBugReport",
+          "group": "AutoPatch@2"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "autopatch.scanWorkspace"
+        },
+        {
+          "command": "autopatch.scanActiveFile"
+        },
+        {
+          "command": "autopatch.showBugReport"
+        },
+        {
+          "command": "autopatch.openDashboard"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.80.0",
+    "typescript": "^5.3.3"
+  }
+}

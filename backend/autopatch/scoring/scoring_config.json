@@ -1,0 +1,70 @@
+{
+  "version": "1.0.0",
+  "description": "AutoPatch Calibrated Scoring Configuration. Weights and parameters for Severity, Confidence, and Priority calculation.",
+  "category_weights": {
+    "security": 1.00,
+    "data_loss": 0.85,
+    "crash": 0.70,
+    "wrong_output": 0.50,
+    "style": 0.20
+  },
+  "reachability_weights": {
+    "entry_point_direct": 1.00,
+    "entry_point_indirect": 0.80,
+    "public_api": 0.70,
+    "internal_reachable": 0.50,
+    "unreachable": 0.20
+  },
+  "blast_radius": {
+    "critical_path_multiplier": 1.35,
+    "caller_count_scale": 0.05,
+    "max_caller_boost": 0.40,
+    "critical_path_keywords": [
+      "auth",
+      "login",
+      "token",
+      "payment",
+      "checkout",
+      "billing",
+      "security",
+      "crypto",
+      "password",
+      "secret",
+      "user",
+      "session",
+      "db",
+      "database",
+      "execute",
+      "query",
+      "api",
+      "route",
+      "main",
+      "server",
+      "admin"
+    ]
+  },
+  "confidence_weights": {
+    "detector_agreement": 0.25,
+    "brt_reproduction": 0.35,
+    "verification_state": 0.25,
+    "epr": 0.15,
+    "overfitting_penalty": 0.30
+  },
+  "verification_state_scores": {
+    "VERIFIED": 1.00,
+    "PLAUSIBLE_BUT_UNVERIFIED": 0.65,
+    "NEEDS_REVIEW": 0.40,
+    "FAILED": 0.05
+  },
+  "brt_status_scores": {
+    "CONFIRMED": 1.00,
+    "UNCONFIRMED": 0.25,
+    "NONE": 0.10
+  },
+  "priority": {
+    "severity_weight": 0.45,
+    "confidence_weight": 0.35,
+    "impact_weight": 0.20,
+    "scale_factor": 100.0
+  }
+}
