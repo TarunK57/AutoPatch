@@ -46,6 +46,11 @@ from autopatch.api.models import (
     PatchGenerationRequest,
     ProjectResponse,
     PurgeResponse,
+    PushBranchRequest,
+    PushBranchResponse,
+    GitHubUserResponse,
+    GitHubRepoItem,
+    GitHubRepoListResponse,
     RevertCommitRequest,
     RevertCommitResponse,
     RevertResponse,
@@ -268,6 +273,7 @@ async def create_project(
         "name": proj_name,
         "owner_id": current_user.user_id,
         "project_dir": str(project_dir),
+        "github_url": url,
         "total_files": proj_map.total_files,
         "languages": proj_map.languages,
         "entry_points": proj_map.entry_points,
@@ -976,6 +982,78 @@ async def export_artifacts(
 
 
 @router.get(
+    "/projects/{project_id}/download-zip",
+    summary="Download Patched Project ZIP",
+    description="Downloads the complete project codebase packaged as a ZIP file with all verified and approved fixes applied, including executive markdown report and unified diff.",
+)
+async def download_patched_project_zip(
+    project_id: str,
+    include_reports: bool = Query(True),
+    current_user: User = Depends(get_current_user),
+):
+    project = PROJECTS_DB.get(project_id)
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found.")
+    assert_project_ownership(project["owner_id"], current_user)
+
+    proj_dir = Path(project["project_dir"])
+
+    # Gather bug states
+    project_jobs = [j["job_id"] for j in JOBS_DB.values() if j["project_id"] == project_id]
+    bug_ids = set()
+    for jid in project_jobs:
+        for ev in event_store.get_events(job_id=jid):
+            if ev.bug_id:
+                bug_ids.add(ev.bug_id)
+    bug_states = [event_store.reconstruct_bug_state(bid) for bid in bug_ids]
+
+    all_patches = []
+    for b in bug_states:
+        patches = b.get("patches", [])
+        if patches:
+            all_patches.append(patches[0])
+
+    report_md = ProjectExporter.export_markdown_report(project["name"], bug_states) if include_reports else None
+    diff_text = ProjectExporter.export_unified_diff(all_patches) if include_reports else None
+
+    # Create temporary copy to ensure all verified candidate patches are applied to the archive
+    import tempfile
+    import shutil
+    with tempfile.TemporaryDirectory(prefix="autopatch_export_") as export_tmp:
+        export_dir = Path(export_tmp) / project["name"]
+        shutil.copytree(proj_dir, export_dir, ignore=shutil.ignore_patterns(".git", "__pycache__", ".venv", ".pytest_cache"))
+
+        # Apply candidate patches that might not yet be applied to the working directory
+        for p in all_patches:
+            rel_file = p.get("file")
+            orig = p.get("original_snippet", "")
+            patched = p.get("patched_snippet", "")
+            if rel_file and orig and patched:
+                target_file = export_dir / rel_file
+                if target_file.is_file():
+                    content = target_file.read_text(encoding="utf-8", errors="replace")
+                    if orig in content:
+                        target_file.write_text(content.replace(orig, patched, 1), encoding="utf-8")
+
+        zip_bytes = ProjectExporter.export_patched_project_zip(
+            project_dir=export_dir,
+            include_reports=include_reports,
+            report_md=report_md,
+            unified_diff=diff_text,
+        )
+
+    clean_filename = f"{project['name']}_patched.zip".replace(" ", "_")
+    return Response(
+        zip_bytes,
+        media_type="application/zip",
+        headers={
+            "Content-Disposition": f"attachment; filename={clean_filename}",
+            "Access-Control-Expose-Headers": "Content-Disposition",
+        },
+    )
+
+
+@router.get(
     "/projects/{project_id}/report",
     summary="Get Full Inspection Report",
     description="Returns the full interactive HTML report or downloadable report for a project.",
@@ -1113,6 +1191,8 @@ async def open_github_pull_request(
         b for b in bug_states
         if (b.get("decision", {}).get("status") == "APPROVED") or b.get("is_patch_applied", False)
     ]
+    if not approved_bugs and bug_states:
+        approved_bugs = bug_states
 
     title = request.title or f"[AutoPatch] Fix {len(approved_bugs)} verified defects in {project['name']}"
     body_markdown = generate_pr_markdown_description(
@@ -1124,6 +1204,25 @@ async def open_github_pull_request(
 
     client = GitHubClient(token=request.github_token)
     try:
+        proj_dir = Path(project["project_dir"])
+        try:
+            git_service.create_remediation_branch(
+                repo_dir=proj_dir,
+                branch_name=request.head_branch,
+                base_branch=request.base_branch,
+                bug_states=approved_bugs,
+            )
+            remote_url = project.get("github_url") or f"https://github.com/{request.repo_slug}.git"
+            git_service.push_branch(
+                repo_dir=proj_dir,
+                branch_name=request.head_branch,
+                remote_name="origin",
+                remote_url=remote_url,
+                token=request.github_token,
+            )
+        except Exception as pe:
+            logger.warning(f"Could not auto-push branch before PR creation: {pe}")
+
         pr_result = await client.open_pull_request(
             repo_slug=request.repo_slug,
             head_branch=request.head_branch,
@@ -1143,6 +1242,144 @@ async def open_github_pull_request(
         base_branch=pr_result.base_branch,
         title=pr_result.title,
         body_markdown=body_markdown,
+    )
+
+
+@router.post(
+    "/projects/{project_id}/git/push",
+    response_model=PushBranchResponse,
+    summary="Push Remediation Branch to Git",
+    description="Pushes local remediation commits to the remote git repository.",
+)
+async def push_git_remediation_branch(
+    project_id: str,
+    request: PushBranchRequest,
+    current_user: User = Depends(get_current_user),
+) -> PushBranchResponse:
+    project = PROJECTS_DB.get(project_id)
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found.")
+    assert_project_ownership(project["owner_id"], current_user)
+
+    proj_dir = Path(project["project_dir"])
+    remote_url = request.remote_url or project.get("github_url")
+    token = request.github_token or os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
+
+    project_jobs = [j["job_id"] for j in JOBS_DB.values() if j["project_id"] == project_id]
+    bug_ids = set()
+    for jid in project_jobs:
+        for ev in event_store.get_events(job_id=jid):
+            if ev.bug_id:
+                bug_ids.add(ev.bug_id)
+    bug_states = [event_store.reconstruct_bug_state(bid) for bid in bug_ids]
+
+    try:
+        git_service.create_remediation_branch(
+            repo_dir=proj_dir,
+            branch_name=request.branch_name,
+            bug_states=bug_states,
+        )
+        res = git_service.push_branch(
+            repo_dir=proj_dir,
+            branch_name=request.branch_name,
+            remote_name=request.remote_name,
+            remote_url=remote_url,
+            token=token,
+        )
+        return PushBranchResponse(
+            branch_name=res["branch_name"],
+            remote_name=res["remote_name"],
+            success=True,
+            output=res.get("output", "Branch pushed successfully"),
+        )
+    except GitIntegrationError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+# ============================================================================
+# GitHub Connector Endpoints (Optional account & repo exploration)
+# ============================================================================
+
+class GitHubReposBody(BaseModel):
+    token: Optional[str] = None
+    username: Optional[str] = None
+    per_page: int = 100
+
+
+@router.get(
+    "/github/user",
+    response_model=GitHubUserResponse,
+    summary="Get GitHub Authenticated User Profile",
+    description="Validates a GitHub Personal Access Token and returns the authenticated user profile.",
+)
+async def get_github_user(
+    token: Optional[str] = Query(None),
+    github_token: Optional[str] = Query(None),
+    current_user: User = Depends(get_current_user),
+) -> GitHubUserResponse:
+    active_token = github_token or token
+    client = GitHubClient(token=active_token)
+    try:
+        user_info = await client.get_authenticated_user(token=active_token)
+        return GitHubUserResponse(**user_info)
+    except GitHubTokenMissingError as e:
+        raise HTTPException(status_code=401, detail=str(e))
+    except GitHubApiError as e:
+        raise HTTPException(status_code=e.status_code, detail=str(e))
+
+
+@router.get(
+    "/github/repos",
+    response_model=GitHubRepoListResponse,
+    summary="List GitHub Repositories (GET)",
+    description="Lists accessible repositories for an authenticated user or specified GitHub account.",
+)
+async def list_github_repositories(
+    token: Optional[str] = Query(None),
+    github_token: Optional[str] = Query(None),
+    username: Optional[str] = Query(None),
+    per_page: int = Query(100, ge=1, le=100),
+    current_user: User = Depends(get_current_user),
+) -> GitHubRepoListResponse:
+    active_token = github_token or token
+    client = GitHubClient(token=active_token)
+    try:
+        repos_data = await client.list_user_repositories(token=active_token, username=username, per_page=per_page)
+        user_login = username
+        if not user_login and (active_token or client.token):
+            try:
+                u = await client.get_authenticated_user(token=active_token)
+                user_login = u.get("login")
+            except Exception:
+                pass
+
+        return GitHubRepoListResponse(
+            authenticated=bool(active_token or client.token),
+            username=user_login,
+            total_count=len(repos_data),
+            repositories=[GitHubRepoItem(**r) for r in repos_data],
+        )
+    except GitHubTokenMissingError as e:
+        raise HTTPException(status_code=401, detail=str(e))
+    except GitHubApiError as e:
+        raise HTTPException(status_code=e.status_code, detail=str(e))
+
+
+@router.post(
+    "/github/repos",
+    response_model=GitHubRepoListResponse,
+    summary="List GitHub Repositories (POST)",
+    description="POST alternative to list repositories by passing token in JSON body.",
+)
+async def list_github_repositories_post(
+    body: GitHubReposBody,
+    current_user: User = Depends(get_current_user),
+) -> GitHubRepoListResponse:
+    return await list_github_repositories(
+        token=body.token,
+        username=body.username,
+        per_page=body.per_page,
+        current_user=current_user,
     )
 
 

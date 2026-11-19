@@ -193,3 +193,48 @@ class PurgeResponse(BaseModel):
     message: str
 
 
+class GitHubUserResponse(BaseModel):
+    login: str
+    name: str
+    avatar_url: Optional[str] = None
+    html_url: Optional[str] = None
+    public_repos: int = 0
+    total_private_repos: int = 0
+
+
+class GitHubRepoItem(BaseModel):
+    id: int
+    name: str
+    full_name: str
+    html_url: str
+    clone_url: str
+    default_branch: str = "main"
+    is_private: bool = False
+    description: str = ""
+    language: str = "Other"
+    stars: int = 0
+    forks: int = 0
+    updated_at: Optional[str] = None
+
+
+class GitHubRepoListResponse(BaseModel):
+    authenticated: bool
+    username: Optional[str] = None
+    total_count: int
+    repositories: List[GitHubRepoItem] = Field(default_factory=list)
+
+
+class PushBranchRequest(BaseModel):
+    branch_name: str
+    remote_name: str = "origin"
+    remote_url: Optional[str] = None
+    github_token: Optional[str] = None
+
+
+class PushBranchResponse(BaseModel):
+    branch_name: str
+    remote_name: str
+    success: bool
+    output: str
+
+

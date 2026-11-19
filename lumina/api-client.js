@@ -240,6 +240,116 @@ class AutoPatchClient {
   }
 
   /**
+   * Triggers download of the complete codebase as a ZIP archive with all verified fixes.
+   */
+  async downloadPatchedZip(projectId, customFilename = null) {
+    if (!this._isOnline) {
+      throw new Error('Backend is offline. Cannot download patched ZIP.');
+    }
+    const downloadUrl = `${this.config.baseUrl}/projects/${encodeURIComponent(projectId)}/download-zip`;
+    const res = await fetch(downloadUrl, { headers: this.headers });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error(err.detail || `Failed to download patched ZIP: ${res.status}`);
+    }
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = url;
+    a.download = customFilename || `autopatch_${projectId.slice(0, 8)}_patched.zip`;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    }, 2000);
+    return true;
+  }
+
+  /**
+   * Pushes remediation branch to remote git repository.
+   */
+  async pushRemediationBranch(projectId, branchName, githubToken = null, remoteUrl = null) {
+    if (!this._isOnline) {
+      throw new Error('Backend is offline. Cannot push branch to remote repository.');
+    }
+    const payload = {
+      branch_name: branchName,
+      github_token: githubToken || localStorage.getItem('autopatch_gh_token') || null,
+      remote_url: remoteUrl || null,
+    };
+    const res = await fetch(`${this.config.baseUrl}/projects/${encodeURIComponent(projectId)}/git/push`, {
+      method: 'POST',
+      headers: this.headers,
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error(err.detail || `Failed to push branch: ${res.status}`);
+    }
+    return await res.json();
+  }
+
+  /**
+   * Opens a GitHub pull request with formatted verification evidence table.
+   */
+  async openPullRequest(projectId, repoSlug, headBranch, baseBranch = 'main', title = null, githubToken = null) {
+    if (!this._isOnline) {
+      throw new Error('Backend is offline. Cannot open pull request.');
+    }
+    const payload = {
+      repo_slug: repoSlug,
+      head_branch: headBranch,
+      base_branch: baseBranch,
+      title: title || null,
+      github_token: githubToken || localStorage.getItem('autopatch_gh_token') || null,
+    };
+    const res = await fetch(`${this.config.baseUrl}/projects/${encodeURIComponent(projectId)}/git/pull-request`, {
+      method: 'POST',
+      headers: this.headers,
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error(err.detail || `Failed to create pull request: ${res.status}`);
+    }
+    return await res.json();
+  }
+
+  /**
+   * Validates GitHub token and returns authenticated user profile.
+   */
+  async getGitHubUser(token = null) {
+    const tok = token || localStorage.getItem('autopatch_gh_token');
+    if (!tok) return null;
+    const url = `${this.config.baseUrl}/github/user?token=${encodeURIComponent(tok)}`;
+    const res = await fetch(url, { headers: this.headers });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error(err.detail || 'GitHub authentication failed');
+    }
+    return await res.json();
+  }
+
+  /**
+   * Lists repositories for authenticated user or username.
+   */
+  async listGitHubRepos(token = null, username = null) {
+    const tok = token || localStorage.getItem('autopatch_gh_token');
+    const params = new URLSearchParams();
+    if (tok) params.set('token', tok);
+    if (username) params.set('username', username);
+    const url = `${this.config.baseUrl}/github/repos?${params.toString()}`;
+    const res = await fetch(url, { headers: this.headers });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error(err.detail || 'Failed to list GitHub repositories');
+    }
+    return await res.json();
+  }
+
+  /**
    * Fetches dashboard telemetry and cost observability data.
    */
   async getDashboardMetrics() {

@@ -199,6 +199,55 @@
         grid-template-columns: 1fr;
       }
     }
+
+    /* Modal Styles */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(20, 17, 16, 0.65);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-card {
+      background: #faf6f0;
+      border: 1px solid rgba(100, 75, 60, 0.2);
+      border-radius: 16px;
+      max-width: 560px;
+      width: 100%;
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.25);
+      overflow: hidden;
+      animation: modalFadeIn 0.2s ease-out;
+    }
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .modal-head {
+      padding: 18px 24px;
+      border-bottom: 1px solid rgba(100, 75, 60, 0.12);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.4);
+    }
+    .modal-body {
+      padding: 20px 24px;
+      max-height: 75vh;
+      overflow-y: auto;
+    }
+    .modal-foot {
+      padding: 14px 24px;
+      border-top: 1px solid rgba(100, 75, 60, 0.12);
+      background: rgba(255, 255, 255, 0.6);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      align-items: center;
+    }
   </style>
 </head>
 <body>
@@ -289,8 +338,8 @@
               <div style="margin-top: 18px;">
                 <div class="detail-title">Human Review & Patch Decision</div>
                 <textarea class="input-glass" id="reviewComment" rows="2" placeholder="Optional review note or audit log comment..."></textarea>
-                <div class="review-actions">
-                  <button class="btn" id="approveBtn" style="padding: 0 24px; height: 42px; font-size: 13.5px;">
+                <div class="review-actions" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                  <button class="btn" id="approveBtn" style="padding: 0 20px; height: 42px; font-size: 13.5px;">
                     <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6">
                       <polyline points="3 8 7 12 13 4"></polyline>
                     </svg>
@@ -298,6 +347,18 @@
                   </button>
                   <button class="btn btn-secondary" id="rejectBtn" style="padding: 0 16px; height: 42px; font-size: 13px; color: var(--danger);">
                     Reject Candidate
+                  </button>
+                  <button class="btn btn-secondary" id="downloadZipReviewBtn" style="padding: 0 16px; height: 42px; font-size: 12.5px; display: inline-flex; align-items: center; gap: 6px;">
+                    <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5">
+                      <path d="M8 2v8M4 7l4 4 4-4M2 12v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1"/>
+                    </svg>
+                    Download Patched ZIP
+                  </button>
+                  <button class="btn btn-secondary" id="applyGitReviewBtn" style="padding: 0 16px; height: 42px; font-size: 12.5px; display: inline-flex; align-items: center; gap: 6px;">
+                    <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor">
+                      <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                    Apply to Git / PR
                   </button>
                 </div>
               </div>
@@ -337,6 +398,65 @@
         </div>
       </div>
     </main>
+  </div>
+
+  <!-- Git Push / PR Modal -->
+  <div class="modal-backdrop" id="gitActionModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 style="margin: 0; font-size: 15px; font-weight: 700; color: var(--ink); display: flex; align-items: center; gap: 8px;">
+          <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+          </svg>
+          Deploy Remediations to Git Repository
+        </h3>
+        <button type="button" class="btn btn-secondary" id="closeGitModalBtn" style="padding: 4px 10px; height: 28px; font-size: 13px; line-height: 1;">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="display: flex; gap: 16px; margin-bottom: 16px; border-bottom: 1px solid rgba(100,75,60,0.12); padding-bottom: 12px;">
+          <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--ink);">
+            <input type="radio" name="gitActionType" value="push" checked>
+            Push Remediation Branch
+          </label>
+          <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--ink);">
+            <input type="radio" name="gitActionType" value="pr">
+            Open GitHub Pull Request
+          </label>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label class="form-label" for="modalBranchName">Remediation Branch Name</label>
+          <input type="text" id="modalBranchName" class="input-glass" value="autopatch/remediation-fixes">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label class="form-label" for="modalGhToken">GitHub Personal Access Token (PAT)</label>
+          <input type="password" id="modalGhToken" class="input-glass" placeholder="ghp_... or github_pat_... (with 'repo' scope)">
+          <div class="form-hint" style="font-size: 11px; color: var(--sub); margin-top: 3px;">Required to authenticate Git push or PR creation on remote GitHub repository.</div>
+        </div>
+
+        <div id="modalPrFields" style="display: none;">
+          <div class="form-group" style="margin-bottom: 12px;">
+            <label class="form-label" for="modalRepoSlug">GitHub Repository Slug (owner/repo)</label>
+            <input type="text" id="modalRepoSlug" class="input-glass" placeholder="e.g. Tajesvi-kumar/Bugs">
+          </div>
+          <div class="form-group" style="margin-bottom: 12px;">
+            <label class="form-label" for="modalBaseBranch">Base Target Branch</label>
+            <input type="text" id="modalBaseBranch" class="input-glass" value="main">
+          </div>
+          <div class="form-group" style="margin-bottom: 12px;">
+            <label class="form-label" for="modalPrTitle">PR Title</label>
+            <input type="text" id="modalPrTitle" class="input-glass" value="[AutoPatch] Remediate verified defects with zero-regression guarantees">
+          </div>
+        </div>
+
+        <div id="modalStatusArea" style="margin-top: 14px; font-size: 12px; display: none;"></div>
+      </div>
+      <div class="modal-foot">
+        <button type="button" class="btn btn-secondary" id="cancelGitModalBtn" style="padding: 0 16px; height: 38px; font-size: 12.5px;">Cancel</button>
+        <button type="button" class="btn" id="submitGitActionBtn" style="padding: 0 20px; height: 38px; font-size: 13px;">Execute Git Action</button>
+      </div>
+    </div>
   </div>
 
   <div class="toast" id="toast">
@@ -607,6 +727,135 @@
           } catch (err) {
             rejectBtn.disabled = false;
             showToast(`Error recording rejection: ${err.message}`, true);
+          }
+        };
+      }
+
+      // Download ZIP & Git Action Modal Handlers in Review Dossier
+      const downloadZipReviewBtn = document.getElementById('downloadZipReviewBtn');
+      const applyGitReviewBtn = document.getElementById('applyGitReviewBtn');
+      const gitActionModal = document.getElementById('gitActionModal');
+      const closeGitModalBtn = document.getElementById('closeGitModalBtn');
+      const cancelGitModalBtn = document.getElementById('cancelGitModalBtn');
+      const submitGitActionBtn = document.getElementById('submitGitActionBtn');
+      const modalBranchName = document.getElementById('modalBranchName');
+      const modalGhToken = document.getElementById('modalGhToken');
+      const modalRepoSlug = document.getElementById('modalRepoSlug');
+      const modalBaseBranch = document.getElementById('modalBaseBranch');
+      const modalPrTitle = document.getElementById('modalPrTitle');
+      const modalPrFields = document.getElementById('modalPrFields');
+      const modalStatusArea = document.getElementById('modalStatusArea');
+      const gitRadioOptions = document.querySelectorAll('input[name="gitActionType"]');
+
+      if (downloadZipReviewBtn) {
+        downloadZipReviewBtn.onclick = async () => {
+          if (!projectId) {
+            showToast('No active project found to export.', true);
+            return;
+          }
+          const origHtml = downloadZipReviewBtn.innerHTML;
+          downloadZipReviewBtn.disabled = true;
+          downloadZipReviewBtn.innerHTML = 'Downloading ZIP...';
+          try {
+            await window.autopatch.downloadPatchedZip(projectId);
+            showToast('Patched codebase ZIP downloaded successfully!');
+          } catch (err) {
+            showToast(`Download failed: ${err.message}`, true);
+          } finally {
+            downloadZipReviewBtn.disabled = false;
+            downloadZipReviewBtn.innerHTML = origHtml;
+          }
+        };
+      }
+
+      if (applyGitReviewBtn) {
+        applyGitReviewBtn.onclick = () => {
+          if (!projectId) {
+            showToast('No active project found.', true);
+            return;
+          }
+          const savedToken = localStorage.getItem('autopatch_gh_token');
+          if (savedToken && modalGhToken) {
+            modalGhToken.value = savedToken;
+          }
+          if (modalBranchName) {
+            modalBranchName.value = `autopatch/remediation-${Date.now().toString().slice(-6)}`;
+          }
+          modalStatusArea.style.display = 'none';
+          modalStatusArea.innerHTML = '';
+          gitActionModal.style.display = 'flex';
+        };
+      }
+
+      function closeGitModal() {
+        if (gitActionModal) gitActionModal.style.display = 'none';
+      }
+      if (closeGitModalBtn) closeGitModalBtn.onclick = closeGitModal;
+      if (cancelGitModalBtn) cancelGitModalBtn.onclick = closeGitModal;
+
+      gitRadioOptions.forEach(radio => {
+        radio.onchange = () => {
+          if (radio.value === 'pr') {
+            modalPrFields.style.display = 'block';
+          } else {
+            modalPrFields.style.display = 'none';
+          }
+        };
+      });
+
+      if (submitGitActionBtn) {
+        submitGitActionBtn.onclick = async () => {
+          const actionType = document.querySelector('input[name="gitActionType"]:checked')?.value || 'push';
+          const branchName = modalBranchName?.value.trim();
+          const token = modalGhToken?.value.trim() || null;
+          const repoSlug = modalRepoSlug?.value.trim() || null;
+          const baseBranch = modalBaseBranch?.value.trim() || 'main';
+          const prTitle = modalPrTitle?.value.trim() || `[AutoPatch] Fix verified defects in ${projectId}`;
+
+          if (!branchName) {
+            alert('Please specify a branch name.');
+            return;
+          }
+
+          if (token) {
+            localStorage.setItem('autopatch_gh_token', token);
+          }
+
+          submitGitActionBtn.disabled = true;
+          submitGitActionBtn.innerHTML = 'Executing Git Operation...';
+          modalStatusArea.style.display = 'block';
+          modalStatusArea.innerHTML = '<span style="color: var(--sub);">Connecting to repository and executing Git commits...</span>';
+
+          try {
+            if (actionType === 'push') {
+              const res = await window.autopatch.pushRemediationBranch(projectId, branchName, token);
+              modalStatusArea.innerHTML = `
+                <div style="background: rgba(40,122,76,0.1); border: 1px solid rgba(40,122,76,0.3); border-radius: 8px; padding: 10px 14px; color: #1b6339;">
+                  <strong>✓ Successfully Pushed Branch!</strong><br>
+                  Branch <code>${escapeHtml(res.branch_name)}</code> pushed to remote repository.
+                </div>
+              `;
+            } else {
+              if (!repoSlug) {
+                throw new Error('Please enter a GitHub repository slug (e.g. owner/repo) to open a pull request.');
+              }
+              const res = await window.autopatch.openPullRequest(projectId, repoSlug, branchName, baseBranch, prTitle, token);
+              modalStatusArea.innerHTML = `
+                <div style="background: rgba(40,122,76,0.1); border: 1px solid rgba(40,122,76,0.3); border-radius: 8px; padding: 10px 14px; color: #1b6339;">
+                  <strong>✓ Pull Request #${res.pr_number} Created!</strong><br>
+                  <a href="${res.html_url}" target="_blank" style="color: #1b6339; font-weight: 700; text-decoration: underline;">View Pull Request on GitHub &rarr;</a>
+                </div>
+              `;
+            }
+          } catch (err) {
+            modalStatusArea.innerHTML = `
+              <div style="background: rgba(179,44,44,0.1); border: 1px solid rgba(179,44,44,0.3); border-radius: 8px; padding: 10px 14px; color: #b32c2c;">
+                <strong>Git Operation Failed:</strong><br>${escapeHtml(err.message)}
+              </div>
+            `;
+          } finally {
+            submitGitActionBtn.disabled = false;
+            submitGitActionBtn.innerHTML = 'Execute Git Action';
           }
         };
       }

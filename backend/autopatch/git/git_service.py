@@ -262,3 +262,38 @@ class GitService:
             is_clean=is_clean,
             message=f"Successfully reverted commit {target_commit_sha[:8]} for bug '{bug_id}'.",
         )
+
+    def push_branch(
+        self,
+        repo_dir: Path,
+        branch_name: str,
+        remote_name: str = "origin",
+        remote_url: Optional[str] = None,
+        token: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Pushes a local branch to the remote git repository."""
+        check_remotes = self._run_git(repo_dir, ["remote"], check=False)
+        remotes = [r.strip() for r in check_remotes.stdout.splitlines() if r.strip()]
+
+        if remote_url:
+            push_url = remote_url
+            if token and "github.com" in push_url and "@" not in push_url:
+                push_url = push_url.replace("https://", f"https://x-access-token:{token}@")
+            if remote_name in remotes:
+                self._run_git(repo_dir, ["remote", "set-url", remote_name, push_url])
+            else:
+                self._run_git(repo_dir, ["remote", "add", remote_name, push_url])
+        elif token and remote_name in remotes:
+            cur_url_res = self._run_git(repo_dir, ["remote", "get-url", remote_name], check=False)
+            cur_url = cur_url_res.stdout.strip()
+            if cur_url.startswith("https://") and "@" not in cur_url:
+                auth_url = cur_url.replace("https://", f"https://x-access-token:{token}@")
+                self._run_git(repo_dir, ["remote", "set-url", remote_name, auth_url])
+
+        res = self._run_git(repo_dir, ["push", "-u", remote_name, branch_name])
+        return {
+            "branch_name": branch_name,
+            "remote_name": remote_name,
+            "success": True,
+            "output": res.stdout.strip(),
+        }
