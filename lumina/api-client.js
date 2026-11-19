@@ -3,7 +3,7 @@
  * 
  * Provides live connectivity to the AutoPatch FastAPI backend with Server-Sent Events (SSE),
  * durable state tracking, human-in-the-loop decision recording, and explicit
- * distinction between live connected mode and offline demo mode.
+ * live SSE telemetry, and real human-in-the-loop decision recording.
  */
 
 const API_CONFIG = {
@@ -67,7 +67,7 @@ class AutoPatchClient {
       container.innerHTML = `
         <div class="backend-pill offline" title="Backend offline at http://localhost:8000. Start backend to run real live scans and sandbox verifications.">
           <span class="status-dot"></span>
-          <span>DEMO / OFFLINE MODE</span>
+          <span>BACKEND OFFLINE</span>
         </div>
       `;
     }
