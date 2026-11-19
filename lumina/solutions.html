@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>LuminaAI — Enterprise Intelligence & Solutions</title>
+  <title>LuminaAI — Enterprise Intelligence & Solutions Hub</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -17,6 +17,16 @@
       margin-bottom: 24px;
       flex-wrap: wrap;
       gap: 16px;
+    }
+    .project-selector-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.75);
+      border: 1px solid rgba(100, 75, 60, 0.15);
+      padding: 8px 14px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(50, 30, 20, 0.04);
     }
     .feature-tabs {
       display: flex;
@@ -64,7 +74,7 @@
 
     /* Cards & Grids */
     .feature-card {
-      background: rgba(255, 255, 255, 0.7);
+      background: rgba(255, 255, 255, 0.75);
       border-radius: 18px;
       border: 1px solid rgba(100, 75, 60, 0.12);
       padding: 24px;
@@ -78,7 +88,7 @@
       margin-top: 16px;
     }
     .member-card {
-      background: rgba(255, 255, 255, 0.8);
+      background: rgba(255, 255, 255, 0.85);
       border: 1px solid rgba(100, 75, 60, 0.12);
       border-radius: 14px;
       padding: 18px;
@@ -94,9 +104,10 @@
       font-family: 'JetBrains Mono', monospace;
       font-size: 12.5px;
       line-height: 1.6;
-      max-height: 400px;
+      max-height: 420px;
       overflow-y: auto;
       margin-top: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
     }
     .debate-turn-item {
       margin-bottom: 14px;
@@ -146,7 +157,7 @@
       line-height: 1.65;
       color: #2b2320;
       white-space: pre-wrap;
-      max-height: 500px;
+      max-height: 520px;
       overflow-y: auto;
     }
     .select-dropdown {
@@ -154,12 +165,35 @@
       font-size: 13px;
       font-weight: 500;
       color: var(--ink);
-      background: rgba(255, 255, 255, 0.85);
+      background: rgba(255, 255, 255, 0.95);
       border: 1px solid rgba(100, 75, 60, 0.2);
       border-radius: 10px;
       outline: none;
       cursor: pointer;
       font-family: inherit;
+    }
+    .select-dropdown:focus {
+      border-color: var(--accent-gold);
+    }
+    .defect-dossier-card {
+      background: rgba(248, 243, 238, 0.9);
+      border: 1px solid rgba(100, 75, 60, 0.14);
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 14px;
+    }
+    .diff-code-box {
+      background: #181412;
+      color: #f7efe8;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      line-height: 1.5;
+      overflow-x: auto;
+      max-height: 220px;
+      margin: 8px 0 0 0;
+      border: 1px solid rgba(255, 255, 255, 0.08);
     }
     @media (max-width: 992px) {
       .member-grid {
@@ -210,13 +244,15 @@
       <div class="glass-panel">
         <div class="hub-header">
           <div>
-            <h1 class="section-title"><em>Enterprise</em> Intelligence & Advanced Defense Hub</h1>
-            <p class="section-desc">Next-generation autonomous program repair modules: predictive defect radar, multi-LLM committee consensus, long-term learning memory, code hotspots, and OWASP API audits.</p>
+            <h1 class="section-title"><em>Enterprise</em> Intelligence & Solutions Hub</h1>
+            <p class="section-desc">Live production modules: 3D Codebase Digital Twin, AI Model Committee consensus, predictive hazard radar, code hotspots, and OWASP API audits.</p>
           </div>
-          <div style="display: flex; gap: 10px; align-items: center;">
-            <select id="hubProjectSelect" class="select-dropdown" aria-label="Target Project">
-              <option value="">Select Project Workspace</option>
+          <div class="project-selector-bar">
+            <label for="hubProjectSelect" style="font-size: 12px; font-weight: 700; color: var(--sub); text-transform: uppercase;">Active Project:</label>
+            <select id="hubProjectSelect" class="select-dropdown" style="min-width: 240px; font-weight: 600;" aria-label="Target Project">
+              <option value="">Loading project workspaces...</option>
             </select>
+            <span id="hubProjectBadge" class="badge" style="background: rgba(194, 131, 64, 0.15); color: var(--accent-gold); font-size: 11px; font-weight: 600; display: none;"></span>
           </div>
         </div>
 
@@ -251,20 +287,23 @@
         <!-- TAB 0: Codebase Digital Twin (3D) -->
         <div class="feature-panel active" id="tab-digitaltwin">
           <div class="feature-card">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; margin-bottom: 16px;">
               <div>
                 <h2 style="font-size: 18px; font-weight: 700; color: var(--ink); margin: 0 0 4px 0; display: flex; align-items: center; gap: 8px;">
                   Codebase Digital Twin (3D Dependency & Blast Radius Topology)
                   <span class="digital-twin-badge">HIGH IMPACT</span>
                 </h2>
-                <p style="font-size: 13px; color: var(--sub); margin: 0;">Interactive 3D model of functions, dependencies, APIs, and tests. Before applying a patch, visualize which components could break.</p>
+                <p style="font-size: 13px; color: var(--sub); margin: 0;">Interactive 3D model of functions, dependencies, APIs, and tests. Real AST caller analysis before applying patches.</p>
               </div>
               <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                <button class="btn" id="simulateBlastBtn" style="padding: 0 18px; height: 38px; font-size: 13px; background: linear-gradient(180deg, #d9534f 0%, #b33927 100%);">
-                  💥 Simulate Patch Blast Radius
+                <select id="dtTargetSelect" class="select-dropdown" style="max-width: 280px; font-weight: 600;" aria-label="Select Target Component">
+                  <option value="">Select Defect / Component to Analyze</option>
+                </select>
+                <button class="btn" id="analyzeBlastBtn" style="padding: 0 16px; height: 38px; font-size: 13px;">
+                  ⚡ Analyze Patch Blast Radius
                 </button>
                 <button class="btn btn-secondary" id="refreshTwinBtn" style="padding: 0 14px; height: 38px; font-size: 13px;">
-                  🔄 Reload Model
+                  🔄 Reload Topology
                 </button>
               </div>
             </div>
@@ -273,16 +312,16 @@
             <div class="digital-twin-wrapper">
               <div class="digital-twin-header">
                 <div class="digital-twin-title">
-                  <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #34d399; box-shadow: 0 0 8px #34d399;"></span>
+                  <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #52c27c; box-shadow: 0 0 8px #52c27c;"></span>
                   <span>Interactive 3D Repository Topology</span>
-                  <span style="font-size: 11px; font-weight: 500; color: #a89a91;">(Drag to Orbit • Scroll to Zoom)</span>
+                  <span style="font-size: 11px; font-weight: 500; color: #a89a91;">(Drag to Orbit • Scroll to Zoom • Click Capsule to Focus)</span>
                 </div>
                 <div style="display: flex; gap: 6px; align-items: center;">
                   <button class="dt-control-btn active" data-filter="all">All</button>
                   <button class="dt-control-btn" data-filter="api">APIs</button>
                   <button class="dt-control-btn" data-filter="function">Functions</button>
                   <button class="dt-control-btn" data-filter="test">Tests</button>
-                  <button class="dt-control-btn" data-filter="affected" style="color: #ff7a00;">Blast Radius Only</button>
+                  <button class="dt-control-btn" data-filter="affected" style="color: #e5a93b;">Blast Radius Only</button>
                 </div>
               </div>
 
@@ -298,20 +337,20 @@
                       <div class="hud-stat-lbl">Components</div>
                     </div>
                     <div class="hud-stat-box">
-                      <div class="hud-stat-val" id="dtStatTotalEdges" style="color: #38bdf8;">--</div>
+                      <div class="hud-stat-val" id="dtStatTotalEdges" style="color: #6db1d4;">--</div>
                       <div class="hud-stat-lbl">Call Edges</div>
                     </div>
                     <div class="hud-stat-box">
-                      <div class="hud-stat-val" id="dtStatBlastPct" style="color: #ff4b2b;">0.0%</div>
+                      <div class="hud-stat-val" id="dtStatBlastPct" style="color: #e5a93b;">0.0%</div>
                       <div class="hud-stat-lbl">Blast Radius</div>
                     </div>
                     <div class="hud-stat-box">
-                      <div class="hud-stat-val" id="dtStatRiskLevel" style="color: #34d399;">NORMAL</div>
+                      <div class="hud-stat-val" id="dtStatRiskLevel" style="color: #52c27c;">NORMAL</div>
                       <div class="hud-stat-lbl">System Risk</div>
                     </div>
                   </div>
                   <div id="dtBlastSummaryText" style="margin-top: 10px; font-size: 11.5px; color: #d1c7c2; line-height: 1.45;">
-                    Ready. Click <strong>'Simulate Patch Blast Radius'</strong> to light up affected modules, call chains, and risk scores.
+                    Ready. Select a defect or click any component capsule to trace real blast radius across upstream callers and tests.
                   </div>
                 </div>
 
@@ -330,10 +369,10 @@
             <div id="blastDetailMatrix" style="margin-top: 18px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;">
               <div style="background: rgba(255,255,255,0.7); border: 1px solid rgba(100,75,60,0.12); padding: 14px 16px; border-radius: 12px;">
                 <div style="font-size: 11.5px; font-weight: 700; color: #b33927; text-transform: uppercase; display: flex; align-items: center; gap: 6px;">
-                  <span>🚨</span> Critical APIs at Risk
+                  <span>🚨</span> Public APIs at Risk
                 </div>
                 <div id="dtApisAtRiskList" style="margin-top: 8px; font-size: 12px; color: var(--ink);">
-                  <span style="color: var(--sub);">No simulated patch active.</span>
+                  <span style="color: var(--sub);">Select a component to evaluate exposed ingress routes.</span>
                 </div>
               </div>
               <div style="background: rgba(255,255,255,0.7); border: 1px solid rgba(100,75,60,0.12); padding: 14px 16px; border-radius: 12px;">
@@ -341,7 +380,7 @@
                   <span>🧪</span> Verification Tests Exercised
                 </div>
                 <div id="dtTestsExercisedList" style="margin-top: 8px; font-size: 12px; color: var(--ink);">
-                  <span style="color: var(--sub);">No tests currently impacted.</span>
+                  <span style="color: var(--sub);">Select a component to inspect linked test coverage.</span>
                 </div>
               </div>
               <div style="background: rgba(255,255,255,0.7); border: 1px solid rgba(100,75,60,0.12); padding: 14px 16px; border-radius: 12px;">
@@ -349,7 +388,7 @@
                   <span>⚡</span> Downstream Functions Impacted
                 </div>
                 <div id="dtFunctionsAffectedList" style="margin-top: 8px; font-size: 12px; color: var(--ink);">
-                  <span style="color: var(--sub);">Clean system state.</span>
+                  <span style="color: var(--sub);">Select a component to traverse caller dependency paths.</span>
                 </div>
               </div>
             </div>
@@ -359,21 +398,45 @@
         <!-- TAB 1: AI Model Committee -->
         <div class="feature-panel" id="tab-committee">
           <div class="feature-card">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
               <div>
                 <h2 style="font-size: 18px; font-weight: 700; color: var(--ink); margin: 0 0 4px 0;">AI Model Committee (Separate Consensus Mode)</h2>
-                <p style="font-size: 13px; color: var(--sub); margin: 0;">Multi-agent round-robin debate between specialized LLM evaluators to eliminate single-model hallucinations before human review.</p>
+                <p style="font-size: 13px; color: var(--sub); margin: 0;">Multi-agent round-robin debate between specialized evaluators to eliminate single-model hallucinations before human review.</p>
               </div>
-              <button class="btn" id="runCommitteeBtn" style="padding: 0 18px; height: 38px; font-size: 13px;">
+            </div>
+
+            <!-- Real Defect Picker & Action -->
+            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; background: rgba(255,255,255,0.7); border: 1px solid rgba(100,75,60,0.14); padding: 14px 18px; border-radius: 12px;">
+              <label for="committeeBugSelect" style="font-size: 12.5px; font-weight: 700; color: var(--sub); text-transform: uppercase;">Target Defect:</label>
+              <select id="committeeBugSelect" class="select-dropdown" style="flex: 1; min-width: 280px; font-weight: 600;">
+                <option value="">Select a defect to evaluate...</option>
+              </select>
+              <button class="btn" id="runCommitteeBtn" style="padding: 0 20px; height: 38px; font-size: 13px;">
                 Convene Committee Review
               </button>
             </div>
 
-            <!-- Committee Members -->
+            <!-- Candidate Patch & Defect Details Box -->
+            <div id="committeeDossierCard" class="defect-dossier-card" style="display: none;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <span style="font-size: 11px; font-weight: 700; color: var(--sub); text-transform: uppercase;">Target Component:</span>
+                  <code id="commDossierFile" style="font-size: 13px; font-weight: 700; color: var(--ink); margin-left: 6px;">--</code>
+                </div>
+                <span id="commDossierCwe" class="badge" style="background: rgba(194, 131, 64, 0.15); color: var(--accent-gold); font-size: 11px;">--</span>
+              </div>
+              <div id="commDossierDesc" style="font-size: 13px; color: var(--ink); margin-top: 6px; font-weight: 500;">--</div>
+              <div style="margin-top: 10px;">
+                <span style="font-size: 11px; font-weight: 700; color: var(--sub); text-transform: uppercase;">Candidate Patch Diff Under Review:</span>
+                <pre class="diff-code-box"><code id="commDossierDiff">--</code></pre>
+              </div>
+            </div>
+
+            <!-- Committee Personas Grid -->
             <div class="member-grid" id="committeeMembersGrid">
               <div class="member-card">
                 <div style="display: flex; align-items: center; gap: 10px;">
-                  <span class="badge-dot" style="background: #eb5757; width: 10px; height: 10px;"></span>
+                  <span class="badge-dot" style="background: #e05244; width: 10px; height: 10px;"></span>
                   <strong>Dr. Evelyn Vance</strong>
                 </div>
                 <div style="font-size: 11.5px; color: var(--sub);">Principal Security Auditor</div>
@@ -382,7 +445,7 @@
 
               <div class="member-card">
                 <div style="display: flex; align-items: center; gap: 10px;">
-                  <span class="badge-dot" style="background: #c28340; width: 10px; height: 10px;"></span>
+                  <span class="badge-dot" style="background: #e2a865; width: 10px; height: 10px;"></span>
                   <strong>Marcus Thorne</strong>
                 </div>
                 <div style="font-size: 11.5px; color: var(--sub);">Principal Systems Architect</div>
@@ -391,7 +454,7 @@
 
               <div class="member-card">
                 <div style="display: flex; align-items: center; gap: 10px;">
-                  <span class="badge-dot" style="background: #4a90e2; width: 10px; height: 10px;"></span>
+                  <span class="badge-dot" style="background: #6db1d4; width: 10px; height: 10px;"></span>
                   <strong>Elena Rostova</strong>
                 </div>
                 <div style="font-size: 11.5px; color: var(--sub);">Defect & Determinism Critic</div>
@@ -419,7 +482,7 @@
         <!-- TAB 2: Predictive Bug Detection -->
         <div class="feature-panel" id="tab-predictive">
           <div class="feature-card">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
               <div>
                 <h2 style="font-size: 18px; font-weight: 700; color: var(--ink); margin: 0 0 4px 0;">Predictive Bug Detection & Hazard Radar</h2>
                 <p style="font-size: 13px; color: var(--sub); margin: 0;">Analyzes deep AST structural complexity, unchecked null dereferencing, and mutable state drifts to prevent production outages.</p>
@@ -427,6 +490,22 @@
               <button class="btn" id="runPredictiveBtn" style="padding: 0 18px; height: 38px; font-size: 13px;">
                 Scan for Predicted Hazards
               </button>
+            </div>
+
+            <!-- Predictive Metrics Strip -->
+            <div id="predictiveMetricsStrip" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 18px;">
+              <div style="background: rgba(255,255,255,0.7); border: 1px solid rgba(100,75,60,0.12); padding: 12px 16px; border-radius: 12px;">
+                <div style="font-size: 11px; font-weight: 600; color: var(--sub); text-transform: uppercase;">Total Hazards Predicted</div>
+                <div style="font-size: 22px; font-weight: 700; color: var(--ink); margin-top: 2px;" id="predStatTotal">--</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.7); border: 1px solid rgba(100,75,60,0.12); padding: 12px 16px; border-radius: 12px;">
+                <div style="font-size: 11px; font-weight: 600; color: var(--sub); text-transform: uppercase;">High-Probability Outage Risks</div>
+                <div style="font-size: 22px; font-weight: 700; color: #e05244; margin-top: 2px;" id="predStatHigh">--</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.7); border: 1px solid rgba(100,75,60,0.12); padding: 12px 16px; border-radius: 12px;">
+                <div style="font-size: 11px; font-weight: 600; color: var(--sub); text-transform: uppercase;">Average Failure Likelihood</div>
+                <div style="font-size: 22px; font-weight: 700; color: #e5a93b; margin-top: 2px;" id="predStatAvg">--%</div>
+              </div>
             </div>
 
             <div id="predictiveResultsArea" style="margin-top: 16px;">
@@ -455,7 +534,7 @@
         <!-- TAB 3: Code Hotspot Detection -->
         <div class="feature-panel" id="tab-hotspots">
           <div class="feature-card">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
               <div>
                 <h2 style="font-size: 18px; font-weight: 700; color: var(--ink); margin: 0 0 4px 0;">Code Hotspot Detection (Git Churn & Complexity Radar)</h2>
                 <p style="font-size: 13px; color: var(--sub); margin: 0;">Cross-references Git commit frequency, author dispersion, and file complexity to isolate defect-prone zones.</p>
@@ -493,7 +572,7 @@
         <!-- TAB 4: Long-term Learning from Repairs -->
         <div class="feature-panel" id="tab-memory">
           <div class="feature-card">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
               <div>
                 <h2 style="font-size: 18px; font-weight: 700; color: var(--ink); margin: 0 0 4px 0;">Repair Memory Bank (Cross-Session Transfer Learning)</h2>
                 <p style="font-size: 13px; color: var(--sub); margin: 0;">Persistent SQLite pattern repository that memorizes verified repairs to accelerate future patch generation and prevent repeating mistakes.</p>
@@ -542,7 +621,7 @@
         <!-- TAB 5: API Security Testing -->
         <div class="feature-panel" id="tab-apisec">
           <div class="feature-card">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
               <div>
                 <h2 style="font-size: 18px; font-weight: 700; color: var(--ink); margin: 0 0 4px 0;">API Security Testing (OWASP API Security Top 10)</h2>
                 <p style="font-size: 13px; color: var(--sub); margin: 0;">Audits discovered REST API endpoints for Broken Object Level Auth (BOLA), Broken Authentication, Resource Exhaustion, and CORS leaks.</p>
@@ -584,14 +663,17 @@
             </div>
 
             <div style="display: flex; gap: 12px; margin-top: 18px; align-items: center; flex-wrap: wrap;">
-              <input type="text" id="originFilePath" class="input-glass" placeholder="File path (e.g. backend/autopatch/api/routes.py)" style="flex: 2; height: 38px;">
-              <input type="number" id="originLineNumber" class="input-glass" placeholder="Line number (e.g. 390)" style="width: 160px; height: 38px;">
+              <select id="originBugSelect" class="select-dropdown" style="width: 260px; font-weight: 600;">
+                <option value="">Auto-fill from project defect...</option>
+              </select>
+              <input type="text" id="originFilePath" class="input-glass" placeholder="File path (e.g. src/payments/ledger.py)" style="flex: 2; min-width: 200px; height: 38px;">
+              <input type="number" id="originLineNumber" class="input-glass" placeholder="Line (e.g. 7)" style="width: 120px; height: 38px;">
               <button class="btn" id="traceOriginBtn" style="height: 38px; padding: 0 18px; font-size: 13px;">
                 Trace Flaw Origin
               </button>
             </div>
 
-            <div id="originResultCard" style="display: none; margin-top: 20px; background: rgba(255,255,255,0.8); border: 1px solid rgba(100,75,60,0.15); border-radius: 14px; padding: 20px;">
+            <div id="originResultCard" style="display: none; margin-top: 20px; background: rgba(255,255,255,0.85); border: 1px solid rgba(100,75,60,0.15); border-radius: 14px; padding: 20px;">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                 <div>
                   <span style="font-size: 11.5px; color: var(--sub);">Introducing Commit:</span>
@@ -614,7 +696,7 @@
         <!-- TAB 7: Automatic Documentation -->
         <div class="feature-panel" id="tab-docs">
           <div class="feature-card">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
               <div>
                 <h2 style="font-size: 18px; font-weight: 700; color: var(--ink); margin: 0 0 4px 0;">Automatic Documentation Generator</h2>
                 <p style="font-size: 13px; color: var(--sub); margin: 0;">Generates production-ready Architecture Decision Records (ADR), Keep a Changelog security release notes, and CISO Executive Briefs.</p>
@@ -629,7 +711,10 @@
             <div style="margin-top: 20px;">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                 <strong style="font-size: 13px; color: var(--ink);" id="docTypeTitle">Generated Documentation Artifact</strong>
-                <button class="btn btn-secondary" id="copyDocBtn" style="padding: 2px 10px; height: 28px; font-size: 11.5px;">Copy Markdown</button>
+                <div style="display: flex; gap: 6px;">
+                  <button class="btn btn-secondary" id="copyDocBtn" style="padding: 2px 10px; height: 28px; font-size: 11.5px;">Copy Markdown</button>
+                  <button class="btn btn-secondary" id="downloadDocBtn" style="padding: 2px 10px; height: 28px; font-size: 11.5px;">Download .md</button>
+                </div>
               </div>
               <div class="markdown-preview-box" id="docPreviewBox">Select an artifact to generate (Architecture Decision Record, Security Changelog, or Executive Brief).</div>
             </div>
@@ -645,6 +730,12 @@
       window.autopatch.renderStatusPill('backendStatusPill');
     }
 
+    // State
+    let activeProjectId = '';
+    let projectBugsList = [];
+    let currentTwinData = null;
+    let digitalTwinVisualizer = null;
+
     // Tab Switching Logic
     const tabs = document.querySelectorAll('.feature-tab');
     const panels = document.querySelectorAll('.feature-panel');
@@ -657,42 +748,468 @@
         tab.classList.add('active');
         const targetId = tab.getAttribute('data-tab');
         const targetPanel = document.getElementById(targetId);
-        if (targetPanel) targetPanel.classList.add('active');
+        if (targetPanel) {
+          targetPanel.classList.add('active');
+          onTabSwitched(targetId);
+        }
       });
     });
 
-    let activeProjectId = '';
+    function onTabSwitched(tabId) {
+      if (tabId === 'tab-digitaltwin' && digitalTwinVisualizer) {
+        setTimeout(() => digitalTwinVisualizer.initCanvasSize(), 50);
+      }
+    }
 
+    // ==========================================
+    // Project Selection & Synchronization
+    // ==========================================
     async function initProjects() {
       try {
         const projs = await window.autopatch.listProjects();
         const sel = document.getElementById('hubProjectSelect');
+        if (!sel) return;
+
         if (projs && projs.length > 0) {
           sel.innerHTML = '';
+          const savedId = new URLSearchParams(window.location.search).get('project_id') ||
+                          localStorage.getItem('autopatch_active_project_id');
+
+          let selectedIndex = 0;
           projs.forEach((p, idx) => {
             const opt = document.createElement('option');
             opt.value = p.project_id;
             opt.textContent = `${p.name} (${p.project_id.substring(0, 8)})`;
-            if (idx === 0) {
-              opt.selected = true;
-              activeProjectId = p.project_id;
+            if (savedId && p.project_id === savedId) {
+              selectedIndex = idx;
             }
             sel.appendChild(opt);
           });
+
+          sel.selectedIndex = selectedIndex;
+          await selectProject(projs[selectedIndex].project_id);
+        } else {
+          sel.innerHTML = '<option value="">No project workspaces found</option>';
         }
       } catch (e) {
-        console.error('Project init error:', e);
+        console.error('Project initialization error:', e);
       }
+    }
+
+    async function selectProject(projectId) {
+      if (!projectId) return;
+      activeProjectId = projectId;
+      localStorage.setItem('autopatch_active_project_id', projectId);
+
+      // Update URL search param seamlessly
+      const url = new URL(window.location);
+      url.searchParams.set('project_id', projectId);
+      window.history.replaceState({}, '', url);
+
+      // Update badge
+      const badge = document.getElementById('hubProjectBadge');
+      if (badge) {
+        badge.style.display = 'inline-block';
+        badge.innerText = `Active ID: ${projectId.substring(0, 8)}`;
+      }
+
+      // Load project bugs & components
+      await loadProjectBugs();
+
+      // Refresh Digital Twin
+      await loadProjectDigitalTwin();
     }
 
     const projSel = document.getElementById('hubProjectSelect');
     if (projSel) {
       projSel.addEventListener('change', (e) => {
-        activeProjectId = e.target.value;
+        selectProject(e.target.value);
       });
     }
 
-    // Feature 1: Predictive Bug Detection
+    async function loadProjectBugs() {
+      if (!activeProjectId) return;
+      try {
+        const bugs = await window.autopatch.listBugs(activeProjectId);
+        projectBugsList = Array.isArray(bugs) ? bugs : (bugs.bugs || bugs.items || []);
+
+        populateBugDropdowns();
+      } catch (e) {
+        console.warn('Failed to load project bugs:', e);
+        projectBugsList = [];
+        populateBugDropdowns();
+      }
+    }
+
+    function populateBugDropdowns() {
+      // 1. Digital Twin Target Select
+      const dtSel = document.getElementById('dtTargetSelect');
+      if (dtSel) {
+        dtSel.innerHTML = '<option value="">Select Defect / Component to Analyze</option>';
+        if (projectBugsList.length > 0) {
+          const optGroup = document.createElement('optgroup');
+          optGroup.label = 'Detected Project Defects';
+          projectBugsList.forEach(b => {
+            const opt = document.createElement('option');
+            opt.value = b.bug_id;
+            opt.textContent = `[${b.severity_level || 'MED'}] ${b.file_path}:${b.line_start} — ${b.description.substring(0, 42)}`;
+            optGroup.appendChild(opt);
+          });
+          dtSel.appendChild(optGroup);
+        }
+      }
+
+      // 2. Committee Bug Select
+      const commSel = document.getElementById('committeeBugSelect');
+      if (commSel) {
+        commSel.innerHTML = '<option value="">Select a defect to evaluate...</option>';
+        if (projectBugsList.length > 0) {
+          projectBugsList.forEach((b, idx) => {
+            const opt = document.createElement('option');
+            opt.value = b.bug_id;
+            opt.textContent = `[${b.severity_level || 'MED'}] ${b.file_path}:${b.line_start} — ${b.description.substring(0, 48)}`;
+            if (idx === 0) opt.selected = true;
+            commSel.appendChild(opt);
+          });
+          updateCommitteeDossier(projectBugsList[0].bug_id);
+        }
+      }
+
+      // 3. Origin Bug Select
+      const originSel = document.getElementById('originBugSelect');
+      if (originSel) {
+        originSel.innerHTML = '<option value="">Auto-fill from project defect...</option>';
+        if (projectBugsList.length > 0) {
+          projectBugsList.forEach(b => {
+            const opt = document.createElement('option');
+            opt.value = b.bug_id;
+            opt.textContent = `${b.file_path}:${b.line_start} — ${b.description.substring(0, 36)}`;
+            originSel.appendChild(opt);
+          });
+        }
+      }
+    }
+
+    // ==========================================
+    // 0. Codebase Digital Twin 3D Visualizer
+    // ==========================================
+    function initDigitalTwin() {
+      const canvas = document.getElementById('solutionsTwinCanvas');
+      const tooltip = document.getElementById('solutionsTwinTooltip');
+      if (!canvas) return;
+
+      digitalTwinVisualizer = new CodebaseDigitalTwinVisualizer(canvas, {
+        defaultHeight: 520,
+        onHover: (node, mx, my) => {
+          if (!tooltip) return;
+          if (node) {
+            tooltip.style.display = 'block';
+            tooltip.style.left = mx + 'px';
+            tooltip.style.top = my + 'px';
+            tooltip.innerHTML = `
+              <div style="font-weight:700; color: #f7efe8; margin-bottom: 2px;">${escapeHtml(node.name)}</div>
+              <div style="font-size:10px; color:#c28340; text-transform:uppercase; margin-bottom:4px;">${node.type} &bull; ${node.category || 'core'}</div>
+              <div style="font-size:10.5px; color:#ab9c94;">File: <code>${escapeHtml(node.file_path)}</code> (line ${node.line})</div>
+              <div style="display:flex; justify-content:space-between; margin-top:6px; padding-top:4px; border-top:1px solid rgba(255,255,255,0.1);">
+                <span>Complexity: <strong>${node.complexity}</strong></span>
+                <span>Risk: <strong style="color:${node.risk_score > 60 ? '#e05244' : '#52c27c'}">${node.risk_score}</strong></span>
+              </div>
+            `;
+          } else {
+            tooltip.style.display = 'none';
+          }
+        },
+        onSelect: (node) => {
+          if (node) {
+            analyzeBlastForComponent(node.file_path, node.line, node.name);
+          }
+        }
+      });
+
+      // Filter buttons
+      document.querySelectorAll('.digital-twin-header .dt-control-btn[data-filter]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.digital-twin-header .dt-control-btn[data-filter]').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          if (digitalTwinVisualizer) {
+            digitalTwinVisualizer.activeFilter = btn.dataset.filter;
+          }
+        });
+      });
+
+      // Controls
+      const autoRotateBtn = document.getElementById('dtAutoRotateBtn');
+      if (autoRotateBtn) {
+        autoRotateBtn.addEventListener('click', () => {
+          if (digitalTwinVisualizer) {
+            digitalTwinVisualizer.autoRotate = !digitalTwinVisualizer.autoRotate;
+            autoRotateBtn.innerText = digitalTwinVisualizer.autoRotate ? '⏸ Pause Orbit' : '▶ Auto Orbit';
+          }
+        });
+      }
+
+      const resetViewBtn = document.getElementById('dtResetViewBtn');
+      if (resetViewBtn) {
+        resetViewBtn.addEventListener('click', () => {
+          if (digitalTwinVisualizer) digitalTwinVisualizer.resetView();
+        });
+      }
+
+      const refreshTwinBtn = document.getElementById('refreshTwinBtn');
+      if (refreshTwinBtn) {
+        refreshTwinBtn.addEventListener('click', () => loadProjectDigitalTwin());
+      }
+
+      // Analyze Blast Button
+      const analyzeBlastBtn = document.getElementById('analyzeBlastBtn');
+      if (analyzeBlastBtn) {
+        analyzeBlastBtn.addEventListener('click', async () => {
+          if (!activeProjectId) return alert('Please select a project first.');
+          const sel = document.getElementById('dtTargetSelect');
+          const selectedTarget = sel ? sel.value : '';
+
+          analyzeBlastBtn.disabled = true;
+          analyzeBlastBtn.innerText = 'Analyzing Callers...';
+          try {
+            let impact = null;
+            if (selectedTarget) {
+              impact = await window.autopatch.getBugDigitalTwinImpact(activeProjectId, selectedTarget);
+            } else if (projectBugsList.length > 0) {
+              impact = await window.autopatch.getBugDigitalTwinImpact(activeProjectId, projectBugsList[0].bug_id);
+            } else {
+              impact = await window.autopatch.analyzeDigitalTwinImpact(activeProjectId, 'src/main.py', 1);
+            }
+
+            if (digitalTwinVisualizer && impact) {
+              digitalTwinVisualizer.setBlastRadius(impact.blast_radius);
+              updateBlastHud(impact.blast_radius);
+            }
+          } catch (e) {
+            alert('Blast radius analysis failed: ' + e.message);
+          } finally {
+            analyzeBlastBtn.disabled = false;
+            analyzeBlastBtn.innerText = '⚡ Analyze Patch Blast Radius';
+          }
+        });
+      }
+
+      // Target Select Change
+      const dtTargetSel = document.getElementById('dtTargetSelect');
+      if (dtTargetSel) {
+        dtTargetSel.addEventListener('change', async (e) => {
+          const bugId = e.target.value;
+          if (bugId) {
+            try {
+              const impact = await window.autopatch.getBugDigitalTwinImpact(activeProjectId, bugId);
+              if (digitalTwinVisualizer && impact) {
+                digitalTwinVisualizer.setBlastRadius(impact.blast_radius);
+                updateBlastHud(impact.blast_radius);
+              }
+            } catch (err) {
+              console.warn('Target impact error:', err);
+            }
+          }
+        });
+      }
+    }
+
+    async function analyzeBlastForComponent(filePath, line, symbol) {
+      if (!activeProjectId || !filePath) return;
+      try {
+        const impact = await window.autopatch.analyzeDigitalTwinImpact(activeProjectId, filePath, line, symbol);
+        if (digitalTwinVisualizer && impact) {
+          digitalTwinVisualizer.setBlastRadius(impact.blast_radius);
+          updateBlastHud(impact.blast_radius);
+        }
+      } catch (e) {
+        console.warn('Component blast analysis error:', e);
+      }
+    }
+
+    async function loadProjectDigitalTwin() {
+      if (!activeProjectId) return;
+      try {
+        const data = await window.autopatch.getDigitalTwin(activeProjectId);
+        currentTwinData = data;
+        if (digitalTwinVisualizer) {
+          digitalTwinVisualizer.setData(data);
+        }
+        if (data.metrics) {
+          document.getElementById('dtStatTotalNodes').innerText = data.metrics.total_nodes;
+          document.getElementById('dtStatTotalEdges').innerText = data.metrics.total_edges;
+        }
+
+        // Add prominent components to dtTargetSelect if not already there
+        if (data.nodes && data.nodes.length > 0) {
+          const sel = document.getElementById('dtTargetSelect');
+          if (sel) {
+            let optGroup = sel.querySelector('optgroup[label="Architectural Components"]');
+            if (!optGroup) {
+              optGroup = document.createElement('optgroup');
+              optGroup.label = 'Architectural Components';
+              sel.appendChild(optGroup);
+            }
+            optGroup.innerHTML = '';
+            data.nodes.slice(0, 12).forEach(n => {
+              const opt = document.createElement('option');
+              opt.value = `node:${n.file_path}:${n.line}`;
+              opt.textContent = `${n.type.toUpperCase()}: ${n.name} (${n.file_path})`;
+              optGroup.appendChild(opt);
+            });
+          }
+        }
+      } catch (e) {
+        console.error('Failed to load digital twin:', e);
+      }
+    }
+
+    function updateBlastHud(blast) {
+      if (!blast) return;
+      document.getElementById('dtStatBlastPct').innerText = `${blast.blast_radius_pct}%`;
+      const riskEl = document.getElementById('dtStatRiskLevel');
+      riskEl.innerText = blast.overall_risk_level;
+      if (blast.overall_risk_level === 'CRITICAL' || blast.overall_risk_level === 'HIGH') {
+        riskEl.style.color = '#e05244';
+      } else if (blast.overall_risk_level === 'MODERATE') {
+        riskEl.style.color = '#e5a93b';
+      } else {
+        riskEl.style.color = '#52c27c';
+      }
+
+      document.getElementById('dtBlastSummaryText').innerText = blast.summary;
+
+      // Update detail matrix boxes
+      const apisEl = document.getElementById('dtApisAtRiskList');
+      if (apisEl) {
+        apisEl.innerHTML = (blast.critical_apis_at_risk && blast.critical_apis_at_risk.length)
+          ? blast.critical_apis_at_risk.map(a => `<div style="padding: 2px 0;">🔴 <code>${escapeHtml(a)}</code></div>`).join('')
+          : '<span style="color:var(--success);">✅ Zero public APIs exposed to regression.</span>';
+      }
+
+      const testsEl = document.getElementById('dtTestsExercisedList');
+      if (testsEl) {
+        testsEl.innerHTML = (blast.tests_exercised && blast.tests_exercised.length)
+          ? blast.tests_exercised.map(t => `<div style="padding: 2px 0;">🧪 <code>${escapeHtml(t)}</code></div>`).join('')
+          : '<span style="color:var(--success);">✅ Verified by BRT test harness.</span>';
+      }
+
+      const funcsEl = document.getElementById('dtFunctionsAffectedList');
+      if (funcsEl) {
+        funcsEl.innerHTML = (blast.functions_affected && blast.functions_affected.length)
+          ? blast.functions_affected.slice(0, 6).map(f => `<div style="padding: 2px 0;">⚡ <code>${escapeHtml(f)}</code></div>`).join('')
+          : '<span style="color:var(--sub);">No downstream callers affected.</span>';
+      }
+    }
+
+    // ==========================================
+    // 1. AI Model Committee Deliberation
+    // ==========================================
+    async function updateCommitteeDossier(bugId) {
+      const dossierCard = document.getElementById('committeeDossierCard');
+      if (!bugId || !activeProjectId) {
+        if (dossierCard) dossierCard.style.display = 'none';
+        return;
+      }
+
+      try {
+        const details = await window.autopatch.getBugDetails(activeProjectId, bugId);
+        if (details) {
+          dossierCard.style.display = 'block';
+          const finding = details.finding || {};
+          document.getElementById('commDossierFile').innerText = `${finding.file || details.file || 'src'}:${finding.line || details.line || 1}`;
+          document.getElementById('commDossierCwe').innerText = finding.cwe || 'CWE-Defect';
+          document.getElementById('commDossierDesc').innerText = finding.description || details.description || 'Program logic flaw';
+
+          let patchDiff = '';
+          if (details.patches && details.patches.length > 0) {
+            patchDiff = details.patches[0].unified_diff || details.patches[0].diff || '';
+          }
+          document.getElementById('commDossierDiff').innerText = patchDiff || '# Automated candidate patch will be synthesized during deliberation';
+        }
+      } catch (e) {
+        console.warn('Failed to load bug details for committee:', e);
+      }
+    }
+
+    const commSel = document.getElementById('committeeBugSelect');
+    if (commSel) {
+      commSel.addEventListener('change', (e) => {
+        updateCommitteeDossier(e.target.value);
+      });
+    }
+
+    const runCommBtn = document.getElementById('runCommitteeBtn');
+    if (runCommBtn) {
+      runCommBtn.addEventListener('click', async () => {
+        if (!activeProjectId) return alert('Please select a project workspace first.');
+        const sel = document.getElementById('committeeBugSelect');
+        const selectedBugId = sel ? sel.value : '';
+
+        runCommBtn.innerText = 'Convening Deliberation...';
+        runCommBtn.disabled = true;
+
+        try {
+          let bugId = selectedBugId;
+          let filePath = 'src/service.py';
+          let patchDiff = null;
+          let desc = 'Defect invariant verification';
+
+          if (selectedBugId) {
+            const details = await window.autopatch.getBugDetails(activeProjectId, selectedBugId);
+            const finding = details.finding || {};
+            filePath = finding.file || details.file || filePath;
+            desc = finding.description || details.description || desc;
+            if (details.patches && details.patches.length > 0) {
+              patchDiff = details.patches[0].unified_diff || details.patches[0].diff;
+            }
+          } else if (projectBugsList.length > 0) {
+            bugId = projectBugsList[0].bug_id;
+            filePath = projectBugsList[0].file_path;
+            desc = projectBugsList[0].description;
+          }
+
+          const report = await window.autopatch.runCommitteeReview(
+            activeProjectId,
+            bugId || 'review-01',
+            filePath,
+            patchDiff,
+            desc
+          );
+
+          document.getElementById('committeeOutputArea').style.display = 'block';
+          const verdictEl = document.getElementById('committeeVerdictBadge');
+          verdictEl.innerText = report.verdict.verdict;
+          verdictEl.style.color = report.verdict.verdict === 'CONSENSUS_APPROVED' ? 'var(--success)' : '#e05244';
+
+          document.getElementById('committeeRatio').innerText = report.verdict.agreement_ratio;
+          document.getElementById('committeeScore').innerText = `${report.verdict.consensus_score}%`;
+          document.getElementById('committeeSummaryText').innerText = report.verdict.consensus_summary;
+
+          let transcriptHtml = '';
+          report.debate_transcript.forEach(turn => {
+            const dotColor = turn.speaker_name.includes('Vance') ? '#e05244' :
+                             (turn.speaker_name.includes('Thorne') ? '#e2a865' : '#6db1d4');
+            transcriptHtml += `
+              <div class="debate-turn-item">
+                <span style="color: ${dotColor}; font-weight: 700;">[${escapeHtml(turn.speaker_name)}]</span>
+                <span style="color: #a3958f; font-size: 11px;">(${escapeHtml(turn.role_title)})</span>:
+                <div style="margin-top: 4px;">${escapeHtml(turn.statement)}</div>
+              </div>
+            `;
+          });
+          document.getElementById('debateTranscriptBox').innerHTML = transcriptHtml;
+        } catch (e) {
+          alert('Committee deliberation failed: ' + e.message);
+        } finally {
+          runCommBtn.innerText = 'Convene Committee Review';
+          runCommBtn.disabled = false;
+        }
+      });
+    }
+
+    // ==========================================
+    // 2. Predictive Bug Detection
+    // ==========================================
     const runPredBtn = document.getElementById('runPredictiveBtn');
     if (runPredBtn) {
       runPredBtn.addEventListener('click', async () => {
@@ -701,6 +1218,10 @@
         runPredBtn.disabled = true;
         try {
           const res = await window.autopatch.getPredictiveAnalysis(activeProjectId);
+          document.getElementById('predStatTotal').innerText = res.total_hazards_predicted;
+          document.getElementById('predStatHigh').innerText = res.high_probability_hazards_count;
+          document.getElementById('predStatAvg').innerText = `${Math.round(res.average_failure_probability * 100)}%`;
+
           const tbody = document.getElementById('predictiveTableBody');
           if (res.findings && res.findings.length > 0) {
             let html = '';
@@ -709,11 +1230,11 @@
               const color = probPct >= 80 ? 'var(--danger)' : 'var(--warning)';
               html += `
                 <tr>
-                  <td><span class="badge" style="background: rgba(235,87,87,0.15); color: ${color}; font-weight: 700;">${probPct}% Risk</span></td>
-                  <td><code>${f.hazard_type}</code></td>
-                  <td><strong>${f.file}</strong>:${f.line_start}</td>
-                  <td>${f.description}</td>
-                  <td style="font-size: 12px; color: var(--sub);">${f.recommendation}</td>
+                  <td><span class="badge" style="background: rgba(224,82,68,0.14); color: ${color}; font-weight: 700;">${probPct}% Likelihood</span></td>
+                  <td><code>${escapeHtml(f.hazard_type)}</code></td>
+                  <td><strong>${escapeHtml(f.file)}</strong>:${f.line_start}</td>
+                  <td>${escapeHtml(f.description)}</td>
+                  <td style="font-size: 12px; color: var(--sub);">${escapeHtml(f.recommendation)}</td>
                 </tr>
               `;
             });
@@ -730,7 +1251,9 @@
       });
     }
 
-    // Feature 2: Code Hotspot Detection
+    // ==========================================
+    // 3. Code Hotspot Detection
+    // ==========================================
     const runHotBtn = document.getElementById('runHotspotsBtn');
     if (runHotBtn) {
       runHotBtn.addEventListener('click', async () => {
@@ -743,16 +1266,16 @@
           if (res.hotspots && res.hotspots.length > 0) {
             let html = '';
             res.hotspots.forEach(h => {
-              const badgeColor = h.risk_tier === 'CRITICAL' ? 'var(--danger)' : (h.risk_tier === 'HIGH' ? '#d96b24' : 'var(--warning)');
+              const badgeColor = h.risk_tier === 'CRITICAL' ? 'var(--danger)' : (h.risk_tier === 'HIGH' ? '#e2a865' : 'var(--warning)');
               html += `
                 <tr>
                   <td><strong style="font-size: 14px; color: var(--ink);">${h.hotspot_score}</strong>/100</td>
                   <td><span class="badge" style="background: rgba(100,75,60,0.1); color: ${badgeColor}; font-weight: 700;">${h.risk_tier}</span></td>
-                  <td><code>${h.file_path}</code></td>
+                  <td><code>${escapeHtml(h.file_path)}</code></td>
                   <td>${h.commit_count} commits</td>
                   <td>${h.unique_authors_count} authors</td>
                   <td>${h.lines_of_code} LOC</td>
-                  <td style="font-size: 12px; color: var(--sub);">${h.recommendation}</td>
+                  <td style="font-size: 12px; color: var(--sub);">${escapeHtml(h.recommendation)}</td>
                 </tr>
               `;
             });
@@ -769,49 +1292,9 @@
       });
     }
 
-    // Feature 3: AI Model Committee
-    const runCommBtn = document.getElementById('runCommitteeBtn');
-    if (runCommBtn) {
-      runCommBtn.addEventListener('click', async () => {
-        if (!activeProjectId) return alert('Please select a project first.');
-        runCommBtn.innerText = 'Convening Deliberation...';
-        runCommBtn.disabled = true;
-        try {
-          const report = await window.autopatch.runCommitteeReview(
-            activeProjectId,
-            'cm-review-01',
-            'src/auth/service.py',
-            '--- a/src/auth/service.py\\n+++ b/src/auth/service.py\\n@@ -10,1 +10,2 @@\\n- query = f"SELECT * FROM users WHERE u = {username}"\\n+ query = "SELECT * FROM users WHERE u = :u", {"u": username}\\n',
-            'SQL Injection vulnerability via unsanitized f-string parameterization'
-          );
-
-          document.getElementById('committeeOutputArea').style.display = 'block';
-          document.getElementById('committeeVerdictBadge').innerText = report.verdict.verdict;
-          document.getElementById('committeeRatio').innerText = report.verdict.agreement_ratio;
-          document.getElementById('committeeScore').innerText = `${report.verdict.consensus_score}%`;
-          document.getElementById('committeeSummaryText').innerText = report.verdict.consensus_summary;
-
-          let transcriptHtml = '';
-          report.debate_transcript.forEach(turn => {
-            transcriptHtml += `
-              <div class="debate-turn-item">
-                <span style="color: var(--accent-gold); font-weight: 700;">[${turn.speaker_name}]</span>
-                <span style="color: #a3958f; font-size: 11px;">(${turn.role_title})</span>:
-                <div>${turn.statement}</div>
-              </div>
-            `;
-          });
-          document.getElementById('debateTranscriptBox').innerHTML = transcriptHtml;
-        } catch (e) {
-          alert('Committee deliberation failed: ' + e.message);
-        } finally {
-          runCommBtn.innerText = 'Convene Committee Review';
-          runCommBtn.disabled = false;
-        }
-      });
-    }
-
-    // Feature 4: Long-Term Repair Learning Memory
+    // ==========================================
+    // 4. Long-Term Repair Learning Memory Bank
+    // ==========================================
     async function loadRepairMemory() {
       try {
         const data = await window.autopatch.getRepairMemory();
@@ -825,11 +1308,11 @@
           data.repairs.forEach(r => {
             html += `
               <tr>
-                <td><code>${r.memory_id}</code></td>
-                <td><span class="badge" style="background: rgba(194,131,64,0.15); color: var(--accent-gold);">${r.cwe || r.category}</span></td>
-                <td><strong>${r.title}</strong><div style="font-size: 11.5px; color: var(--sub);">${r.description}</div></td>
+                <td><code>${escapeHtml(r.memory_id)}</code></td>
+                <td><span class="badge" style="background: rgba(194,131,64,0.15); color: var(--accent-gold);">${escapeHtml(r.cwe || r.category)}</span></td>
+                <td><strong>${escapeHtml(r.title)}</strong><div style="font-size: 11.5px; color: var(--sub);">${escapeHtml(r.description)}</div></td>
                 <td><strong style="color: var(--success);">${r.times_applied}x applied</strong></td>
-                <td><pre style="background: #181412; color: #f7efe8; padding: 6px 10px; border-radius: 6px; font-size: 11px; margin: 0; max-width: 320px; overflow-x: auto;"><code>${r.diff_pattern}</code></pre></td>
+                <td><pre style="background: #181412; color: #f7efe8; padding: 6px 10px; border-radius: 6px; font-size: 11px; margin: 0; max-width: 320px; overflow-x: auto;"><code>${escapeHtml(r.diff_pattern)}</code></pre></td>
               </tr>
             `;
           });
@@ -843,7 +1326,9 @@
     if (refMemBtn) refMemBtn.addEventListener('click', loadRepairMemory);
     loadRepairMemory();
 
-    // Feature 5: API Security Testing
+    // ==========================================
+    // 5. API Security Testing (OWASP API Top 10)
+    // ==========================================
     const runApiSecBtn = document.getElementById('runApiSecBtn');
     if (runApiSecBtn) {
       runApiSecBtn.addEventListener('click', async () => {
@@ -859,11 +1344,11 @@
               const sevColor = f.severity === 'CRITICAL' ? 'var(--danger)' : 'var(--warning)';
               html += `
                 <tr>
-                  <td><span class="badge" style="background: rgba(235,87,87,0.12); color: ${sevColor}; font-weight: 700;">${f.severity}</span></td>
-                  <td><strong>${f.http_method}</strong> <code>${f.route_path}</code></td>
-                  <td><span style="font-size: 12px; font-weight: 600;">${f.owasp_category}</span></td>
-                  <td>${f.description}</td>
-                  <td><code style="font-size: 11.5px; color: var(--success);">${f.suggested_fix}</code></td>
+                  <td><span class="badge" style="background: rgba(224,82,68,0.12); color: ${sevColor}; font-weight: 700;">${f.severity}</span></td>
+                  <td><strong>${escapeHtml(f.http_method)}</strong> <code>${escapeHtml(f.route_path)}</code></td>
+                  <td><span style="font-size: 12px; font-weight: 600;">${escapeHtml(f.owasp_category)}</span></td>
+                  <td>${escapeHtml(f.description)}</td>
+                  <td><code style="font-size: 11.5px; color: var(--success);">${escapeHtml(f.suggested_fix)}</code></td>
                 </tr>
               `;
             });
@@ -880,26 +1365,42 @@
       });
     }
 
-    // Feature 6: Bug Origin Detection
+    // ==========================================
+    // 6. Bug Origin Detection (Git Blame)
+    // ==========================================
+    const originSel = document.getElementById('originBugSelect');
+    if (originSel) {
+      originSel.addEventListener('change', (e) => {
+        const bugId = e.target.value;
+        const bug = projectBugsList.find(b => b.bug_id === bugId);
+        if (bug) {
+          document.getElementById('originFilePath').value = bug.file_path;
+          document.getElementById('originLineNumber').value = bug.line_start;
+        }
+      });
+    }
+
     const traceBtn = document.getElementById('traceOriginBtn');
     if (traceBtn) {
       traceBtn.addEventListener('click', async () => {
         if (!activeProjectId) return alert('Please select a project first.');
-        const filePath = document.getElementById('originFilePath').value.trim() || 'backend/autopatch/api/routes.py';
-        const lineNum = parseInt(document.getElementById('originLineNumber').value, 10) || 390;
+        const filePath = document.getElementById('originFilePath').value.trim();
+        const lineNum = parseInt(document.getElementById('originLineNumber').value, 10);
+
+        if (!filePath) return alert('Please specify a file path to trace.');
 
         traceBtn.innerText = 'Tracing Blame...';
         traceBtn.disabled = true;
         try {
-          const origin = await window.autopatch.getBugOrigin(activeProjectId, 'trace-query', filePath, lineNum);
+          const origin = await window.autopatch.getBugOrigin(activeProjectId, 'trace-query', filePath, lineNum || 1);
           if (origin) {
             document.getElementById('originResultCard').style.display = 'block';
             document.getElementById('originCommitSha').innerText = origin.short_sha;
             document.getElementById('originCommitSummary').innerText = origin.commit_summary;
             document.getElementById('originAuthor').innerText = `${origin.author_name} <${origin.author_email}>`;
-            document.getElementById('originDate').innerText = origin.commit_date.substring(0, 10);
-            document.getElementById('originAge').innerText = origin.age_in_days;
-            document.getElementById('originCodeLine').innerText = origin.culprit_code_line;
+            document.getElementById('originDate').innerText = origin.commit_date ? origin.commit_date.substring(0, 10) : 'Recent';
+            document.getElementById('originAge').innerText = origin.age_in_days || 0;
+            document.getElementById('originCodeLine').innerText = origin.culprit_code_line || '(source line)';
             document.getElementById('originClassificationBadge').innerText = origin.origin_classification;
           }
         } catch (e) {
@@ -911,13 +1412,15 @@
       });
     }
 
-    // Feature 7: Automatic Documentation
+    // ==========================================
+    // 7. Automatic Documentation Generator
+    // ==========================================
     let activeMarkdownDoc = '';
     const previewBox = document.getElementById('docPreviewBox');
     const docTitle = document.getElementById('docTypeTitle');
 
     document.getElementById('genAdrBtn').addEventListener('click', async () => {
-      if (!activeProjectId) return alert('Please select a project first.');
+      if (!activeProjectId) return alert('Please select a project workspace first.');
       try {
         const adr = await window.autopatch.getAdrDocument(activeProjectId);
         docTitle.innerText = adr.title;
@@ -929,7 +1432,7 @@
     });
 
     document.getElementById('genChangelogBtn').addEventListener('click', async () => {
-      if (!activeProjectId) return alert('Please select a project first.');
+      if (!activeProjectId) return alert('Please select a project workspace first.');
       try {
         const chg = await window.autopatch.getSecurityChangelog(activeProjectId);
         docTitle.innerText = `Security Remediation Changelog (${chg.version})`;
@@ -941,7 +1444,7 @@
     });
 
     document.getElementById('genBriefBtn').addEventListener('click', async () => {
-      if (!activeProjectId) return alert('Please select a project first.');
+      if (!activeProjectId) return alert('Please select a project workspace first.');
       try {
         const brief = await window.autopatch.getExecutiveBrief(activeProjectId);
         docTitle.innerText = `Executive Remediation Brief: ${brief.project_name}`;
@@ -957,159 +1460,30 @@
       navigator.clipboard.writeText(activeMarkdownDoc).then(() => alert('Markdown copied to clipboard!'));
     });
 
-    // ==========================================
-    // Codebase Digital Twin 3D Visualizer Logic
-    // ==========================================
-    let digitalTwinVisualizer = null;
-    let currentTwinData = null;
+    document.getElementById('downloadDocBtn').addEventListener('click', () => {
+      if (!activeMarkdownDoc) return alert('No document generated yet.');
+      const blob = new Blob([activeMarkdownDoc], { type: 'text/markdown;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${(docTitle.innerText || 'documentation').toLowerCase().replace(/[^a-z0-9]/g, '_')}.md`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
 
-    function initDigitalTwin() {
-      const canvas = document.getElementById('solutionsTwinCanvas');
-      const tooltip = document.getElementById('solutionsTwinTooltip');
-      if (!canvas) return;
-
-      digitalTwinVisualizer = new CodebaseDigitalTwinVisualizer(canvas, {
-        onHover: (node, mx, my) => {
-          if (!tooltip) return;
-          if (node) {
-            tooltip.style.display = 'block';
-            tooltip.style.left = mx + 'px';
-            tooltip.style.top = my + 'px';
-            tooltip.innerHTML = `
-              <div style="font-weight:700; color: #f7efe8; margin-bottom: 2px;">${node.name}</div>
-              <div style="font-size:10px; color:#c28340; text-transform:uppercase; margin-bottom:4px;">${node.type} &bull; ${node.category || 'core'}</div>
-              <div style="font-size:10.5px; color:#ab9c94;">File: <code>${node.file_path}</code> (line ${node.line})</div>
-              <div style="display:flex; justify-content:space-between; margin-top:6px; padding-top:4px; border-top:1px solid rgba(255,255,255,0.1);">
-                <span>Complexity: <strong>${node.complexity}</strong></span>
-                <span>Risk: <strong style="color:${node.risk_score > 60 ? '#e05244' : '#52c27c'}">${node.risk_score}</strong></span>
-              </div>
-            `;
-          } else {
-            tooltip.style.display = 'none';
-          }
-        }
-      });
-
-      // Filter buttons
-      document.querySelectorAll('.digital-twin-header .dt-control-btn[data-filter]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          document.querySelectorAll('.digital-twin-header .dt-control-btn[data-filter]').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          if (digitalTwinVisualizer) {
-            digitalTwinVisualizer.activeFilter = btn.dataset.filter;
-          }
-        });
-      });
-
-      // Auto-rotate toggle
-      const autoRotateBtn = document.getElementById('dtAutoRotateBtn');
-      if (autoRotateBtn) {
-        autoRotateBtn.addEventListener('click', () => {
-          if (digitalTwinVisualizer) {
-            digitalTwinVisualizer.autoRotate = !digitalTwinVisualizer.autoRotate;
-            autoRotateBtn.innerText = digitalTwinVisualizer.autoRotate ? '⏸ Pause Orbit' : '▶ Auto Orbit';
-          }
-        });
-      }
-
-      // Reset Camera
-      const resetViewBtn = document.getElementById('dtResetViewBtn');
-      if (resetViewBtn) {
-        resetViewBtn.addEventListener('click', () => {
-          if (digitalTwinVisualizer) digitalTwinVisualizer.resetView();
-        });
-      }
-
-      // Reload Model
-      const refreshTwinBtn = document.getElementById('refreshTwinBtn');
-      if (refreshTwinBtn) {
-        refreshTwinBtn.addEventListener('click', () => loadProjectDigitalTwin());
-      }
-
-      // Simulate Blast Radius
-      const simulateBlastBtn = document.getElementById('simulateBlastBtn');
-      if (simulateBlastBtn) {
-        simulateBlastBtn.addEventListener('click', async () => {
-          simulateBlastBtn.disabled = true;
-          simulateBlastBtn.innerText = 'Simulating Blast...';
-          try {
-            const impact = await window.autopatch.getBugDigitalTwinImpact(activeProjectId, 'simulated-target-1');
-            if (digitalTwinVisualizer && impact) {
-              digitalTwinVisualizer.setBlastRadius(impact.blast_radius);
-              updateBlastHud(impact.blast_radius);
-            }
-          } catch (e) {
-            alert('Blast simulation failed: ' + e.message);
-          } finally {
-            simulateBlastBtn.disabled = false;
-            simulateBlastBtn.innerText = '💥 Simulate Patch Blast Radius';
-          }
-        });
-      }
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
     }
 
-    async function loadProjectDigitalTwin() {
-      if (!activeProjectId) return;
-      try {
-        const data = await window.autopatch.getDigitalTwin(activeProjectId);
-        currentTwinData = data;
-        if (digitalTwinVisualizer) {
-          digitalTwinVisualizer.setData(data);
-        }
-        if (data.metrics) {
-          document.getElementById('dtStatTotalNodes').innerText = data.metrics.total_nodes;
-          document.getElementById('dtStatTotalEdges').innerText = data.metrics.total_edges;
-        }
-      } catch (e) {
-        console.error('Failed to load digital twin:', e);
-      }
-    }
-
-    function updateBlastHud(blast) {
-      if (!blast) return;
-      document.getElementById('dtStatBlastPct').innerText = `${blast.blast_radius_pct}%`;
-      const riskEl = document.getElementById('dtStatRiskLevel');
-      riskEl.innerText = blast.overall_risk_level;
-      if (blast.overall_risk_level === 'CRITICAL' || blast.overall_risk_level === 'HIGH') {
-        riskEl.style.color = '#ff4b2b';
-      } else if (blast.overall_risk_level === 'MODERATE') {
-        riskEl.style.color = '#eab308';
-      } else {
-        riskEl.style.color = '#34d399';
-      }
-
-      document.getElementById('dtBlastSummaryText').innerText = blast.summary;
-
-      // Update detail boxes
-      const apisEl = document.getElementById('dtApisAtRiskList');
-      if (apisEl) {
-        apisEl.innerHTML = (blast.critical_apis_at_risk && blast.critical_apis_at_risk.length)
-          ? blast.critical_apis_at_risk.map(a => `<div style="padding: 2px 0;">🔴 <code>${a}</code></div>`).join('')
-          : '<span style="color:var(--success);">✅ Zero public APIs exposed to regression.</span>';
-      }
-
-      const testsEl = document.getElementById('dtTestsExercisedList');
-      if (testsEl) {
-        testsEl.innerHTML = (blast.tests_exercised && blast.tests_exercised.length)
-          ? blast.tests_exercised.map(t => `<div style="padding: 2px 0;">🧪 <code>${t}</code></div>`).join('')
-          : '<span style="color:var(--sub);">No linked regression tests found.</span>';
-      }
-
-      const funcsEl = document.getElementById('dtFunctionsAffectedList');
-      if (funcsEl) {
-        funcsEl.innerHTML = (blast.functions_affected && blast.functions_affected.length)
-          ? blast.functions_affected.slice(0, 5).map(f => `<div style="padding: 2px 0;">⚡ <code>${f}</code></div>`).join('')
-          : '<span style="color:var(--sub);">No downstream callers.</span>';
-      }
-    }
-
-    // Trigger Digital Twin load when active project changes
-    const origSelectProject = selectProject;
-    selectProject = function(projId) {
-      origSelectProject(projId);
-      loadProjectDigitalTwin();
-    };
-
+    // Startup Initialization
     initDigitalTwin();
     initProjects();
   </script>

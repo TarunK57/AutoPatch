@@ -911,10 +911,58 @@ async def get_project_digital_twin(
         raise HTTPException(status_code=404, detail="Project not found.")
     assert_project_ownership(project["owner_id"], current_user)
 
-    repo_path = Path(project.get("path", "."))
+    dir_str = project.get("project_dir") or project.get("path") or "."
+    repo_path = Path(dir_str)
+    if not repo_path.exists():
+        repo_path = Path(".")
+
     builder = CodebaseDigitalTwinBuilder(repo_path)
     model = builder.build_model()
     return DigitalTwinResponse(**model)
+
+
+@router.get(
+    "/projects/{project_id}/digital-twin/impact",
+    response_model=DigitalTwinResponse,
+    summary="Analyze Patch Blast Radius in Digital Twin",
+    description="Simulates candidate patch blast radius across repository functions, APIs, and tests for any target file or function.",
+)
+async def analyze_digital_twin_impact(
+    project_id: str,
+    target_file: Optional[str] = Query(None, description="Target file path (e.g. src/payments/ledger.py)"),
+    line_number: Optional[int] = Query(None, description="Target line number"),
+    function_hint: Optional[str] = Query(None, description="Target function symbol"),
+    bug_id: Optional[str] = Query(None, description="Optional bug ID to look up"),
+    current_user: User = Depends(get_current_user),
+) -> DigitalTwinResponse:
+    project = PROJECTS_DB.get(project_id)
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found.")
+    assert_project_ownership(project["owner_id"], current_user)
+
+    f_file = target_file
+    f_line = line_number
+    f_symbol = function_hint
+
+    if bug_id:
+        state = event_store.reconstruct_bug_state(bug_id)
+        finding = state.get("finding") or {}
+        f_file = f_file or finding.get("file") or state.get("file_path") or ""
+        f_line = f_line or finding.get("line") or state.get("line_number")
+        f_symbol = f_symbol or finding.get("symbol")
+
+    dir_str = project.get("project_dir") or project.get("path") or "."
+    repo_path = Path(dir_str)
+    if not repo_path.exists():
+        repo_path = Path(".")
+
+    builder = CodebaseDigitalTwinBuilder(repo_path)
+    impact_data = builder.analyze_patch_blast_radius(
+        target_file=f_file or "",
+        line_number=f_line,
+        function_hint=f_symbol,
+    )
+    return DigitalTwinResponse(**impact_data)
 
 
 @router.get(
@@ -926,6 +974,9 @@ async def get_project_digital_twin(
 async def get_bug_digital_twin_impact(
     project_id: str,
     bug_id: str,
+    target_file: Optional[str] = Query(None),
+    line_number: Optional[int] = Query(None),
+    function_hint: Optional[str] = Query(None),
     current_user: User = Depends(get_current_user),
 ) -> DigitalTwinResponse:
     project = PROJECTS_DB.get(project_id)
@@ -935,11 +986,15 @@ async def get_bug_digital_twin_impact(
 
     state = event_store.reconstruct_bug_state(bug_id)
     finding = state.get("finding") or {}
-    f_file = finding.get("file") or state.get("file_path") or ""
-    f_line = finding.get("line") or state.get("line_number")
-    f_symbol = finding.get("symbol")
+    f_file = target_file or finding.get("file") or state.get("file_path") or ""
+    f_line = line_number or finding.get("line") or state.get("line_number")
+    f_symbol = function_hint or finding.get("symbol")
 
-    repo_path = Path(project.get("path", "."))
+    dir_str = project.get("project_dir") or project.get("path") or "."
+    repo_path = Path(dir_str)
+    if not repo_path.exists():
+        repo_path = Path(".")
+
     builder = CodebaseDigitalTwinBuilder(repo_path)
     impact_data = builder.analyze_patch_blast_radius(
         target_file=f_file,

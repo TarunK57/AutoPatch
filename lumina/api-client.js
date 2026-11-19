@@ -551,13 +551,38 @@ class AutoPatchClient {
   }
 
   /**
-   * Codebase Digital Twin: Simulate patch blast radius & downstream impact.
+   * Codebase Digital Twin: Analyze patch blast radius & downstream impact for a bug.
    */
-  async getBugDigitalTwinImpact(projectId, bugId) {
-    const res = await fetch(`${this.config.baseUrl}/projects/${encodeURIComponent(projectId)}/bugs/${encodeURIComponent(bugId)}/digital-twin-impact`, {
+  async getBugDigitalTwinImpact(projectId, bugId, targetFile = null, lineNumber = null, functionHint = null) {
+    const params = new URLSearchParams();
+    if (targetFile) params.set('target_file', targetFile);
+    if (lineNumber) params.set('line_number', lineNumber.toString());
+    if (functionHint) params.set('function_hint', functionHint);
+
+    let url = `${this.config.baseUrl}/projects/${encodeURIComponent(projectId)}/bugs/${encodeURIComponent(bugId)}/digital-twin-impact`;
+    if (params.toString()) url += `?${params.toString()}`;
+
+    const res = await fetch(url, {
       headers: this.headers,
     });
-    if (!res.ok) throw new Error(`Digital Twin impact simulation failed: ${res.status}`);
+    if (!res.ok) throw new Error(`Digital Twin blast radius query failed: ${res.status}`);
+    return await res.json();
+  }
+
+  /**
+   * Codebase Digital Twin: Analyze patch blast radius for any target file or function in the project.
+   */
+  async analyzeDigitalTwinImpact(projectId, targetFile, lineNumber = null, functionHint = null, bugId = null) {
+    const params = new URLSearchParams();
+    if (targetFile) params.set('target_file', targetFile);
+    if (lineNumber) params.set('line_number', lineNumber.toString());
+    if (functionHint) params.set('function_hint', functionHint);
+    if (bugId) params.set('bug_id', bugId);
+
+    const res = await fetch(`${this.config.baseUrl}/projects/${encodeURIComponent(projectId)}/digital-twin/impact?${params.toString()}`, {
+      headers: this.headers,
+    });
+    if (!res.ok) throw new Error(`Digital Twin blast radius query failed: ${res.status}`);
     return await res.json();
   }
 }
