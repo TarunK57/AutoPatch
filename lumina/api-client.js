@@ -76,15 +76,28 @@ class AutoPatchClient {
   /**
    * Creates or registers a code project.
    */
-  async createProject(name, githubUrl = null) {
+  async createProject(name, githubUrl = null, file = null) {
     if (!this._isOnline) {
       throw new Error('Backend is offline. Cannot create live project.');
     }
-    const res = await fetch(`${this.config.baseUrl}/projects`, {
-      method: 'POST',
-      headers: this.headers,
-      body: JSON.stringify({ name, github_url: githubUrl }),
-    });
+    let res;
+    if (file) {
+      const formData = new FormData();
+      formData.append('name', name);
+      if (githubUrl) formData.append('github_url', githubUrl);
+      formData.append('file', file);
+      res = await fetch(`${this.config.baseUrl}/projects`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${this.config.authToken}` },
+        body: formData,
+      });
+    } else {
+      res = await fetch(`${this.config.baseUrl}/projects`, {
+        method: 'POST',
+        headers: this.headers,
+        body: JSON.stringify({ name, github_url: githubUrl }),
+      });
+    }
     if (!res.ok) {
       const err = await res.json().catch(() => ({ detail: res.statusText }));
       throw new Error(err.detail || `Project creation failed: ${res.status}`);

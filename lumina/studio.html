@@ -423,7 +423,7 @@
             const gitUrl = document.getElementById('gitUrl')?.value || null;
 
             appendLog(new Date().toLocaleTimeString(), '[INIT]', 'log-info', `Registering project '${projName}' on AutoPatch backend...`);
-            const project = await window.autopatch.createProject(projName, gitUrl);
+            const project = await window.autopatch.createProject(projName, gitUrl, selectedArchiveFile);
             localStorage.setItem('autopatch_active_project_id', project.project_id);
 
             appendLog(new Date().toLocaleTimeString(), '[JOB]', 'log-accent', `Launching autonomous scan job for project ${project.project_id}...`);
@@ -508,16 +508,20 @@
       });
     }
 
+    let selectedArchiveFile = null;
+
     // Dropzone interaction
     const dropzone = document.getElementById('dropzone');
     if (dropzone) {
       dropzone.addEventListener('click', () => {
         const input = document.createElement('input');
         input.type = 'file';
+        input.accept = '.zip,.tar,.gz,.tgz';
         input.onchange = (e) => {
           if (e.target.files.length > 0) {
-            document.querySelector('.dropzone-text').innerText = `Selected: ${e.target.files[0].name}`;
-            document.querySelector('.dropzone-sub').innerText = `${(e.target.files[0].size / 1024).toFixed(1)} KB archive ready for analysis`;
+            selectedArchiveFile = e.target.files[0];
+            document.querySelector('.dropzone-text').innerText = `Selected: ${selectedArchiveFile.name}`;
+            document.querySelector('.dropzone-sub').innerText = `${(selectedArchiveFile.size / 1024).toFixed(1)} KB archive ready for analysis`;
           }
         };
         input.click();

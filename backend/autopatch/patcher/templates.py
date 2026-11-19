@@ -210,15 +210,18 @@ class DeterministicTemplatePatcher:
         return None
 
     def _fix_parameterized_query(self, file_path: str, content: str) -> Optional[CandidatePatch]:
-        # Python: cursor.execute(f"SELECT ... WHERE id = {user_id}")
-        match = re.search(r"""cursor\.execute\s*\(\s*f['"](SELECT\s+.*?\s+WHERE\s+([a-zA-Z0-9_]+)\s*=\s*)\{([a-zA-Z0-9_]+)\}(['"])""", content, re.IGNORECASE)
+        # Python: cursor.execute(f"SELECT ... WHERE id = {user_id}") or db_cursor.execute(f"SELECT ... WHERE token = '{token}'")
+        match = re.search(
+            r"""(?i)(?:[a-zA-Z0-9_]+\.)?execute\s*\(\s*f['"](SELECT\s+.*?\s+WHERE\s+([a-zA-Z0-9_]+)\s*=\s*)['"]?\{([a-zA-Z0-9_]+)\}['"]?['"]\s*\)""",
+            content,
+        )
         if match and file_path.endswith(".py"):
             orig = match.group(0)
             prefix = match.group(1)
             col_name = match.group(2)
             param_var = match.group(3)
-            quote = match.group(4)
-            patched = f'cursor.execute("{prefix}%s", ({param_var},))'
+            caller = orig.split("(")[0].strip()
+            patched = f'{caller}("{prefix}%s", ({param_var},))'
             return CandidatePatch(
                 file=file_path,
                 original_snippet=orig,
