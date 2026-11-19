@@ -201,6 +201,47 @@ class EventStore:
             )
         return events
 
+    def get_recent_events(
+        self,
+        limit: int = 50,
+        job_id: Optional[str] = None,
+        job_ids: Optional[List[str]] = None,
+    ) -> List[AuditEvent]:
+        """Retrieves most recent events across all jobs or for specified job IDs."""
+        query = "SELECT * FROM audit_events"
+        params: List[Any] = []
+        if job_id:
+            query += " WHERE job_id = ?"
+            params.append(job_id)
+        elif job_ids is not None and len(job_ids) > 0:
+            placeholders = ",".join("?" for _ in job_ids)
+            query += f" WHERE job_id IN ({placeholders})"
+            params.extend(job_ids)
+
+        query += " ORDER BY timestamp DESC, sequence_number DESC LIMIT ?"
+        params.append(limit)
+
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(query, params)
+            rows = cursor.fetchall()
+
+        events: List[AuditEvent] = []
+        for r in rows:
+            events.append(
+                AuditEvent(
+                    event_id=r["event_id"],
+                    job_id=r["job_id"],
+                    bug_id=r["bug_id"],
+                    sequence_number=r["sequence_number"],
+                    timestamp=datetime.fromisoformat(r["timestamp"]),
+                    event_type=EventType(r["event_type"]),
+                    actor=r["actor"],
+                    payload=json.loads(r["payload"]),
+                )
+            )
+        return events
+
     def reconstruct_bug_state(self, bug_id: str) -> Dict[str, Any]:
         """Reconstructs the full lifecycle state of a bug by replaying its audit events."""
         with self._get_connection() as conn:

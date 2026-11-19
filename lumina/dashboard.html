@@ -151,6 +151,59 @@
         grid-template-columns: 1fr;
       }
     }
+
+    .project-filter-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .select-dropdown {
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink);
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid rgba(100, 75, 60, 0.2);
+      border-radius: 10px;
+      outline: none;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s ease;
+    }
+    .select-dropdown:hover, .select-dropdown:focus {
+      border-color: var(--accent-gold);
+      background: #ffffff;
+    }
+    .cost-strip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255, 255, 255, 0.5);
+      border: 1px solid rgba(100, 75, 60, 0.1);
+      border-radius: 14px;
+      padding: 12px 20px;
+      margin-bottom: 24px;
+      font-size: 12.5px;
+      color: var(--sub);
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .cost-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .cost-value {
+      font-weight: 700;
+      color: var(--ink);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .empty-ledger-state {
+      padding: 32px 16px;
+      text-align: center;
+      color: var(--sub);
+      font-size: 13px;
+    }
   </style>
 </head>
 <body>
@@ -196,12 +249,48 @@
         <div class="section-head">
           <div>
             <h1 class="section-title"><em>Health</em> & Observability Dashboard</h1>
-            <p class="section-desc">Real-time telemetry across multi-agent vulnerability repair pipelines, regression verification rates, and MTTR reduction.</p>
+            <p class="section-desc" id="dashboardDesc">Real-time telemetry across multi-agent vulnerability repair pipelines, regression verification rates, and MTTR reduction.</p>
           </div>
-          <div style="display: flex; gap: 10px; align-items: center;">
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <div class="project-filter-wrap">
+              <select id="projectFilterSelect" class="select-dropdown" aria-label="Filter Telemetry by Project">
+                <option value="">All Monitored Projects</option>
+              </select>
+            </div>
+            <button class="btn btn-secondary" id="refreshBtn" style="padding: 0 14px; height: 38px; font-size: 13px;" title="Refresh live telemetry">
+              <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;">
+                <path d="M2 8a6 6 0 1 1 1.8 4.3L2 14"></path>
+                <path d="M2 10v4h4"></path>
+              </svg>
+              Refresh
+            </button>
             <button class="btn btn-secondary" onclick="window.print()" style="padding: 0 16px; height: 38px; font-size: 13px;">
               Export Audit Report
             </button>
+          </div>
+        </div>
+
+        <!-- Observability Financial & Token Telemetry Strip -->
+        <div class="cost-strip" id="costStrip">
+          <div class="cost-item">
+            <span class="badge-dot" style="background: var(--accent-gold); width: 8px; height: 8px;"></span>
+            <span>LLM Spend:</span>
+            <span class="cost-value" id="costSpend">$0.00</span>
+          </div>
+          <div class="cost-item">
+            <span class="badge-dot" style="background: var(--info); width: 8px; height: 8px;"></span>
+            <span>Tokens Processed:</span>
+            <span class="cost-value" id="costTokens">0</span>
+          </div>
+          <div class="cost-item">
+            <span class="badge-dot" style="background: var(--success); width: 8px; height: 8px;"></span>
+            <span>Cache Hit Rate:</span>
+            <span class="cost-value" id="costCache">0.0%</span>
+          </div>
+          <div class="cost-item">
+            <span class="badge-dot" style="background: #7a6860; width: 8px; height: 8px;"></span>
+            <span>Audit Ledger Depth:</span>
+            <span class="cost-value" id="costEvents">0 events</span>
           </div>
         </div>
 
@@ -209,43 +298,43 @@
         <div class="kpi-grid">
           <div class="kpi-card">
             <div class="kpi-label">Auto-Verification Rate</div>
-            <div class="kpi-value">98.4%</div>
-            <div class="kpi-trend trend-up">
+            <div class="kpi-value" id="kpiVerificationRate">--%</div>
+            <div class="kpi-trend trend-up" id="kpiVerificationTrend">
               <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M4 10l4-4 4 4"></path>
               </svg>
-              +3.2% vs previous quarter
+              <span id="kpiVerificationSub">Loading telemetry...</span>
             </div>
           </div>
 
           <div class="kpi-card">
             <div class="kpi-label">Mean Time To Patch (MTTR)</div>
-            <div class="kpi-value">3.8<span style="font-size: 18px; font-weight: 500;">min</span></div>
-            <div class="kpi-trend trend-up">
+            <div class="kpi-value" id="kpiMttr">--s</div>
+            <div class="kpi-trend trend-up" id="kpiMttrTrend">
               <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M4 10l4-4 4 4"></path>
               </svg>
-              99.8% faster than 14-day manual
+              <span id="kpiMttrSub">Autonomous execution benchmark</span>
             </div>
           </div>
 
           <div class="kpi-card">
             <div class="kpi-label">Vulnerabilities Resolved</div>
-            <div class="kpi-value">42</div>
-            <div class="kpi-trend trend-up">
+            <div class="kpi-value" id="kpiResolved">--</div>
+            <div class="kpi-trend trend-up" id="kpiResolvedTrend">
               <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M4 10l4-4 4 4"></path>
               </svg>
-              0 unresolved criticals in main
+              <span id="kpiResolvedSub">Verified candidate patches</span>
             </div>
           </div>
 
           <div class="kpi-card">
-            <div class="kpi-label">Zero-Day Invariants</div>
-            <div class="kpi-value">1,280</div>
-            <div class="kpi-trend trend-neutral">
+            <div class="kpi-label">Monitored Assets & Operations</div>
+            <div class="kpi-value" id="kpiOperations">--</div>
+            <div class="kpi-trend trend-neutral" id="kpiOperationsTrend">
               <span class="badge-dot" style="background: var(--success); width: 8px; height: 8px; display: inline-block;"></span>
-              All microVM sandboxes healthy
+              <span id="kpiOperationsSub">Active pipelines & SQLite ledger</span>
             </div>
           </div>
         </div>
@@ -255,10 +344,10 @@
           <!-- Patch Velocity Curve -->
           <div class="chart-card">
             <div class="chart-head">
-              <div class="chart-title">Autonomous Remediation Velocity (Last 30 Days)</div>
-              <span class="badge badge-verified" style="font-size: 10.5px;">Nominal Flow</span>
+              <div class="chart-title" id="velocityTitle">Autonomous Remediation Velocity</div>
+              <span class="badge badge-verified" id="velocityBadge" style="font-size: 10.5px;">Live Telemetry</span>
             </div>
-            <svg class="svg-chart" viewBox="0 0 500 200" preserveAspectRatio="none">
+            <svg class="svg-chart" id="velocitySvg" viewBox="0 0 500 200" preserveAspectRatio="none">
               <defs>
                 <linearGradient id="goldGrad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stop-color="#c28340" stop-opacity="0.6"/>
@@ -270,23 +359,15 @@
               <line x1="0" y1="100" x2="500" y2="100" stroke="rgba(100,75,60,0.08)" stroke-dasharray="4"/>
               <line x1="0" y1="160" x2="500" y2="160" stroke="rgba(100,75,60,0.08)" stroke-dasharray="4"/>
 
-              <!-- Fill Area -->
-              <path class="chart-area" d="M0,170 Q70,140 120,110 T240,85 T360,50 T500,25 L500,200 L0,200 Z"></path>
-              <!-- Stroke Line -->
-              <path class="chart-path" d="M0,170 Q70,140 120,110 T240,85 T360,50 T500,25"></path>
+              <!-- Dynamic Fill Area and Stroke Line -->
+              <path class="chart-area" id="velocityArea" d="M0,195 L500,195 Z"></path>
+              <path class="chart-path" id="velocityPath" d="M0,195 L500,195"></path>
 
-              <!-- Data points -->
-              <circle cx="120" cy="110" r="4.5" fill="#c28340" stroke="#fff" stroke-width="2"/>
-              <circle cx="240" cy="85" r="4.5" fill="#c28340" stroke="#fff" stroke-width="2"/>
-              <circle cx="360" cy="50" r="4.5" fill="#c28340" stroke="#fff" stroke-width="2"/>
-              <circle cx="500" cy="25" r="5" fill="#141110" stroke="#c28340" stroke-width="2.5"/>
+              <!-- Dynamic Data points container -->
+              <g id="velocityPointsGroup"></g>
             </svg>
-            <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--sub); margin-top: 8px;">
-              <span>Oct 20</span>
-              <span>Oct 28</span>
-              <span>Nov 05</span>
-              <span>Nov 12</span>
-              <span>Today (Accelerated)</span>
+            <div id="velocityLabels" style="display: flex; justify-content: space-between; font-size: 11px; color: var(--sub); margin-top: 8px;">
+              <span>--</span>
             </div>
           </div>
 
@@ -294,56 +375,10 @@
           <div class="chart-card">
             <div class="chart-head">
               <div class="chart-title">Vulnerability Category Distribution</div>
+              <span style="font-size: 12px; color: var(--sub);" id="cweTotalBadge">0 Findings</span>
             </div>
-
-            <div class="cwe-bar">
-              <div class="cwe-info">
-                <span>CWE-89: SQL Injection</span>
-                <span>38%</span>
-              </div>
-              <div class="cwe-track">
-                <div class="cwe-fill" style="width: 38%; background: var(--danger);"></div>
-              </div>
-            </div>
-
-            <div class="cwe-bar">
-              <div class="cwe-info">
-                <span>CWE-120: Buffer Overflows</span>
-                <span>26%</span>
-              </div>
-              <div class="cwe-track">
-                <div class="cwe-fill" style="width: 26%; background: #d96b24;"></div>
-              </div>
-            </div>
-
-            <div class="cwe-bar">
-              <div class="cwe-info">
-                <span>CWE-367: Concurrency & TOCTOU</span>
-                <span>18%</span>
-              </div>
-              <div class="cwe-track">
-                <div class="cwe-fill" style="width: 18%; background: var(--warning);"></div>
-              </div>
-            </div>
-
-            <div class="cwe-bar">
-              <div class="cwe-info">
-                <span>CWE-918: SSRF & Webhooks</span>
-                <span>12%</span>
-              </div>
-              <div class="cwe-track">
-                <div class="cwe-fill" style="width: 12%; background: var(--info);"></div>
-              </div>
-            </div>
-
-            <div class="cwe-bar">
-              <div class="cwe-info">
-                <span>CWE-22: Path Traversal</span>
-                <span>6%</span>
-              </div>
-              <div class="cwe-track">
-                <div class="cwe-fill" style="width: 6%; background: #7a6860;"></div>
-              </div>
+            <div id="cweDistributionList">
+              <div class="empty-ledger-state">Loading detected vulnerability distribution...</div>
             </div>
           </div>
         </div>
@@ -352,47 +387,11 @@
         <div class="chart-card">
           <div class="chart-head">
             <div class="chart-title">Real-Time Autonomous Action Ledger</div>
-            <a href="queue.html" style="font-size: 12.5px; color: var(--accent-gold); text-decoration: none; font-weight: 600;">View All &rarr;</a>
+            <a href="queue.html" style="font-size: 12.5px; color: var(--accent-gold); text-decoration: none; font-weight: 600;">View Issues Queue &rarr;</a>
           </div>
 
-          <div class="activity-row">
-            <div class="activity-icon" style="background: var(--success-bg); color: var(--success);">
-              <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="3 8 7 12 13 4"></polyline>
-              </svg>
-            </div>
-            <div style="flex: 1;">
-              <strong>Patch PR #42 Merged:</strong> Resolved critical SQL Injection in <code>src/auth/service.py</code>
-              <div style="font-size: 11.5px; color: var(--sub);">Verified 14/14 sandbox regression tests &bull; 0 invariants broken</div>
-            </div>
-            <div style="font-size: 12px; color: var(--sub); font-family: 'JetBrains Mono', monospace;">2m ago</div>
-          </div>
-
-          <div class="activity-row">
-            <div class="activity-icon" style="background: var(--info-bg); color: var(--info);">
-              <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="8" cy="8" r="6"></circle>
-                <line x1="8" y1="4" x2="8" y2="8"></line>
-              </svg>
-            </div>
-            <div style="flex: 1;">
-              <strong>Sandbox Verified:</strong> Buffer overflow fix generated for <code>core/protocol/parser.c</code>
-              <div style="font-size: 11.5px; color: var(--sub);">Bound bounds check added &bull; microVM test execution completed in 1.2s</div>
-            </div>
-            <div style="font-size: 12px; color: var(--sub); font-family: 'JetBrains Mono', monospace;">14m ago</div>
-          </div>
-
-          <div class="activity-row">
-            <div class="activity-icon" style="background: rgba(194, 131, 64, 0.15); color: var(--accent-gold);">
-              <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-                <polygon points="5 3 13 8 5 13 5 3"></polygon>
-              </svg>
-            </div>
-            <div style="flex: 1;">
-              <strong>Autonomous Scan Completed:</strong> Project <code>AutoPatch-Core-Engine</code> (42 files indexed)
-              <div style="font-size: 11.5px; color: var(--sub);">Found 5 target vulnerabilities &bull; Generated 5 candidate patches</div>
-            </div>
-            <div style="font-size: 12px; color: var(--sub); font-family: 'JetBrains Mono', monospace;">32m ago</div>
+          <div id="activityLedgerList">
+            <div class="empty-ledger-state">Loading append-only pipeline audit events...</div>
           </div>
         </div>
       </div>
@@ -424,26 +423,273 @@
       });
     }
 
-    async function initDashboard() {
-      const isOnline = await window.autopatch.checkHealth();
-      if (isOnline) {
-        const metrics = await window.autopatch.getDashboardMetrics();
-        if (metrics && metrics.project_summaries) {
-          const projs = metrics.project_summaries;
-          let totalCost = 0;
-          let totalTokens = 0;
-          projs.forEach(p => {
-            totalCost += p.total_cost_usd || 0;
-            totalTokens += p.total_tokens || 0;
-          });
-          const kpiVals = document.querySelectorAll('.kpi-value');
-          if (kpiVals.length >= 2) {
-            kpiVals[1].innerText = `$${totalCost.toFixed(2)}`;
-          }
+    let activeProjectId = '';
+
+    function renderVelocityChart(velocity) {
+      const pathEl = document.getElementById('velocityPath');
+      const areaEl = document.getElementById('velocityArea');
+      const groupEl = document.getElementById('velocityPointsGroup');
+      const labelsEl = document.getElementById('velocityLabels');
+      const titleEl = document.getElementById('velocityTitle');
+
+      if (!velocity || !velocity.points || velocity.points.length === 0) {
+        pathEl.setAttribute('d', 'M0,195 L500,195');
+        areaEl.setAttribute('d', 'M0,195 L500,195 Z');
+        groupEl.innerHTML = '';
+        labelsEl.innerHTML = '<span>No activity recorded yet</span>';
+        return;
+      }
+
+      if (velocity.unit) {
+        titleEl.innerText = `${velocity.unit} (Autonomous Pipeline)`;
+      }
+
+      const points = velocity.points;
+      const maxVal = Math.max(...points.map(p => p.count), 1);
+      const width = 500;
+      const height = 200;
+      const padX = 25;
+      const usableW = width - padX * 2;
+      const bottomY = 180;
+      const topY = 30;
+      const usableH = bottomY - topY;
+
+      const coords = points.map((p, idx) => {
+        const x = points.length === 1
+          ? width / 2
+          : padX + (idx / (points.length - 1)) * usableW;
+        const normalized = p.count / maxVal;
+        const y = bottomY - normalized * usableH;
+        return { x, y, label: p.label, count: p.count };
+      });
+
+      // Build SVG Path
+      let dStr = `M ${coords[0].x.toFixed(1)},${coords[0].y.toFixed(1)}`;
+      for (let i = 1; i < coords.length; i++) {
+        dStr += ` L ${coords[i].x.toFixed(1)},${coords[i].y.toFixed(1)}`;
+      }
+      pathEl.setAttribute('d', dStr);
+
+      // Area Path
+      const areaStr = `${dStr} L ${coords[coords.length - 1].x.toFixed(1)},195 L ${coords[0].x.toFixed(1)},195 Z`;
+      areaEl.setAttribute('d', areaStr);
+
+      // Circles for data points
+      let circlesHtml = '';
+      coords.forEach(pt => {
+        circlesHtml += `
+          <circle cx="${pt.x.toFixed(1)}" cy="${pt.y.toFixed(1)}" r="4.5" fill="#c28340" stroke="#fff" stroke-width="2">
+            <title>${pt.label}: ${pt.count} events</title>
+          </circle>
+        `;
+      });
+      groupEl.innerHTML = circlesHtml;
+
+      // X-Axis Labels
+      let labelsHtml = '';
+      const step = Math.max(1, Math.floor(points.length / 5));
+      points.forEach((p, idx) => {
+        if (idx === 0 || idx === points.length - 1 || idx % step === 0) {
+          labelsHtml += `<span>${p.label}</span>`;
         }
+      });
+      labelsEl.innerHTML = labelsHtml;
+    }
+
+    function renderCweDistribution(cweList) {
+      const container = document.getElementById('cweDistributionList');
+      const badge = document.getElementById('cweTotalBadge');
+      if (!cweList || cweList.length === 0) {
+        container.innerHTML = `
+          <div class="empty-ledger-state">
+            <div style="font-weight: 600; margin-bottom: 4px;">Zero Defect Findings</div>
+            <div>No unresolved vulnerabilities or defects found in the selected project scope.</div>
+          </div>
+        `;
+        if (badge) badge.innerText = '0 Findings';
+        return;
+      }
+
+      const totalFindings = cweList.reduce((acc, it) => acc + it.count, 0);
+      if (badge) badge.innerText = `${totalFindings} Total Finding${totalFindings === 1 ? '' : 's'}`;
+
+      let html = '';
+      cweList.forEach(item => {
+        html += `
+          <div class="cwe-bar">
+            <div class="cwe-info">
+              <span>${item.label}</span>
+              <span>${item.count} (${item.percentage}%)</span>
+            </div>
+            <div class="cwe-track">
+              <div class="cwe-fill" style="width: ${Math.max(item.percentage, 2)}%; background: ${item.color};"></div>
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    function getEventIcon(badgeType) {
+      if (badgeType === 'success') {
+        return `
+          <div class="activity-icon" style="background: var(--success-bg); color: var(--success);">
+            <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 8 7 12 13 4"></polyline>
+            </svg>
+          </div>
+        `;
+      } else if (badgeType === 'gold') {
+        return `
+          <div class="activity-icon" style="background: rgba(194, 131, 64, 0.15); color: var(--accent-gold);">
+            <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="5 3 13 8 5 13 5 3"></polygon>
+            </svg>
+          </div>
+        `;
+      } else if (badgeType === 'warning') {
+        return `
+          <div class="activity-icon" style="background: rgba(224, 159, 62, 0.15); color: var(--warning);">
+            <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M8 2l6 11H2L8 2z"></path>
+              <line x1="8" y1="7" x2="8" y2="9"></line>
+              <circle cx="8" cy="11.5" r="0.5" fill="currentColor"></circle>
+            </svg>
+          </div>
+        `;
+      }
+      return `
+        <div class="activity-icon" style="background: var(--info-bg); color: var(--info);">
+          <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="8" cy="8" r="6"></circle>
+            <line x1="8" y1="4" x2="8" y2="8"></line>
+          </svg>
+        </div>
+      `;
+    }
+
+    function renderActivityLedger(activities) {
+      const container = document.getElementById('activityLedgerList');
+      if (!activities || activities.length === 0) {
+        container.innerHTML = `
+          <div class="empty-ledger-state">
+            <div style="font-weight: 600; margin-bottom: 4px;">Action Ledger Quiet</div>
+            <div>No pipeline operations logged yet for this project. Run a scan to initiate activity.</div>
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+      activities.forEach(act => {
+        const iconHtml = getEventIcon(act.badge_type);
+        html += `
+          <div class="activity-row">
+            ${iconHtml}
+            <div style="flex: 1; min-width: 0;">
+              <div style="font-size: 13px; color: var(--ink);">
+                <strong>${act.title}:</strong> <span style="color: var(--sub);">${act.description}</span>
+              </div>
+              <div style="font-size: 11.5px; color: var(--sub); margin-top: 2px;">
+                Actor: <code>${act.actor}</code> &bull; Job: <code>${act.job_id.substring(0, 8)}</code>
+              </div>
+            </div>
+            <div style="font-size: 12px; color: var(--sub); font-family: 'JetBrains Mono', monospace; white-space: nowrap; margin-left: 8px;">
+              ${act.time_ago}
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    async function loadDashboard(projectId = null) {
+      try {
+        const isOnline = await window.autopatch.checkHealth();
+        if (!isOnline) {
+          document.getElementById('kpiVerificationSub').innerText = 'Backend offline';
+          return;
+        }
+
+        const metrics = await window.autopatch.getDashboardMetrics(projectId);
+        if (!metrics) return;
+
+        // Populate Project selector dropdown once
+        const selectEl = document.getElementById('projectFilterSelect');
+        if (selectEl && metrics.projects_list && selectEl.options.length <= 1) {
+          selectEl.innerHTML = '<option value="">All Monitored Projects</option>';
+          metrics.projects_list.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = p.project_id;
+            opt.textContent = p.name;
+            if (p.project_id === activeProjectId) opt.selected = true;
+            selectEl.appendChild(opt);
+          });
+        }
+
+        // Render Observability Financial & Token Strip
+        if (metrics.kpis) {
+          const kpis = metrics.kpis;
+          document.getElementById('costSpend').innerText = `$${kpis.total_cost_usd.toFixed(2)}`;
+          document.getElementById('costTokens').innerText = kpis.total_tokens.toLocaleString();
+          document.getElementById('costCache').innerText = `${kpis.cache_hit_rate.toFixed(1)}%`;
+          document.getElementById('costEvents').innerText = `${kpis.total_audit_events.toLocaleString()} events`;
+
+          // KPI 1: Auto-Verification Rate
+          document.getElementById('kpiVerificationRate').innerText = `${kpis.verification_rate.toFixed(1)}%`;
+          document.getElementById('kpiVerificationSub').innerText = kpis.verification_rate_label || 'Candidate patches verified';
+
+          // KPI 2: MTTR
+          document.getElementById('kpiMttr').innerHTML = `${kpis.mttr_display}`;
+          document.getElementById('kpiMttrSub').innerText = kpis.mttr_subtitle || 'Autonomous turnaround';
+
+          // KPI 3: Resolved
+          document.getElementById('kpiResolved').innerText = kpis.vulnerabilities_resolved.toString();
+          document.getElementById('kpiResolvedSub').innerText = `${kpis.patches_applied} applied &bull; ${kpis.vulnerabilities_pending} pending`;
+
+          // KPI 4: Operations
+          document.getElementById('kpiOperations').innerText = kpis.total_audit_events.toLocaleString();
+          document.getElementById('kpiOperationsSub').innerText = `${kpis.total_projects} projects &bull; ${kpis.total_jobs} scans run`;
+        }
+
+        // Render Velocity Curve Chart
+        renderVelocityChart(metrics.velocity_curve);
+
+        // Render CWE Breakdown
+        renderCweDistribution(metrics.cwe_distribution);
+
+        // Render Real-time Activity Ledger
+        renderActivityLedger(metrics.recent_activities);
+
+      } catch (err) {
+        console.error('Failed to load live dashboard telemetry:', err);
       }
     }
-    initDashboard();
+
+    // Dropdown change listener
+    const projSelect = document.getElementById('projectFilterSelect');
+    if (projSelect) {
+      projSelect.addEventListener('change', (e) => {
+        activeProjectId = e.target.value;
+        loadDashboard(activeProjectId || null);
+      });
+    }
+
+    // Refresh button listener
+    const refreshBtn = document.getElementById('refreshBtn');
+    if (refreshBtn) {
+      refreshBtn.addEventListener('click', () => {
+        loadDashboard(activeProjectId || null);
+      });
+    }
+
+    // Initial load & automatic 30s polling
+    loadDashboard();
+    setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        loadDashboard(activeProjectId || null);
+      }
+    }, 30000);
   </script>
 </body>
 </html>

@@ -386,14 +386,15 @@ class AutoPatchClient {
   }
 
   /**
-   * Fetches dashboard telemetry and cost observability data.
+   * Fetches real live dashboard telemetry, KPIs, CWE breakdown, velocity points, and activity ledger.
    */
-  async getDashboardMetrics() {
+  async getDashboardMetrics(projectId = null) {
     if (!this._isOnline) return null;
     try {
-      const res = await fetch(`${this.config.baseUrl}/observability/dashboard`, {
-        headers: this.headers,
-      });
+      const url = projectId
+        ? `${this.config.baseUrl}/observability/dashboard?project_id=${encodeURIComponent(projectId)}`
+        : `${this.config.baseUrl}/observability/dashboard`;
+      const res = await fetch(url, { headers: this.headers });
       if (!res.ok) return null;
       return await res.json();
     } catch {

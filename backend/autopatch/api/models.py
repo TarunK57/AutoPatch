@@ -19,8 +19,8 @@ class ProjectResponse(BaseModel):
     project_id: str
     name: str
     owner_id: str
-    total_files: int
-    languages: List[str]
+    total_files: int = 0
+    languages: List[str] = Field(default_factory=lambda: ["python"])
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
@@ -255,6 +255,72 @@ class GitHubPortalConnectResponse(BaseModel):
     user: GitHubUserResponse
     total_repositories: int
     repositories: List[GitHubRepoItem] = Field(default_factory=list)
+
+
+class DashboardKpis(BaseModel):
+    verification_rate: float = 0.0
+    verification_rate_label: str = ""
+    mttr_seconds: float = 0.0
+    mttr_display: str = "0.0s"
+    mttr_subtitle: str = ""
+    vulnerabilities_resolved: int = 0
+    vulnerabilities_total: int = 0
+    vulnerabilities_pending: int = 0
+    patches_applied: int = 0
+    total_audit_events: int = 0
+    total_projects: int = 0
+    total_jobs: int = 0
+    total_cost_usd: float = 0.0
+    total_tokens: int = 0
+    cache_hit_rate: float = 0.0
+
+
+class CweCategoryItem(BaseModel):
+    key: str
+    label: str
+    count: int
+    percentage: float
+    color: str
+
+
+class VelocityPoint(BaseModel):
+    label: str
+    count: int
+
+
+class VelocityCurveData(BaseModel):
+    unit: str
+    points: List[VelocityPoint] = Field(default_factory=list)
+
+
+class DashboardActivityItem(BaseModel):
+    event_id: str
+    job_id: str
+    bug_id: Optional[str] = None
+    event_type: str
+    actor: str
+    timestamp: str
+    time_ago: str
+    title: str
+    description: str
+    badge_type: str = "info"
+
+
+class ProjectSelectItem(BaseModel):
+    project_id: str
+    name: str
+
+
+class DashboardTelemetryResponse(BaseModel):
+    project_id: Optional[str] = None
+    project_name: Optional[str] = None
+    generated_at: str
+    kpis: DashboardKpis
+    cwe_distribution: List[CweCategoryItem] = Field(default_factory=list)
+    velocity_curve: VelocityCurveData
+    recent_activities: List[DashboardActivityItem] = Field(default_factory=list)
+    projects_list: List[ProjectSelectItem] = Field(default_factory=list)
+
 
 
 
