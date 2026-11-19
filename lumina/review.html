@@ -361,11 +361,11 @@
                       <div style="font-size: 9.5px; font-weight: 700; color: #a3958f; text-transform: uppercase;">DOWNSTREAM IMPACT PREVIEW</div>
                       <div class="hud-stat-grid" style="grid-template-columns: repeat(2, 1fr); gap: 6px; margin-top: 6px;">
                         <div class="hud-stat-box" style="padding: 5px 8px;">
-                          <div class="hud-stat-val" id="reviewTwinBlastPct" style="font-size: 14px; color: #ff4b2b;">--%</div>
+                          <div class="hud-stat-val" id="reviewTwinBlastPct" style="font-size: 14px; color: #e5a93b;">--%</div>
                           <div class="hud-stat-lbl" style="font-size: 9px;">Blast Radius</div>
                         </div>
                         <div class="hud-stat-box" style="padding: 5px 8px;">
-                          <div class="hud-stat-val" id="reviewTwinRiskLevel" style="font-size: 14px; color: #34d399;">LOW</div>
+                          <div class="hud-stat-val" id="reviewTwinRiskLevel" style="font-size: 14px; color: #52c27c;">LOW</div>
                           <div class="hud-stat-lbl" style="font-size: 9px;">Risk Level</div>
                         </div>
                       </div>
@@ -386,11 +386,11 @@
                   <!-- Downstream APIs and Tests breakdown -->
                   <div style="padding: 12px 16px; background: #181412; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; font-size: 11.5px; color: #ab9c94;">
                     <div>
-                      <span style="color: #ff4b2b; font-weight: 600;">Public APIs at Risk:</span>
+                      <span style="color: #e05244; font-weight: 600;">Public APIs at Risk:</span>
                       <span id="reviewTwinApisAtRisk" style="color: #f7efe8; margin-left: 4px;">None</span>
                     </div>
                     <div>
-                      <span style="color: #34d399; font-weight: 600;">Verification Tests Exercised:</span>
+                      <span style="color: #52c27c; font-weight: 600;">Verification Tests Exercised:</span>
                       <span id="reviewTwinTestsExercised" style="color: #f7efe8; margin-left: 4px;">None</span>
                     </div>
                   </div>
@@ -902,14 +902,14 @@
             const apisEl = document.getElementById('reviewTwinApisAtRisk');
             if (apisEl) {
               apisEl.innerHTML = (b.critical_apis_at_risk && b.critical_apis_at_risk.length)
-                ? b.critical_apis_at_risk.map(a => `<code style="color:#ff7a00;">${escapeHtml(a)}</code>`).join(', ')
-                : '<span style="color:#34d399;">None (0 exposed APIs)</span>';
+                ? b.critical_apis_at_risk.map(a => `<code style="color:#e5a93b; font-family:'JetBrains Mono',monospace;">${escapeHtml(a)}</code>`).join(', ')
+                : '<span style="color:#52c27c;">None (0 exposed APIs)</span>';
             }
 
             const testsEl = document.getElementById('reviewTwinTestsExercised');
             if (testsEl) {
               testsEl.innerHTML = (b.tests_exercised && b.tests_exercised.length)
-                ? b.tests_exercised.map(t => `<code style="color:#34d399;">${escapeHtml(t)}</code>`).join(', ')
+                ? b.tests_exercised.map(t => `<code style="color:#52c27c; font-family:'JetBrains Mono',monospace;">${escapeHtml(t)}</code>`).join(', ')
                 : '<span style="color:#ab9c94;">BRT harness verifies patch</span>';
             }
 
@@ -918,6 +918,7 @@
             const tooltip = document.getElementById('reviewTwinTooltip');
             if (canvas && window.CodebaseDigitalTwinVisualizer) {
               const viz = new CodebaseDigitalTwinVisualizer(canvas, {
+                defaultHeight: 380,
                 onHover: (node, mx, my) => {
                   if (!tooltip) return;
                   if (node) {
@@ -928,8 +929,8 @@
                       <div style="font-weight:700; color: #f7efe8;">${escapeHtml(node.name)}</div>
                       <div style="font-size:10px; color:#c28340; text-transform:uppercase;">${node.type} &bull; ${node.category || 'core'}</div>
                       <div style="font-size:10.5px; color:#ab9c94;">${escapeHtml(node.file_path)}:${node.line}</div>
-                      <div style="margin-top:4px; font-size:10.5px; color:${node.is_direct_target ? '#ff4b2b' : (node.is_affected ? '#ff7a00' : '#34d399')}; font-weight:600;">
-                        ${node.is_direct_target ? '🔴 DIRECT TARGET OF PATCH' : (node.is_affected ? '⚠️ IN DOWNSTREAM BLAST RADIUS' : '✅ SAFE / UNAFFECTED')}
+                      <div style="margin-top:4px; font-size:10.5px; color:${node.is_direct_target ? '#e05244' : (node.is_affected ? '#e5a93b' : '#52c27c')}; font-weight:600;">
+                        ${node.is_direct_target ? 'TARGET COMPONENT' : (node.is_affected ? 'IN DOWNSTREAM BLAST RADIUS' : 'SAFE / UNAFFECTED')}
                       </div>
                     `;
                   } else {
@@ -939,6 +940,7 @@
               });
               viz.setData(impact);
               viz.setBlastRadius(b);
+              window.reviewDigitalTwinViz = viz;
 
               const rotateBtn = document.getElementById('reviewTwinRotateBtn');
               if (rotateBtn) {
@@ -965,6 +967,9 @@
           const isHidden = reviewTwinBody.style.display === 'none';
           reviewTwinBody.style.display = isHidden ? 'block' : 'none';
           toggleTwinBtn.innerText = isHidden ? 'Collapse 3D View' : 'Expand 3D View';
+          if (isHidden && window.reviewDigitalTwinViz) {
+            setTimeout(() => window.reviewDigitalTwinViz.initCanvasSize(), 50);
+          }
         };
       }
 
