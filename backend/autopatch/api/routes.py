@@ -1142,6 +1142,18 @@ async def create_git_remediation_branch(
             include_brt_tests=request.include_brt_tests,
         )
     except GitIntegrationError as e:
+        err_str = str(e)
+        if ("Permission to" in err_str and "denied" in err_str) or ("403" in err_str):
+            target_repo = (remote_url if "remote_url" in locals() else None) or project.get("github_url", "upstream repository")
+            raise HTTPException(
+                status_code=403,
+                detail=(
+                    f"GitHub Write Permission Denied (403): You do not have write access to push branches directly to '{target_repo}'. "
+                    f"On GitHub, pushing directly to someone else's repository requires collaborator permissions. "
+                    f"To deliver your remediation: (1) Specify your own fork or personal repository URL in the Remote URL field, or "
+                    f"(2) Click 'Download Patched ZIP' to download the complete codebase with all verified fixes applied."
+                ),
+            )
         raise HTTPException(status_code=400, detail=str(e))
 
     event_store.append(
@@ -1297,6 +1309,18 @@ async def push_git_remediation_branch(
             output=res.get("output", "Branch pushed successfully"),
         )
     except GitIntegrationError as e:
+        err_str = str(e)
+        if ("Permission to" in err_str and "denied" in err_str) or ("403" in err_str):
+            target_repo = (remote_url if "remote_url" in locals() else None) or project.get("github_url", "upstream repository")
+            raise HTTPException(
+                status_code=403,
+                detail=(
+                    f"GitHub Write Permission Denied (403): You do not have write access to push branches directly to '{target_repo}'. "
+                    f"On GitHub, pushing directly to someone else's repository requires collaborator permissions. "
+                    f"To deliver your remediation: (1) Specify your own fork or personal repository URL in the Remote URL field, or "
+                    f"(2) Click 'Download Patched ZIP' to download the complete codebase with all verified fixes applied."
+                ),
+            )
         raise HTTPException(status_code=400, detail=str(e))
 
 
@@ -1512,6 +1536,18 @@ async def revert_git_commit(
             bug_id_or_commit_sha=request.bug_id_or_commit_sha,
         )
     except GitIntegrationError as e:
+        err_str = str(e)
+        if ("Permission to" in err_str and "denied" in err_str) or ("403" in err_str):
+            target_repo = (remote_url if "remote_url" in locals() else None) or project.get("github_url", "upstream repository")
+            raise HTTPException(
+                status_code=403,
+                detail=(
+                    f"GitHub Write Permission Denied (403): You do not have write access to push branches directly to '{target_repo}'. "
+                    f"On GitHub, pushing directly to someone else's repository requires collaborator permissions. "
+                    f"To deliver your remediation: (1) Specify your own fork or personal repository URL in the Remote URL field, or "
+                    f"(2) Click 'Download Patched ZIP' to download the complete codebase with all verified fixes applied."
+                ),
+            )
         raise HTTPException(status_code=400, detail=str(e))
 
     return RevertCommitResponse(

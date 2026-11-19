@@ -235,3 +235,28 @@ class GitHubClient:
                     "updated_at": r.get("updated_at"),
                 })
             return repos
+
+    async def fork_repository(self, repo_slug: str, token: Optional[str] = None) -> Dict[str, Any]:
+        """Forks a GitHub repository to the authenticated user's account."""
+        tok = (token or self.token or "").strip()
+        if not tok:
+            raise GitHubTokenMissingError("GitHub token required to fork repository.")
+        headers = {
+            "Authorization": f"Bearer {tok}",
+            "Accept": "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28",
+            "User-Agent": "AutoPatch-Agent/1.0",
+        }
+        url = f"{self.base_url}/repos/{repo_slug}/forks"
+        async with httpx.AsyncClient(transport=self.transport, timeout=self.timeout) as client:
+            resp = await client.post(url, headers=headers)
+            if resp.status_code not in (200, 202):
+                err_data = resp.json() if resp.headers.get("content-type", "").startswith("application/json") else {}
+                msg = err_data.get("message", resp.text)
+                raise GitHubApiError(resp.status_code, msg, details=err_data)
+            data = resp.json()
+            return {
+                "clone_url": data.get("clone_url"),
+                "html_url": data.get("html_url"),
+                "full_name": data.get("full_name"),
+            }
