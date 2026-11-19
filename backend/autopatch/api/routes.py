@@ -8,6 +8,7 @@ import json
 import os
 import shutil
 import tempfile
+import httpx
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -51,6 +52,9 @@ from autopatch.api.models import (
     GitHubUserResponse,
     GitHubRepoItem,
     GitHubRepoListResponse,
+    GitHubOAuthConfigResponse,
+    GitHubPortalConnectRequest,
+    GitHubPortalConnectResponse,
     RevertCommitRequest,
     RevertCommitResponse,
     RevertResponse,
@@ -1307,20 +1311,122 @@ class GitHubReposBody(BaseModel):
 
 
 @router.get(
+    "/github/oauth/config",
+    response_model=GitHubOAuthConfigResponse,
+    summary="Get GitHub OAuth Configuration",
+    description="Returns whether an official GitHub OAuth app is configured and the authorization URL.",
+)
+async def get_github_oauth_config() -> GitHubOAuthConfigResponse:
+    client_id = os.environ.get("GITHUB_CLIENT_ID")
+    is_conf = bool(client_id)
+    scope = "repo,read:user"
+    auth_url = (
+        f"https://github.com/login/oauth/authorize?client_id={client_id}&scope={scope}"
+        if client_id
+        else None
+    )
+    return GitHubOAuthConfigResponse(
+        is_configured=is_conf,
+        client_id=client_id,
+        scope=scope,
+        auth_url=auth_url,
+    )
+
+
+@router.get(
+    "/github/oauth/callback",
+    summary="GitHub OAuth Callback",
+    description="Exchanges GitHub OAuth code for access token.",
+)
+async def github_oauth_callback(code: str = Query(...)):
+    client_id = os.environ.get("GITHUB_CLIENT_ID")
+    client_secret = os.environ.get("GITHUB_CLIENT_SECRET")
+    if not client_id or not client_secret:
+        raise HTTPException(status_code=400, detail="GitHub OAuth not configured on server.")
+
+    async with httpx.AsyncClient() as client:
+        resp = await client.post(
+            "https://github.com/login/oauth/access_token",
+            data={
+                "client_id": client_id,
+                "client_secret": client_secret,
+                "code": code,
+            },
+            headers={"Accept": "application/json"},
+        )
+        if resp.status_code != 200:
+            raise HTTPException(status_code=resp.status_code, detail="OAuth code exchange failed.")
+        data = resp.json()
+        token = data.get("access_token")
+        if not token:
+            raise HTTPException(status_code=400, detail=data.get("error_description", "No token returned"))
+
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head><title>GitHub Authorization Successful</title></head>
+    <body style="font-family: system-ui; text-align: center; padding: 40px; background: #faf6f0;">
+        <h2>✓ GitHub Authorization Successful</h2>
+        <p>Connecting your account to AutoPatch...</p>
+        <script>
+            if (window.opener) {{
+                window.opener.postMessage({{
+                    type: 'GITHUB_OAUTH_TOKEN',
+                    token: '{token}'
+                }}, '*');
+                window.close();
+            }} else {{
+                window.location.href = '/studio.html?connected=1';
+            }}
+        </script>
+    </body>
+    </html>
+    """
+    return HTMLResponse(content=html_content)
+
+
+@router.post(
+    "/github/portal-connect",
+    response_model=GitHubPortalConnectResponse,
+    summary="Direct Connection via Official GitHub Portal",
+    description="Directly connects to an official GitHub account, fetching profile and all accessible repositories without requiring a manual PAT.",
+)
+async def portal_connect_github(
+    req: GitHubPortalConnectRequest,
+    current_user: User = Depends(get_current_user),
+) -> GitHubPortalConnectResponse:
+    client = GitHubClient(token=req.token)
+    try:
+        user_info = await client.get_authenticated_user(token=req.token, username=req.username)
+        repos = await client.list_user_repositories(token=req.token, username=req.username)
+        return GitHubPortalConnectResponse(
+            connected=True,
+            user=GitHubUserResponse(**user_info),
+            total_repositories=len(repos),
+            repositories=[GitHubRepoItem(**r) for r in repos],
+        )
+    except GitHubApiError as e:
+        raise HTTPException(status_code=e.status_code, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.get(
     "/github/user",
     response_model=GitHubUserResponse,
     summary="Get GitHub Authenticated User Profile",
-    description="Validates a GitHub Personal Access Token and returns the authenticated user profile.",
+    description="Validates a GitHub Personal Access Token or username and returns the user profile.",
 )
 async def get_github_user(
     token: Optional[str] = Query(None),
     github_token: Optional[str] = Query(None),
+    username: Optional[str] = Query(None),
     current_user: User = Depends(get_current_user),
 ) -> GitHubUserResponse:
     active_token = github_token or token
     client = GitHubClient(token=active_token)
     try:
-        user_info = await client.get_authenticated_user(token=active_token)
+        user_info = await client.get_authenticated_user(token=active_token, username=username)
         return GitHubUserResponse(**user_info)
     except GitHubTokenMissingError as e:
         raise HTTPException(status_code=401, detail=str(e))

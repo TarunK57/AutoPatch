@@ -238,3 +238,23 @@ class PushBranchResponse(BaseModel):
     output: str
 
 
+class GitHubOAuthConfigResponse(BaseModel):
+    is_configured: bool
+    client_id: Optional[str] = None
+    scope: str = "repo,read:user"
+    auth_url: Optional[str] = None
+
+
+class GitHubPortalConnectRequest(BaseModel):
+    username: str
+    token: Optional[str] = None
+
+
+class GitHubPortalConnectResponse(BaseModel):
+    connected: bool
+    user: GitHubUserResponse
+    total_repositories: int
+    repositories: List[GitHubRepoItem] = Field(default_factory=list)
+
+
+

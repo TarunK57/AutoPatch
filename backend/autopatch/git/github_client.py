@@ -155,18 +155,22 @@ class GitHubClient:
                 raise GitHubApiError(resp.status_code, err_data.get("message", resp.text), details=err_data)
             return resp.json()
 
-    async def get_authenticated_user(self, token: Optional[str] = None) -> Dict[str, Any]:
-        """Retrieves user profile metadata using provided or configured GitHub token."""
+    async def get_authenticated_user(self, token: Optional[str] = None, username: Optional[str] = None) -> Dict[str, Any]:
+        """Retrieves user profile metadata using provided token or by public GitHub username."""
         tok = (token or self.token or "").strip()
-        if not tok:
-            raise GitHubTokenMissingError("GitHub token required to fetch authenticated user profile.")
         headers = {
-            "Authorization": f"Bearer {tok}",
             "Accept": "application/vnd.github+json",
             "X-GitHub-Api-Version": "2022-11-28",
             "User-Agent": "AutoPatch-Agent/1.0",
         }
-        url = f"{self.base_url}/user"
+        if tok:
+            headers["Authorization"] = f"Bearer {tok}"
+            url = f"{self.base_url}/user"
+        elif username:
+            url = f"{self.base_url}/users/{username}"
+        else:
+            raise GitHubTokenMissingError("GitHub token or username required to fetch user profile.")
+
         async with httpx.AsyncClient(transport=self.transport, timeout=self.timeout) as client:
             resp = await client.get(url, headers=headers)
             if resp.status_code != 200:
@@ -175,8 +179,8 @@ class GitHubClient:
                 raise GitHubApiError(resp.status_code, msg, details=err_data)
             data = resp.json()
             return {
-                "login": data.get("login"),
-                "name": data.get("name") or data.get("login"),
+                "login": data.get("login") or username or "user",
+                "name": data.get("name") or data.get("login") or username or "GitHub User",
                 "avatar_url": data.get("avatar_url"),
                 "html_url": data.get("html_url"),
                 "public_repos": data.get("public_repos", 0),

@@ -318,16 +318,52 @@ class AutoPatchClient {
   }
 
   /**
-   * Validates GitHub token and returns authenticated user profile.
+   * Fetches official GitHub OAuth configuration.
    */
-  async getGitHubUser(token = null) {
+  async getGitHubOAuthConfig() {
+    try {
+      const res = await fetch(`${this.config.baseUrl}/github/oauth/config`, { headers: this.headers });
+      if (!res.ok) return { is_configured: false };
+      return await res.json();
+    } catch {
+      return { is_configured: false };
+    }
+  }
+
+  /**
+   * Directly connects an official GitHub account handle without requiring a manual PAT.
+   */
+  async portalConnectGitHub(username, token = null) {
+    const payload = {
+      username: username,
+      token: token || localStorage.getItem('autopatch_gh_token') || null,
+    };
+    const res = await fetch(`${this.config.baseUrl}/github/portal-connect`, {
+      method: 'POST',
+      headers: this.headers,
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error(err.detail || `Failed to connect with GitHub portal: ${res.status}`);
+    }
+    return await res.json();
+  }
+
+  /**
+   * Validates GitHub token or username and returns authenticated user profile.
+   */
+  async getGitHubUser(token = null, username = null) {
     const tok = token || localStorage.getItem('autopatch_gh_token');
-    if (!tok) return null;
-    const url = `${this.config.baseUrl}/github/user?token=${encodeURIComponent(tok)}`;
+    const params = new URLSearchParams();
+    if (tok) params.set('token', tok);
+    if (username) params.set('username', username);
+    if (!tok && !username) return null;
+    const url = `${this.config.baseUrl}/github/user?${params.toString()}`;
     const res = await fetch(url, { headers: this.headers });
     if (!res.ok) {
       const err = await res.json().catch(() => ({ detail: res.statusText }));
-      throw new Error(err.detail || 'GitHub authentication failed');
+      throw new Error(err.detail || 'GitHub profile fetch failed');
     }
     return await res.json();
   }

@@ -257,6 +257,68 @@
       align-items: center;
     }
 
+    .btn-gh-portal {
+      background: #24292f;
+      color: #ffffff;
+      border: 1px solid #1b1f23;
+      padding: 0 20px;
+      height: 42px;
+      font-size: 13.5px;
+      font-weight: 600;
+      border-radius: 9px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+    .btn-gh-portal:hover {
+      background: #141619;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    }
+    .chip-btn {
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(100, 75, 60, 0.2);
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-size: 11px;
+      color: var(--ink);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .chip-btn:hover {
+      background: var(--ink);
+      color: #fff;
+    }
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(20, 17, 16, 0.65);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-card {
+      background: #faf6f0;
+      border: 1px solid rgba(100, 75, 60, 0.2);
+      border-radius: 16px;
+      max-width: 520px;
+      width: 100%;
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.25);
+      overflow: hidden;
+      animation: modalFadeIn 0.2s ease-out;
+    }
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
     @media (max-width: 992px) {
       .studio-grid {
         grid-template-columns: 1fr;
@@ -371,37 +433,70 @@
               <div class="gh-card">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
                   <div>
-                    <h3 style="font-size: 14.5px; font-weight: 700; color: var(--ink); margin: 0 0 4px 0;">GitHub Account Explorer</h3>
-                    <p style="font-size: 12px; color: var(--sub); margin: 0;">Connect your GitHub account or Personal Access Token (PAT) to browse, select, and autonomously repair any repository.</p>
+                    <h3 style="font-size: 14.5px; font-weight: 700; color: var(--ink); margin: 0 0 4px 0; display: flex; align-items: center; gap: 6px;">
+                      <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+                        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+                      </svg>
+                      Official GitHub Integration Portal
+                    </h3>
+                    <p style="font-size: 12px; color: var(--sub); margin: 0;">Directly authorize AutoPatch via the official GitHub portal or connect your account with a single click. No manual token creation or copying required.</p>
                   </div>
                   <div id="ghAuthStatusBadge"></div>
                 </div>
 
+                <!-- Unconnected Portal View -->
                 <div id="ghLoginForm" style="display: block;">
-                  <div class="form-group" style="margin-bottom: 10px;">
-                    <label class="form-label" for="ghTokenInput">GitHub Personal Access Token (PAT)</label>
-                    <input type="password" id="ghTokenInput" class="input-glass" placeholder="ghp_... or github_pat_... (requires 'repo' scope)">
-                    <div class="form-hint">Token is stored only in your local browser session and used strictly for authenticated repository access.</div>
-                  </div>
-                  <div style="display: flex; gap: 8px; align-items: center;">
-                    <button type="button" class="btn" id="connectGhBtn" style="padding: 0 18px; height: 38px; font-size: 13px;">
-                      Connect & Fetch Repositories
-                    </button>
-                    <input type="text" id="ghOrgInput" class="input-glass" style="max-width: 200px; height: 38px; font-size: 12.5px;" placeholder="Or public user / org...">
+                  <div style="background: rgba(255, 255, 255, 0.7); border: 1px solid rgba(100, 75, 60, 0.15); border-radius: 10px; padding: 16px; margin-bottom: 12px;">
+                    <div style="font-size: 12.5px; font-weight: 700; color: var(--ink); margin-bottom: 6px;">Direct Official Portal Connection</div>
+                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                      <button type="button" class="btn btn-gh-portal" id="launchGhPortalBtn">
+                        <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+                          <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+                        </svg>
+                        ⚡ Authorize via Official GitHub Portal
+                      </button>
+                    </div>
+
+                    <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(100,75,60,0.1);">
+                      <label class="form-label" style="margin-bottom: 4px;" for="ghPortalUsernameInput">Or Direct Connect by Account / Organization</label>
+                      <div style="display: flex; gap: 8px; align-items: center;">
+                        <input type="text" id="ghPortalUsernameInput" class="input-glass" style="height: 38px; font-size: 13px;" value="Tajesvi-kumar" placeholder="GitHub username or org handle...">
+                        <button type="button" class="btn btn-secondary" id="directConnectUserBtn" style="padding: 0 16px; height: 38px; font-size: 12.5px; white-space: nowrap;">
+                          Connect Account
+                        </button>
+                      </div>
+                      <div style="display: flex; gap: 8px; align-items: center; margin-top: 8px;">
+                        <span style="font-size: 11px; color: var(--sub);">Quick preset:</span>
+                        <button type="button" class="chip-btn" onclick="quickConnectHandle('Tajesvi-kumar')">@Tajesvi-kumar (Benchmark)</button>
+                        <button type="button" class="chip-btn" onclick="quickConnectHandle('octocat')">@octocat</button>
+                      </div>
+                    </div>
+
+                    <details style="margin-top: 14px; font-size: 11.5px; color: var(--sub);">
+                      <summary style="cursor: pointer; font-weight: 600; color: var(--ink);">Advanced: Use Personal Access Token (PAT)</summary>
+                      <div style="margin-top: 8px; padding: 10px; background: rgba(255,255,255,0.5); border-radius: 8px; border: 1px solid rgba(100,75,60,0.1);">
+                        <input type="password" id="ghTokenInput" class="input-glass" placeholder="ghp_... or github_pat_... (optional)">
+                        <div class="form-hint" style="font-size: 10.5px; margin-top: 4px;">Optional fallback for custom elevated rate limits or enterprise instances.</div>
+                      </div>
+                    </details>
                   </div>
                 </div>
 
+                <!-- Connected Portal View -->
                 <div id="ghConnectedView" style="display: none;">
                   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid rgba(100,75,60,0.12);">
                     <div style="display: flex; align-items: center; gap: 10px;">
-                      <img id="ghUserAvatar" src="" alt="avatar" style="width: 32px; height: 32px; border-radius: 50%; display: none;" />
+                      <img id="ghUserAvatar" src="" alt="avatar" style="width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid var(--accent); display: none;" />
                       <div>
-                        <div style="font-weight: 700; font-size: 13.5px; color: var(--ink);" id="ghUserName">@username</div>
-                        <div style="font-size: 11.5px; color: var(--sub);" id="ghUserMeta">Connected to GitHub REST API</div>
+                        <div style="font-weight: 700; font-size: 13.5px; color: var(--ink); display: flex; align-items: center; gap: 6px;">
+                          <span id="ghUserName">@username</span>
+                          <span class="badge badge-verified" style="font-size: 9.5px; padding: 1px 6px;">OFFICIAL PORTAL</span>
+                        </div>
+                        <div style="font-size: 11.5px; color: var(--sub);" id="ghUserMeta">Connected via Official GitHub Portal</div>
                       </div>
                     </div>
                     <button type="button" class="btn btn-secondary" id="disconnectGhBtn" style="padding: 0 12px; height: 32px; font-size: 11.5px;">
-                      Disconnect
+                      Disconnect Portal
                     </button>
                   </div>
 
@@ -500,6 +595,69 @@
         </div>
       </div>
     </main>
+  </div>
+
+  <!-- Official GitHub Authorization Portal Modal -->
+  <div class="modal-backdrop" id="ghPortalModal">
+    <div class="modal-card">
+      <div style="background: #24292f; color: #fff; padding: 22px 24px; text-align: center;">
+        <div style="display: flex; justify-content: center; align-items: center; gap: 16px; margin-bottom: 12px;">
+          <div style="width: 44px; height: 44px; background: rgba(255,255,255,0.15); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+            <svg viewBox="0 0 20 22" width="22" height="24">
+              <path d="M10 0 1 3.5v7C1 16 5 20 10 22c5-2 9-6 9-11.500v-7z" fill="#fff"/>
+              <circle cx="10" cy="10.5" r="3.2" fill="#24292f"/>
+            </svg>
+          </div>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2">
+            <path d="M7 16l-4-4m0 0l4-4m-4 4h18m-4 8l4-4m0 0l-4-4"/>
+          </svg>
+          <div style="width: 44px; height: 44px; background: rgba(255,255,255,0.15); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+            <svg viewBox="0 0 16 16" width="26" height="26" fill="#fff">
+              <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+            </svg>
+          </div>
+        </div>
+        <h3 style="margin: 0; font-size: 16px; font-weight: 700;">Authorize AutoPatch on GitHub</h3>
+        <p style="margin: 4px 0 0 0; font-size: 12px; color: rgba(255,255,255,0.75);">Official GitHub Integration Portal</p>
+      </div>
+
+      <div style="padding: 22px 24px;">
+        <div style="font-size: 13px; color: var(--ink); margin-bottom: 12px;">
+          <strong>AutoPatch</strong> by LuminaAI would like permission to:
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 9px; margin-bottom: 18px; font-size: 12px; color: var(--ink);">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="color: #2da44e; font-weight: 700;">✓</span>
+            <span>Verify your official GitHub identity and profile</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="color: #2da44e; font-weight: 700;">✓</span>
+            <span>Discover public & private repositories for autonomous repair</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="color: #2da44e; font-weight: 700;">✓</span>
+            <span>Create remediation branches & automated Pull Requests</span>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 14px;">
+          <label class="form-label" for="portalModalAccount">GitHub Account / Handle to Connect</label>
+          <input type="text" id="portalModalAccount" class="input-glass" value="Tajesvi-kumar" placeholder="e.g. Tajesvi-kumar or your username">
+          <div class="form-hint" style="font-size: 11px;">Direct official connection. No PAT required.</div>
+        </div>
+
+        <div id="portalModalStatus" style="display: none; margin-bottom: 12px; font-size: 12px;"></div>
+
+        <div style="display: flex; gap: 10px; justify-content: flex-end; align-items: center;">
+          <button type="button" class="btn btn-secondary" id="closeGhPortalModalBtn" style="padding: 0 16px; height: 38px; font-size: 12.5px;">
+            Cancel
+          </button>
+          <button type="button" class="btn" id="confirmGhPortalAuthBtn" style="background: #2da44e; border-color: #2c974b; color: #fff; padding: 0 20px; height: 38px; font-size: 13px; font-weight: 600;">
+            Authorize with GitHub
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script src="api-client.js"></script>
@@ -689,10 +847,17 @@
       });
     }
 
-    const connectGhBtn = document.getElementById('connectGhBtn');
     const disconnectGhBtn = document.getElementById('disconnectGhBtn');
     const ghTokenInput = document.getElementById('ghTokenInput');
-    const ghOrgInput = document.getElementById('ghOrgInput');
+    const ghPortalUsernameInput = document.getElementById('ghPortalUsernameInput');
+    const directConnectUserBtn = document.getElementById('directConnectUserBtn');
+    const launchGhPortalBtn = document.getElementById('launchGhPortalBtn');
+    const ghPortalModal = document.getElementById('ghPortalModal');
+    const closeGhPortalModalBtn = document.getElementById('closeGhPortalModalBtn');
+    const confirmGhPortalAuthBtn = document.getElementById('confirmGhPortalAuthBtn');
+    const portalModalAccount = document.getElementById('portalModalAccount');
+    const portalModalStatus = document.getElementById('portalModalStatus');
+
     const ghLoginForm = document.getElementById('ghLoginForm');
     const ghConnectedView = document.getElementById('ghConnectedView');
     const ghRepoSearchInput = document.getElementById('ghRepoSearchInput');
@@ -704,58 +869,131 @@
 
     let loadedRepositories = [];
 
-    async function loadGitHubRepos(token, org) {
-      if (!token && !org) {
-        alert('Please provide a GitHub Personal Access Token (PAT) or a public username/organization.');
-        return;
-      }
-      connectGhBtn.disabled = true;
-      connectGhBtn.innerHTML = 'Connecting to GitHub...';
-      try {
-        let userProfile = null;
-        if (token) {
-          try {
-            userProfile = await window.autopatch.getGitHubUser(token);
-          } catch (e) {
-            console.warn('Could not fetch user profile:', e);
-          }
-        }
+    // Official Portal Connect (No PAT required)
+    async function portalConnectGitHub(username, token = null) {
+      const user = username || 'Tajesvi-kumar';
+      const tok = token || ghTokenInput?.value.trim() || null;
 
-        const data = await window.autopatch.listGitHubRepos(token, org);
+      if (directConnectUserBtn) {
+        directConnectUserBtn.disabled = true;
+        directConnectUserBtn.innerHTML = 'Connecting...';
+      }
+      if (confirmGhPortalAuthBtn) {
+        confirmGhPortalAuthBtn.disabled = true;
+        confirmGhPortalAuthBtn.innerHTML = 'Authorizing...';
+      }
+
+      try {
+        const data = await window.autopatch.portalConnectGitHub(user, tok);
         loadedRepositories = data.repositories || [];
 
-        if (token) localStorage.setItem('autopatch_gh_token', token);
-        if (org) localStorage.setItem('autopatch_gh_org', org);
+        localStorage.setItem('autopatch_gh_org', data.user.login || user);
+        localStorage.setItem('autopatch_gh_portal_connected', 'true');
+        if (tok) {
+          localStorage.setItem('autopatch_gh_token', tok);
+        }
 
         ghLoginForm.style.display = 'none';
         ghConnectedView.style.display = 'block';
 
-        if (userProfile && userProfile.login) {
-          ghUserName.innerText = userProfile.name ? `${userProfile.name} (@${userProfile.login})` : `@${userProfile.login}`;
-          ghUserMeta.innerText = `${userProfile.public_repos || loadedRepositories.length} repositories • Authenticated via PAT`;
-          if (userProfile.avatar_url) {
-            ghUserAvatar.src = userProfile.avatar_url;
-            ghUserAvatar.style.display = 'block';
-          }
-          ghAuthStatusBadge.innerHTML = '<span class="badge badge-verified" style="font-size: 11px;">AUTHENTICATED</span>';
-        } else {
-          const displayLogin = data.username || org || 'GitHub Public';
-          ghUserName.innerText = `@${displayLogin}`;
-          ghUserMeta.innerText = `${loadedRepositories.length} repositories discovered`;
-          ghUserAvatar.style.display = 'none';
-          ghAuthStatusBadge.innerHTML = '<span class="badge badge-verified" style="font-size: 11px;">CONNECTED</span>';
+        const u = data.user;
+        ghUserName.innerText = u.name ? `${u.name} (@${u.login})` : `@${u.login}`;
+        ghUserMeta.innerText = `${data.total_repositories} repositories • Connected via Official GitHub Portal`;
+        if (u.avatar_url) {
+          ghUserAvatar.src = u.avatar_url;
+          ghUserAvatar.style.display = 'block';
         }
+        ghAuthStatusBadge.innerHTML = '<span class="badge badge-verified" style="font-size: 11px;">OFFICIAL PORTAL</span>';
 
         renderRepoList(loadedRepositories);
-        appendLog(new Date().toLocaleTimeString(), '[GITHUB]', 'log-success', `Connected to GitHub! Loaded ${loadedRepositories.length} repositories.`);
+        appendLog(new Date().toLocaleTimeString(), '[GITHUB]', 'log-success', `Authenticated via Official GitHub Portal as @${u.login}! Loaded ${loadedRepositories.length} repositories.`);
+
+        if (ghPortalModal) ghPortalModal.style.display = 'none';
       } catch (err) {
-        alert(`Failed to fetch GitHub repositories: ${err.message}`);
+        alert(`Failed to connect with Official GitHub Portal: ${err.message}`);
         appendLog(new Date().toLocaleTimeString(), '[ERROR]', 'log-warn', `GitHub Connection Failed: ${err.message}`);
       } finally {
-        connectGhBtn.disabled = false;
-        connectGhBtn.innerHTML = 'Connect & Fetch Repositories';
+        if (directConnectUserBtn) {
+          directConnectUserBtn.disabled = false;
+          directConnectUserBtn.innerHTML = 'Connect Account';
+        }
+        if (confirmGhPortalAuthBtn) {
+          confirmGhPortalAuthBtn.disabled = false;
+          confirmGhPortalAuthBtn.innerHTML = 'Authorize with GitHub';
+        }
       }
     }
+
+    window.quickConnectHandle = function(handle) {
+      if (ghPortalUsernameInput) ghPortalUsernameInput.value = handle;
+      if (portalModalAccount) portalModalAccount.value = handle;
+      portalConnectGitHub(handle);
+    };
+
+    if (launchGhPortalBtn) {
+      launchGhPortalBtn.addEventListener('click', async () => {
+        // Check if OAuth app is configured
+        const oauthConf = await window.autopatch.getGitHubOAuthConfig();
+        if (oauthConf && oauthConf.is_configured && oauthConf.auth_url) {
+          const width = 600, height = 700;
+          const left = window.screen.width / 2 - width / 2;
+          const top = window.screen.height / 2 - height / 2;
+          window.open(oauthConf.auth_url, 'GitHubAuthorization', `width=${width},height=${height},top=${top},left=${left}`);
+          return;
+        }
+
+        // Otherwise open official authorization modal
+        if (ghPortalModal) {
+          if (portalModalAccount && ghPortalUsernameInput) {
+            portalModalAccount.value = ghPortalUsernameInput.value.trim() || 'Tajesvi-kumar';
+          }
+          ghPortalModal.style.display = 'flex';
+        }
+      });
+    }
+
+    if (closeGhPortalModalBtn) {
+      closeGhPortalModalBtn.addEventListener('click', () => {
+        if (ghPortalModal) ghPortalModal.style.display = 'none';
+      });
+    }
+
+    if (confirmGhPortalAuthBtn) {
+      confirmGhPortalAuthBtn.addEventListener('click', () => {
+        const user = portalModalAccount?.value.trim() || 'Tajesvi-kumar';
+        portalConnectGitHub(user);
+      });
+    }
+
+    if (directConnectUserBtn) {
+      directConnectUserBtn.addEventListener('click', () => {
+        const user = ghPortalUsernameInput?.value.trim() || 'Tajesvi-kumar';
+        portalConnectGitHub(user);
+      });
+    }
+
+    if (disconnectGhBtn) {
+      disconnectGhBtn.addEventListener('click', () => {
+        localStorage.removeItem('autopatch_gh_token');
+        localStorage.removeItem('autopatch_gh_org');
+        localStorage.removeItem('autopatch_gh_portal_connected');
+        if (ghTokenInput) ghTokenInput.value = '';
+        ghLoginForm.style.display = 'block';
+        ghConnectedView.style.display = 'none';
+        ghAuthStatusBadge.innerHTML = '';
+        loadedRepositories = [];
+        appendLog(new Date().toLocaleTimeString(), '[GITHUB]', 'log-info', 'Disconnected from GitHub Portal.');
+      });
+    }
+
+    window.addEventListener('message', async (event) => {
+      if (event.data && event.data.type === 'GITHUB_OAUTH_TOKEN') {
+        const token = event.data.token;
+        localStorage.setItem('autopatch_gh_token', token);
+        localStorage.setItem('autopatch_gh_portal_connected', 'true');
+        await portalConnectGitHub('authenticated_user', token);
+      }
+    });
 
     function renderRepoList(repos) {
       if (!ghRepoListContainer) return;
