@@ -194,8 +194,8 @@ class PurgeResponse(BaseModel):
 
 
 class GitHubUserResponse(BaseModel):
-    login: str
-    name: str
+    login: str = "user"
+    name: Optional[str] = "GitHub User"
     avatar_url: Optional[str] = None
     html_url: Optional[str] = None
     public_repos: int = 0
@@ -203,17 +203,17 @@ class GitHubUserResponse(BaseModel):
 
 
 class GitHubRepoItem(BaseModel):
-    id: int
-    name: str
-    full_name: str
-    html_url: str
-    clone_url: str
-    default_branch: str = "main"
-    is_private: bool = False
-    description: str = ""
-    language: str = "Other"
-    stars: int = 0
-    forks: int = 0
+    id: Optional[int] = 0
+    name: str = ""
+    full_name: str = ""
+    html_url: Optional[str] = ""
+    clone_url: Optional[str] = ""
+    default_branch: Optional[str] = "main"
+    is_private: Optional[bool] = False
+    description: Optional[str] = ""
+    language: Optional[str] = "Other"
+    stars: Optional[int] = 0
+    forks: Optional[int] = 0
     updated_at: Optional[str] = None
 
 
@@ -246,7 +246,7 @@ class GitHubOAuthConfigResponse(BaseModel):
 
 
 class GitHubPortalConnectRequest(BaseModel):
-    username: str
+    username: Optional[str] = "NiharNeo"
     token: Optional[str] = None
 
 

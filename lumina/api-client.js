@@ -355,10 +355,12 @@ class AutoPatchClient {
   /**
    * Directly connects an official GitHub account handle without requiring a manual PAT.
    */
-  async portalConnectGitHub(username, token = null) {
+  async portalConnectGitHub(username = null, token = null) {
+    const org = username || localStorage.getItem('autopatch_gh_org') || 'NiharNeo';
+    const tok = token || localStorage.getItem('autopatch_gh_token') || null;
     const payload = {
-      username: username,
-      token: token || localStorage.getItem('autopatch_gh_token') || null,
+      username: org,
+      token: tok,
     };
     const res = await fetch(`${this.config.baseUrl}/github/portal-connect`, {
       method: 'POST',
@@ -376,11 +378,11 @@ class AutoPatchClient {
    * Validates GitHub token or username and returns authenticated user profile.
    */
   async getGitHubUser(token = null, username = null) {
-    const tok = token || localStorage.getItem('autopatch_gh_token');
+    const tok = token || localStorage.getItem('autopatch_gh_token') || null;
+    const org = username || localStorage.getItem('autopatch_gh_org') || 'NiharNeo';
     const params = new URLSearchParams();
     if (tok) params.set('token', tok);
-    if (username) params.set('username', username);
-    if (!tok && !username) return null;
+    if (org) params.set('username', org);
     const url = `${this.config.baseUrl}/github/user?${params.toString()}`;
     const res = await fetch(url, { headers: this.headers });
     if (!res.ok) {
@@ -394,10 +396,11 @@ class AutoPatchClient {
    * Lists repositories for authenticated user or username.
    */
   async listGitHubRepos(token = null, username = null) {
-    const tok = token || localStorage.getItem('autopatch_gh_token');
+    const tok = token || localStorage.getItem('autopatch_gh_token') || null;
+    const org = username || localStorage.getItem('autopatch_gh_org') || 'NiharNeo';
     const params = new URLSearchParams();
     if (tok) params.set('token', tok);
-    if (username) params.set('username', username);
+    if (org) params.set('username', org);
     const url = `${this.config.baseUrl}/github/repos?${params.toString()}`;
     const res = await fetch(url, { headers: this.headers });
     if (!res.ok) {

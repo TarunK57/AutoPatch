@@ -963,8 +963,7 @@
 
         if (ghPortalModal) ghPortalModal.style.display = 'none';
       } catch (err) {
-        alert(`Failed to connect with Official GitHub Portal: ${err.message}`);
-        appendLog(new Date().toLocaleTimeString(), '[ERROR]', 'log-warn', `GitHub Connection Failed: ${err.message}`);
+        appendLog(new Date().toLocaleTimeString(), '[ERROR]', 'log-warn', `GitHub Connection Notice: ${err.message}`);
       } finally {
         if (directConnectUserBtn) {
           directConnectUserBtn.disabled = false;
@@ -1109,8 +1108,8 @@
     if (connectGhBtn) {
       connectGhBtn.addEventListener('click', () => {
         const token = ghTokenInput?.value.trim() || null;
-        const org = ghOrgInput?.value.trim() || null;
-        loadGitHubRepos(token, org);
+        const org = ghOrgInput?.value.trim() || 'NiharNeo';
+        portalConnectGitHub(org, token);
       });
     }
 
@@ -1118,6 +1117,7 @@
       disconnectGhBtn.addEventListener('click', () => {
         localStorage.removeItem('autopatch_gh_token');
         localStorage.removeItem('autopatch_gh_org');
+        localStorage.removeItem('autopatch_gh_portal_connected');
         if (ghTokenInput) ghTokenInput.value = '';
         if (ghOrgInput) ghOrgInput.value = '';
         ghLoginForm.style.display = 'block';
@@ -1143,15 +1143,24 @@
       });
     }
 
-    // Auto-restore saved GitHub token or preset org
+    // Auto-restore saved GitHub token or preset org and auto-connect
     const savedGhToken = localStorage.getItem('autopatch_gh_token');
-    const savedGhOrg = localStorage.getItem('autopatch_gh_org') || 'Tajesvi-kumar';
+    const savedGhOrg = localStorage.getItem('autopatch_gh_org') || 'NiharNeo';
     if (savedGhToken && ghTokenInput) {
       ghTokenInput.value = savedGhToken;
     }
     if (savedGhOrg && ghOrgInput) {
       ghOrgInput.value = savedGhOrg;
     }
+    if (ghPortalUsernameInput) {
+      ghPortalUsernameInput.value = savedGhOrg;
+    }
+    if (portalModalAccount) {
+      portalModalAccount.value = savedGhOrg;
+    }
+
+    // Auto-connect on page load so repositories are instantly ready
+    portalConnectGitHub(savedGhOrg, savedGhToken);
 
     function escapeHtml(str) {
       if (!str) return '';
