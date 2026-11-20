@@ -140,6 +140,24 @@ class AutoPatchClient {
   }
 
   /**
+   * Fetches details for a single project including github_url.
+   */
+  async getProject(projectId) {
+    if (!projectId) return null;
+    try {
+      const res = await fetch(`${this.config.baseUrl}/projects/${encodeURIComponent(projectId)}`, {
+        headers: this.headers,
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
    * Starts a new scan job for a project.
    */
   async startScanJob(projectId) {

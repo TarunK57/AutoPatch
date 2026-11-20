@@ -334,22 +334,24 @@
           </div>
         </div>
 
-        <div id="modalGhConnectedBanner" style="display: none; padding: 10px 14px; background: rgba(40,122,76,0.1); border: 1px solid rgba(40,122,76,0.3); border-radius: 8px; margin-bottom: 12px; font-size: 12.5px; color: #1b6339; align-items: center; justify-content: space-between;">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-            <span>Connected via <strong>Official GitHub Portal</strong> (<code id="modalGhConnectedName">@user</code>)</span>
+        <!-- GitHub Write Authentication Card -->
+        <div id="modalGhAuthCard" style="background: rgba(255,255,255,0.7); border: 1px solid rgba(100,75,60,0.18); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 7px; font-weight: 700; font-size: 13px; color: var(--ink);">
+              <svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+              <span>GitHub Account &bull; <code id="modalGhConnectedName" style="color: var(--accent);">@NiharNeo</code></span>
+            </div>
+            <a href="https://github.com/settings/tokens/new?scopes=repo&description=AutoPatch" target="_blank" class="chip-btn" style="font-size: 11px; padding: 3px 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; background: #2da44e; color: #fff; border-color: #2c974b;" title="Generate a GitHub Personal Access Token with repo scope pre-selected">
+              <span>👉 Get Token (1-Click)</span> &rarr;
+            </a>
           </div>
-          <span class="badge badge-verified" style="font-size: 10px;">AUTHORIZED</span>
+          <div style="font-size: 11.5px; color: var(--sub); line-height: 1.4; margin-bottom: 8px;">
+            To push changes to GitHub from the cloud, enter your GitHub Personal Access Token (PAT) with <code>repo</code> scope. AutoPatch saves it to your browser for seamless 1-click pushes.
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <input type="password" id="modalGhToken" class="input-glass" style="height: 38px; font-size: 13px;" placeholder="Paste GitHub Token here (ghp_... or github_pat_...)">
+          </div>
         </div>
-
-        <details id="modalPatDetails" style="margin-bottom: 12px; font-size: 11.5px; color: var(--sub);">
-          <summary style="cursor: pointer; font-weight: 600; color: var(--ink);">Use Custom Access Token (Optional)</summary>
-          <div style="margin-top: 6px; padding: 10px; background: rgba(255,255,255,0.5); border-radius: 8px; border: 1px solid rgba(100,75,60,0.1);">
-            <label class="form-label" for="modalGhToken" style="font-size: 11px;">Custom Personal Access Token (PAT)</label>
-            <input type="password" id="modalGhToken" class="input-glass" placeholder="ghp_... (only if overriding default authorization)">
-            <div class="form-hint" style="font-size: 10.5px; margin-top: 3px;">Optional fallback for custom elevated rate limits or private repo push.</div>
-          </div>
-        </details>
 
         <div id="modalPrFields" style="display: none;">
           <div class="form-group" style="margin-bottom: 12px;">
@@ -602,7 +604,7 @@
     }
 
     if (applyGitQueueBtn) {
-      applyGitQueueBtn.addEventListener('click', () => {
+      applyGitQueueBtn.addEventListener('click', async () => {
         if (!activeProjectId) {
           alert('No active project found to apply changes.');
           return;
@@ -611,46 +613,34 @@
         if (modalBranchName) {
           modalBranchName.value = `autopatch/remediation-${Date.now().toString().slice(-6)}`;
         }
-        // Show official portal connection status
-        const savedOrg = localStorage.getItem('autopatch_gh_org') || 'NiharNeo';
-        const savedToken = localStorage.getItem('autopatch_gh_token');
-        const modalGhConnectedBanner = document.getElementById('modalGhConnectedBanner');
-        const modalGhConnectedName = document.getElementById('modalGhConnectedName');
-        const modalPatDetails = document.getElementById('modalPatDetails');
 
-        if (savedToken && modalGhToken) {
-          modalGhToken.value = savedToken;
-          if (modalGhConnectedBanner) {
-            modalGhConnectedBanner.style.display = 'flex';
-            modalGhConnectedBanner.style.background = 'rgba(40,122,76,0.1)';
-            modalGhConnectedBanner.style.borderColor = 'rgba(40,122,76,0.3)';
-            modalGhConnectedBanner.style.color = '#1b6339';
-            modalGhConnectedBanner.innerHTML = `
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-                <span>Authenticated via <strong>PAT</strong> (<code id="modalGhConnectedName">@${savedOrg}</code>)</span>
-              </div>
-              <span class="badge badge-verified" style="font-size: 10px;">WRITE ACTIVE</span>
-            `;
+        // Auto-populate remote URL & repo slug from active project
+        const modalRemoteUrl = document.getElementById('modalRemoteUrl');
+        try {
+          const project = await window.autopatch.getProject(activeProjectId);
+          if (project && project.github_url) {
+            if (modalRemoteUrl) modalRemoteUrl.value = project.github_url;
+            let slug = '';
+            try {
+              const clean = project.github_url.replace(/\.git$/, '');
+              const match = clean.match(/github\.com[/:]([^/]+\/[^/]+)/);
+              if (match) slug = match[1];
+            } catch (_) {}
+            if (slug && modalRepoSlug) modalRepoSlug.value = slug;
           }
-        } else {
-          if (modalGhConnectedBanner) {
-            modalGhConnectedBanner.style.display = 'flex';
-            modalGhConnectedBanner.style.background = 'rgba(217, 119, 6, 0.1)';
-            modalGhConnectedBanner.style.borderColor = 'rgba(217, 119, 6, 0.3)';
-            modalGhConnectedBanner.style.color = '#b45309';
-            modalGhConnectedBanner.innerHTML = `
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 10.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2zm1-4a1 1 0 0 1-2 0V4a1 1 0 0 1 2 0v3.5z"/></svg>
-                <span>GitHub PAT required for write / push operations (<code id="modalGhConnectedName">@${savedOrg}</code>)</span>
-              </div>
-              <span class="badge" style="background: rgba(217, 119, 6, 0.2); color: #b45309; font-size: 10px;">TOKEN NEEDED</span>
-            `;
-          }
-          if (modalPatDetails) {
-            modalPatDetails.open = true;
-          }
+        } catch (_) {}
+
+        // Populate connected GitHub user and saved PAT
+        const savedOrg = localStorage.getItem('autopatch_gh_org') || 'NiharNeo';
+        const savedToken = localStorage.getItem('autopatch_gh_token') || '';
+        const modalGhConnectedName = document.getElementById('modalGhConnectedName');
+        if (modalGhConnectedName) {
+          modalGhConnectedName.textContent = `@${savedOrg}`;
         }
+        if (modalGhToken && savedToken) {
+          modalGhToken.value = savedToken;
+        }
+
         modalStatusArea.style.display = 'none';
         modalStatusArea.innerHTML = '';
         gitActionModal.style.display = 'flex';
@@ -695,8 +685,6 @@
               GitHub requires authentication to push branches to remote repositories. Please enter a Personal Access Token with <code>repo</code> or <code>contents: write</code> scope below, or use <strong>Download Patched ZIP</strong> to get your patched codebase directly without pushing.
             </div>
           `;
-          const patDetails = document.getElementById('modalPatDetails');
-          if (patDetails) patDetails.open = true;
           if (modalGhToken) {
             modalGhToken.focus();
             modalGhToken.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -771,7 +759,7 @@
                   ${escapeHtml(err.message)}
                 </div>
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                  <button type="button" class="btn" style="background: var(--ink); color: #f7efe8; height: 34px; font-size: 12px;" onclick="document.getElementById('modalPatDetails').open = true; document.getElementById('modalGhToken').focus();">
+                  <button type="button" class="btn" style="background: var(--ink); color: #f7efe8; height: 34px; font-size: 12px;" onclick="const t = document.getElementById('modalGhToken'); if (t) { t.focus(); t.scrollIntoView({ behavior: 'smooth', block: 'center' }); }">
                     Enter Personal Access Token (PAT)
                   </button>
                   <button type="button" class="btn btn-secondary" style="height: 34px; font-size: 12px;" onclick="downloadZipFromModal();">
@@ -780,8 +768,6 @@
                 </div>
               </div>
             `;
-            const patDetails = document.getElementById('modalPatDetails');
-            if (patDetails) patDetails.open = true;
           } else {
             modalStatusArea.innerHTML = `
               <div style="background: rgba(179,44,44,0.1); border: 1px solid rgba(179,44,44,0.3); border-radius: 8px; padding: 10px 14px; color: #b32c2c;">

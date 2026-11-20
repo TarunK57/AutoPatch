@@ -408,6 +408,7 @@ async def create_project(
         owner_id=current_user.user_id,
         total_files=proj_map.total_files,
         languages=proj_map.languages,
+        github_url=url,
         created_at=record["created_at"],
     )
 
@@ -426,12 +427,38 @@ async def list_projects(current_user: User = Depends(get_current_user)) -> List[
             owner_id=p.get("owner_id") or current_user.user_id,
             total_files=p.get("total_files") or 0,
             languages=p.get("languages") if isinstance(p.get("languages"), list) else ["python"],
+            github_url=p.get("github_url"),
             created_at=p.get("created_at") or datetime.now(timezone.utc),
         )
         for p in PROJECTS_DB.values()
         if p.get("owner_id") == current_user.user_id or current_user.role == "ADMIN"
     ]
     return user_projects
+
+
+@router.get(
+    "/projects/{project_id}",
+    response_model=ProjectResponse,
+    summary="Get Project Details",
+    description="Returns project metadata, including repository URL and scan statistics.",
+)
+async def get_project_details(
+    project_id: str,
+    current_user: User = Depends(get_current_user),
+) -> ProjectResponse:
+    project = PROJECTS_DB.get(project_id)
+    if not project:
+        raise HTTPException(status_code=404, detail=f"Project '{project_id}' not found.")
+    assert_project_ownership(project["owner_id"], current_user)
+    return ProjectResponse(
+        project_id=project["project_id"],
+        name=project.get("name") or "Unnamed Project",
+        owner_id=project.get("owner_id") or current_user.user_id,
+        total_files=project.get("total_files") or 0,
+        languages=project.get("languages") if isinstance(project.get("languages"), list) else ["python"],
+        github_url=project.get("github_url"),
+        created_at=project.get("created_at") or datetime.now(timezone.utc),
+    )
 
 
 # ============================================================================
@@ -1527,7 +1554,18 @@ async def open_github_pull_request(
         approved_bug_states=approved_bugs,
     )
 
-    client = GitHubClient(token=request.github_token)
+    token = (
+        request.github_token
+        or project.get("token")
+        or project.get("github_token")
+        or os.environ.get("GITHUB_TOKEN")
+        or os.environ.get("GH_TOKEN")
+    )
+    if request.github_token:
+        project["token"] = request.github_token
+        project["github_token"] = request.github_token
+
+    client = GitHubClient(token=token)
     try:
         proj_dir = Path(project["project_dir"])
         try:
@@ -1543,7 +1581,7 @@ async def open_github_pull_request(
                 branch_name=request.head_branch,
                 remote_name="origin",
                 remote_url=remote_url,
-                token=request.github_token,
+                token=token,
             )
         except Exception as pe:
             logger.warning(f"Could not auto-push branch before PR creation: {pe}")
@@ -1595,6 +1633,9 @@ async def push_git_remediation_branch(
         or os.environ.get("GITHUB_TOKEN")
         or os.environ.get("GH_TOKEN")
     )
+    if request.github_token:
+        project["token"] = request.github_token
+        project["github_token"] = request.github_token
     if remote_url and ("github.com" in remote_url or remote_url.startswith("http")) and (not token or not str(token).strip()):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
