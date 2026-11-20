@@ -393,6 +393,7 @@ async def create_project(
         "owner_id": current_user.user_id,
         "project_dir": str(project_dir),
         "github_url": url,
+        "token": gh_token,
         "total_files": proj_map.total_files,
         "languages": proj_map.languages,
         "entry_points": proj_map.entry_points,
@@ -1587,7 +1588,22 @@ async def push_git_remediation_branch(
 
     proj_dir = Path(project["project_dir"])
     remote_url = request.remote_url or project.get("github_url")
-    token = request.github_token or os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
+    token = (
+        request.github_token
+        or project.get("token")
+        or project.get("github_token")
+        or os.environ.get("GITHUB_TOKEN")
+        or os.environ.get("GH_TOKEN")
+    )
+    if remote_url and ("github.com" in remote_url or remote_url.startswith("http")) and (not token or not str(token).strip()):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=(
+                "GitHub Personal Access Token (PAT) Required (401): GitHub does not allow unauthenticated branch pushes. "
+                "Please provide a GitHub Personal Access Token with 'repo' or 'contents: write' scope in the modal, "
+                "or click 'Download Patched ZIP' to download the complete codebase with all verified fixes."
+            ),
+        )
 
     project_jobs = [j["job_id"] for j in JOBS_DB.values() if j["project_id"] == project_id]
     bug_ids = set()
@@ -1627,6 +1643,15 @@ async def push_git_remediation_branch(
                     f"On GitHub, pushing directly to someone else's repository requires collaborator permissions. "
                     f"To deliver your remediation: (1) Specify your own fork or personal repository URL in the Remote URL field, or "
                     f"(2) Click 'Download Patched ZIP' to download the complete codebase with all verified fixes applied."
+                ),
+            )
+        if "could not read Username" in err_str or "terminal prompts disabled" in err_str or "token required" in err_str.lower() or "authentication failed" in err_str.lower() or "401" in err_str:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=(
+                    "GitHub Personal Access Token (PAT) Required (401): Terminal prompts are disabled and no valid GitHub Personal Access Token was provided. "
+                    "Please enter a GitHub Personal Access Token with 'repo' or 'contents: write' scope in the modal to push to this repository, "
+                    "or click 'Download Patched ZIP' to download the complete remediated project."
                 ),
             )
         raise HTTPException(status_code=400, detail=str(e))

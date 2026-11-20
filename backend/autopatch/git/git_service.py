@@ -275,22 +275,48 @@ class GitService:
         check_remotes = self._run_git(repo_dir, ["remote"], check=False)
         remotes = [r.strip() for r in check_remotes.stdout.splitlines() if r.strip()]
 
+        cur_url = ""
+        if remote_name in remotes:
+            cur_url_res = self._run_git(repo_dir, ["remote", "get-url", remote_name], check=False)
+            cur_url = cur_url_res.stdout.strip()
+
+        target_url = remote_url or cur_url
+        tok = (token or os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN") or "").strip()
+
+        is_remote_http = bool(
+            target_url
+            and (
+                target_url.startswith(("http://", "https://"))
+                or "github.com" in target_url
+            )
+        )
+
+        if is_remote_http and not tok:
+            raise GitIntegrationError(
+                f"GitHub Personal Access Token (PAT) required to push branch '{branch_name}' to '{target_url}'. "
+                "GitHub requires authentication for remote git push. "
+                "Please provide a GitHub Personal Access Token with 'repo' or 'contents: write' scope in the modal, "
+                "or click 'Download Patched ZIP' to download the complete remediated project."
+            )
+
         if remote_url:
             push_url = remote_url
-            if token and "github.com" in push_url and "@" not in push_url:
-                push_url = push_url.replace("https://", f"https://x-access-token:{token}@")
+            if tok and "github.com" in push_url and "@" not in push_url:
+                push_url = push_url.replace("https://", f"https://x-access-token:{tok}@")
             if remote_name in remotes:
                 self._run_git(repo_dir, ["remote", "set-url", remote_name, push_url])
             else:
                 self._run_git(repo_dir, ["remote", "add", remote_name, push_url])
-        elif token and remote_name in remotes:
-            cur_url_res = self._run_git(repo_dir, ["remote", "get-url", remote_name], check=False)
-            cur_url = cur_url_res.stdout.strip()
+        elif tok and remote_name in remotes and cur_url:
             if cur_url.startswith("https://") and "@" not in cur_url:
-                auth_url = cur_url.replace("https://", f"https://x-access-token:{token}@")
+                auth_url = cur_url.replace("https://", f"https://x-access-token:{tok}@")
                 self._run_git(repo_dir, ["remote", "set-url", remote_name, auth_url])
 
-        res = self._run_git(repo_dir, ["push", "-u", remote_name, branch_name])
+        push_cmd = ["push", "-u", remote_name, branch_name]
+        if tok:
+            push_cmd = ["-c", f"http.extraheader=Authorization: Bearer {tok}"] + push_cmd
+
+        res = self._run_git(repo_dir, push_cmd)
         return {
             "branch_name": branch_name,
             "remote_name": remote_name,

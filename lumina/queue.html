@@ -612,16 +612,44 @@
           modalBranchName.value = `autopatch/remediation-${Date.now().toString().slice(-6)}`;
         }
         // Show official portal connection status
-        const savedOrg = localStorage.getItem('autopatch_gh_org') || 'Tajesvi-kumar';
+        const savedOrg = localStorage.getItem('autopatch_gh_org') || 'NiharNeo';
+        const savedToken = localStorage.getItem('autopatch_gh_token');
         const modalGhConnectedBanner = document.getElementById('modalGhConnectedBanner');
         const modalGhConnectedName = document.getElementById('modalGhConnectedName');
-        if (modalGhConnectedBanner) {
-          modalGhConnectedBanner.style.display = 'flex';
-          if (modalGhConnectedName) modalGhConnectedName.innerText = `@${savedOrg}`;
-        }
-        const savedToken = localStorage.getItem('autopatch_gh_token');
+        const modalPatDetails = document.getElementById('modalPatDetails');
+
         if (savedToken && modalGhToken) {
           modalGhToken.value = savedToken;
+          if (modalGhConnectedBanner) {
+            modalGhConnectedBanner.style.display = 'flex';
+            modalGhConnectedBanner.style.background = 'rgba(40,122,76,0.1)';
+            modalGhConnectedBanner.style.borderColor = 'rgba(40,122,76,0.3)';
+            modalGhConnectedBanner.style.color = '#1b6339';
+            modalGhConnectedBanner.innerHTML = `
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+                <span>Authenticated via <strong>PAT</strong> (<code id="modalGhConnectedName">@${savedOrg}</code>)</span>
+              </div>
+              <span class="badge badge-verified" style="font-size: 10px;">WRITE ACTIVE</span>
+            `;
+          }
+        } else {
+          if (modalGhConnectedBanner) {
+            modalGhConnectedBanner.style.display = 'flex';
+            modalGhConnectedBanner.style.background = 'rgba(217, 119, 6, 0.1)';
+            modalGhConnectedBanner.style.borderColor = 'rgba(217, 119, 6, 0.3)';
+            modalGhConnectedBanner.style.color = '#b45309';
+            modalGhConnectedBanner.innerHTML = `
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 10.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2zm1-4a1 1 0 0 1-2 0V4a1 1 0 0 1 2 0v3.5z"/></svg>
+                <span>GitHub PAT required for write / push operations (<code id="modalGhConnectedName">@${savedOrg}</code>)</span>
+              </div>
+              <span class="badge" style="background: rgba(217, 119, 6, 0.2); color: #b45309; font-size: 10px;">TOKEN NEEDED</span>
+            `;
+          }
+          if (modalPatDetails) {
+            modalPatDetails.open = true;
+          }
         }
         modalStatusArea.style.display = 'none';
         modalStatusArea.innerHTML = '';
@@ -649,13 +677,30 @@
       submitGitActionBtn.addEventListener('click', async () => {
         const actionType = document.querySelector('input[name="gitActionType"]:checked')?.value || 'push';
         const branchName = modalBranchName?.value.trim();
-        const token = modalGhToken?.value.trim() || null;
+        const token = modalGhToken?.value.trim() || localStorage.getItem('autopatch_gh_token') || null;
         const repoSlug = modalRepoSlug?.value.trim() || null;
         const baseBranch = modalBaseBranch?.value.trim() || 'main';
         const prTitle = modalPrTitle?.value.trim() || '[AutoPatch] Remediate verified defects';
 
         if (!branchName) {
           alert('Please specify a branch name.');
+          return;
+        }
+
+        if (!token && actionType === 'push') {
+          modalStatusArea.style.display = 'block';
+          modalStatusArea.innerHTML = `
+            <div style="background: rgba(179,44,44,0.08); border: 1px solid rgba(179,44,44,0.3); border-radius: 10px; padding: 12px 14px; color: #b32c2c; font-size: 12px;">
+              <strong style="display: block; margin-bottom: 4px;">GitHub Personal Access Token (PAT) Required</strong>
+              GitHub requires authentication to push branches to remote repositories. Please enter a Personal Access Token with <code>repo</code> or <code>contents: write</code> scope below, or use <strong>Download Patched ZIP</strong> to get your patched codebase directly without pushing.
+            </div>
+          `;
+          const patDetails = document.getElementById('modalPatDetails');
+          if (patDetails) patDetails.open = true;
+          if (modalGhToken) {
+            modalGhToken.focus();
+            modalGhToken.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
           return;
         }
 
@@ -694,6 +739,7 @@
           }
         } catch (err) {
           const isPermDenied = err.message.includes('403') || err.message.includes('Permission to') || err.message.includes('denied');
+          const isAuthError = err.message.includes('401') || err.message.includes('Authentication') || err.message.includes('Username') || err.message.includes('Token') || err.message.includes('token') || err.message.includes('terminal prompts');
           if (isPermDenied) {
             modalStatusArea.innerHTML = `
               <div style="background: rgba(179,44,44,0.08); border: 1px solid rgba(179,44,44,0.3); border-radius: 10px; padding: 14px; color: #b32c2c;">
@@ -714,6 +760,28 @@
                 </div>
               </div>
             `;
+          } else if (isAuthError) {
+            modalStatusArea.innerHTML = `
+              <div style="background: rgba(179,44,44,0.08); border: 1px solid rgba(179,44,44,0.3); border-radius: 10px; padding: 14px; color: #b32c2c;">
+                <div style="display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 13px; margin-bottom: 6px;">
+                  <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm0 12a1 1 0 1 1 0-2 1 1 0 0 1 0 2zm1-4a1 1 0 0 1-2 0V4a1 1 0 0 1 2 0v4z"/></svg>
+                  GitHub Personal Access Token Required
+                </div>
+                <div style="font-size: 11.5px; line-height: 1.5; margin-bottom: 12px; color: #4a3e39;">
+                  ${escapeHtml(err.message)}
+                </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                  <button type="button" class="btn" style="background: var(--ink); color: #f7efe8; height: 34px; font-size: 12px;" onclick="document.getElementById('modalPatDetails').open = true; document.getElementById('modalGhToken').focus();">
+                    Enter Personal Access Token (PAT)
+                  </button>
+                  <button type="button" class="btn btn-secondary" style="height: 34px; font-size: 12px;" onclick="downloadZipFromModal();">
+                    Download Patched ZIP
+                  </button>
+                </div>
+              </div>
+            `;
+            const patDetails = document.getElementById('modalPatDetails');
+            if (patDetails) patDetails.open = true;
           } else {
             modalStatusArea.innerHTML = `
               <div style="background: rgba(179,44,44,0.1); border: 1px solid rgba(179,44,44,0.3); border-radius: 8px; padding: 10px 14px; color: #b32c2c;">
