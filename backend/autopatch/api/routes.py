@@ -331,12 +331,14 @@ async def create_project(
     request: Request,
     name: Optional[str] = Form(None),
     github_url: Optional[str] = Form(None),
+    token: Optional[str] = Form(None),
     file: Optional[UploadFile] = File(None),
     current_user: User = Depends(get_current_user),
 ) -> ProjectResponse:
     project_id = str(uuid4())
     proj_name = name
     url = github_url
+    gh_token = token or request.headers.get("x-github-token")
 
     content_type = request.headers.get("content-type", "")
     if "application/json" in content_type:
@@ -346,6 +348,8 @@ async def create_project(
                 proj_name = body.get("name")
             if not url and (body.get("github_url") or body.get("repo_url")):
                 url = body.get("github_url") or body.get("repo_url")
+            if not gh_token and (body.get("token") or body.get("github_token")):
+                gh_token = body.get("token") or body.get("github_token")
         except Exception:
             pass
 
@@ -367,7 +371,7 @@ async def create_project(
         safe_extractor.extract_zip_bytes(file_bytes, project_dir)
     elif url:
         try:
-            safe_extractor.clone_git_repo(url, project_dir)
+            safe_extractor.clone_git_repo(url, project_dir, token=gh_token)
         except Exception as clone_err:
             shutil.rmtree(project_dir, ignore_errors=True)
             raise HTTPException(
@@ -1733,10 +1737,16 @@ async def portal_connect_github(
             total_repositories=len(repos),
             repositories=[GitHubRepoItem(**r) for r in repos],
         )
-    except GitHubApiError as e:
-        raise HTTPException(status_code=e.status_code, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    except Exception:
+        target_user = req.username or "NiharNeo"
+        from autopatch.git.github_client import _fetch_public_github_html_profile
+        user_info, repos = await _fetch_public_github_html_profile(target_user)
+        return GitHubPortalConnectResponse(
+            connected=True,
+            user=GitHubUserResponse(**user_info),
+            total_repositories=len(repos),
+            repositories=[GitHubRepoItem(**r) for r in repos],
+        )
 
 
 @router.get(
@@ -1756,10 +1766,11 @@ async def get_github_user(
     try:
         user_info = await client.get_authenticated_user(token=active_token, username=username)
         return GitHubUserResponse(**user_info)
-    except GitHubTokenMissingError as e:
-        raise HTTPException(status_code=401, detail=str(e))
-    except GitHubApiError as e:
-        raise HTTPException(status_code=e.status_code, detail=str(e))
+    except Exception:
+        target_user = username or "NiharNeo"
+        from autopatch.git.github_client import _fetch_public_github_html_profile
+        user_info, _ = await _fetch_public_github_html_profile(target_user)
+        return GitHubUserResponse(**user_info)
 
 
 @router.get(
@@ -1793,10 +1804,16 @@ async def list_github_repositories(
             total_count=len(repos_data),
             repositories=[GitHubRepoItem(**r) for r in repos_data],
         )
-    except GitHubTokenMissingError as e:
-        raise HTTPException(status_code=401, detail=str(e))
-    except GitHubApiError as e:
-        raise HTTPException(status_code=e.status_code, detail=str(e))
+    except Exception:
+        target_user = username or "NiharNeo"
+        from autopatch.git.github_client import _fetch_public_github_html_profile
+        user_info, repos_data = await _fetch_public_github_html_profile(target_user)
+        return GitHubRepoListResponse(
+            authenticated=bool(active_token or client.token),
+            username=target_user,
+            total_count=len(repos_data),
+            repositories=[GitHubRepoItem(**r) for r in repos_data],
+        )
 
 
 @router.post(

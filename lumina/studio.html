@@ -492,25 +492,24 @@
                     <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(100,75,60,0.1);">
                       <label class="form-label" style="margin-bottom: 4px;" for="ghPortalUsernameInput">Or Direct Connect by Account / Organization</label>
                       <div style="display: flex; gap: 8px; align-items: center;">
-                        <input type="text" id="ghPortalUsernameInput" class="input-glass" style="height: 38px; font-size: 13px;" value="Tajesvi-kumar" placeholder="GitHub username or org handle...">
+                        <input type="text" id="ghPortalUsernameInput" class="input-glass" style="height: 38px; font-size: 13px;" value="NiharNeo" placeholder="GitHub username or org handle...">
                         <button type="button" class="btn btn-secondary" id="directConnectUserBtn" style="padding: 0 16px; height: 38px; font-size: 12.5px; white-space: nowrap;">
                           Connect Account
                         </button>
                       </div>
                       <div style="display: flex; gap: 8px; align-items: center; margin-top: 8px;">
                         <span style="font-size: 11px; color: var(--sub);">Quick preset:</span>
-                        <button type="button" class="chip-btn" onclick="quickConnectHandle('Tajesvi-kumar')">@Tajesvi-kumar (Benchmark)</button>
-                        <button type="button" class="chip-btn" onclick="quickConnectHandle('octocat')">@octocat</button>
+                        <button type="button" class="chip-btn" onclick="quickConnectHandle('NiharNeo')">@NiharNeo</button>
+                        <button type="button" class="chip-btn" onclick="quickConnectHandle('Tajesvi-kumar')">@Tajesvi-kumar</button>
+                        <button type="button" class="chip-btn" onclick="quickConnectHandle('TarunK57')">@TarunK57</button>
                       </div>
                     </div>
 
-                    <details style="margin-top: 14px; font-size: 11.5px; color: var(--sub);">
-                      <summary style="cursor: pointer; font-weight: 600; color: var(--ink);">Advanced: Use Personal Access Token (PAT)</summary>
-                      <div style="margin-top: 8px; padding: 10px; background: rgba(255,255,255,0.5); border-radius: 8px; border: 1px solid rgba(100,75,60,0.1);">
-                        <input type="password" id="ghTokenInput" class="input-glass" placeholder="ghp_... or github_pat_... (optional)">
-                        <div class="form-hint" style="font-size: 10.5px; margin-top: 4px;">Optional fallback for custom elevated rate limits or enterprise instances.</div>
-                      </div>
-                    </details>
+                    <div style="margin-top: 14px; padding: 12px; background: rgba(255,255,255,0.6); border-radius: 8px; border: 1px solid rgba(100,75,60,0.12);">
+                      <label class="form-label" style="margin-bottom: 4px;" for="ghTokenInput">Private Repository Access &bull; Personal Access Token (PAT)</label>
+                      <input type="password" id="ghTokenInput" class="input-glass" style="height: 38px; font-size: 13px;" placeholder="ghp_... or github_pat_... (Paste token to unlock private repositories)">
+                      <div class="form-hint" style="font-size: 11px; margin-top: 4px;">Optional for public repos. Entering a token unlocks private repo scanning, branch push &amp; 5,000 req/hr.</div>
+                    </div>
                   </div>
                 </div>
 
@@ -688,8 +687,14 @@
 
         <div class="form-group" style="margin-bottom: 14px;">
           <label class="form-label" for="portalModalAccount">GitHub Account / Handle to Connect</label>
-          <input type="text" id="portalModalAccount" class="input-glass" value="Tajesvi-kumar" placeholder="e.g. Tajesvi-kumar or your username">
-          <div class="form-hint" style="font-size: 11px;">Direct official connection. No PAT required.</div>
+          <input type="text" id="portalModalAccount" class="input-glass" value="NiharNeo" placeholder="e.g. NiharNeo or your username">
+          <div class="form-hint" style="font-size: 11px;">Direct official connection. Free for public repositories.</div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 14px;">
+          <label class="form-label" for="portalModalToken">GitHub Personal Access Token (PAT) <span style="font-weight: normal; color: var(--sub);">(Optional &bull; Required for Private Repos)</span></label>
+          <input type="password" id="portalModalToken" class="input-glass" placeholder="ghp_... or github_pat_... (Paste token to unlock private repositories)">
+          <div class="form-hint" style="font-size: 11px;">Unlocks private repos, branch push &amp; elevated 5,000 req/hr rate limits. (Needs <code>repo</code> scope).</div>
         </div>
 
         <div id="portalModalStatus" style="display: none; margin-bottom: 12px; font-size: 12px;"></div>
@@ -915,10 +920,10 @@
 
     let loadedRepositories = [];
 
-    // Official Portal Connect (No PAT required)
+    // Official Portal Connect (No PAT required for public, PAT unlocks private)
     async function portalConnectGitHub(username, token = null) {
-      const user = username || 'Tajesvi-kumar';
-      const tok = token || ghTokenInput?.value.trim() || null;
+      const user = username || 'NiharNeo';
+      const tok = token || document.getElementById('portalModalToken')?.value.trim() || ghTokenInput?.value.trim() || localStorage.getItem('autopatch_gh_token') || null;
 
       if (directConnectUserBtn) {
         directConnectUserBtn.disabled = true;
@@ -949,7 +954,9 @@
           ghUserAvatar.src = u.avatar_url;
           ghUserAvatar.style.display = 'block';
         }
-        ghAuthStatusBadge.innerHTML = '<span class="badge badge-verified" style="font-size: 11px;">OFFICIAL PORTAL</span>';
+        ghAuthStatusBadge.innerHTML = tok 
+          ? '<span class="badge badge-verified" style="font-size: 11px;">OFFICIAL PORTAL &bull; PRIVATE ACCESS ACTIVE</span>'
+          : '<span class="badge badge-verified" style="font-size: 11px;">OFFICIAL PORTAL</span>';
 
         renderRepoList(loadedRepositories);
         appendLog(new Date().toLocaleTimeString(), '[GITHUB]', 'log-success', `Authenticated via Official GitHub Portal as @${u.login}! Loaded ${loadedRepositories.length} repositories.`);
@@ -973,7 +980,8 @@
     window.quickConnectHandle = function(handle) {
       if (ghPortalUsernameInput) ghPortalUsernameInput.value = handle;
       if (portalModalAccount) portalModalAccount.value = handle;
-      portalConnectGitHub(handle);
+      const tok = ghTokenInput?.value.trim() || document.getElementById('portalModalToken')?.value.trim() || localStorage.getItem('autopatch_gh_token') || null;
+      portalConnectGitHub(handle, tok);
     };
 
     if (launchGhPortalBtn) {
@@ -991,8 +999,11 @@
         // Otherwise open official authorization modal
         if (ghPortalModal) {
           if (portalModalAccount && ghPortalUsernameInput) {
-            portalModalAccount.value = ghPortalUsernameInput.value.trim() || 'Tajesvi-kumar';
+            portalModalAccount.value = ghPortalUsernameInput.value.trim() || 'NiharNeo';
           }
+          const savedTok = localStorage.getItem('autopatch_gh_token') || ghTokenInput?.value.trim() || '';
+          const modalTok = document.getElementById('portalModalToken');
+          if (modalTok && savedTok) modalTok.value = savedTok;
           ghPortalModal.style.display = 'flex';
         }
       });
@@ -1006,15 +1017,17 @@
 
     if (confirmGhPortalAuthBtn) {
       confirmGhPortalAuthBtn.addEventListener('click', () => {
-        const user = portalModalAccount?.value.trim() || 'Tajesvi-kumar';
-        portalConnectGitHub(user);
+        const user = portalModalAccount?.value.trim() || 'NiharNeo';
+        const tok = document.getElementById('portalModalToken')?.value.trim() || ghTokenInput?.value.trim() || localStorage.getItem('autopatch_gh_token') || null;
+        portalConnectGitHub(user, tok);
       });
     }
 
     if (directConnectUserBtn) {
       directConnectUserBtn.addEventListener('click', () => {
-        const user = ghPortalUsernameInput?.value.trim() || 'Tajesvi-kumar';
-        portalConnectGitHub(user);
+        const user = ghPortalUsernameInput?.value.trim() || 'NiharNeo';
+        const tok = ghTokenInput?.value.trim() || document.getElementById('portalModalToken')?.value.trim() || localStorage.getItem('autopatch_gh_token') || null;
+        portalConnectGitHub(user, tok);
       });
     }
 
@@ -1048,12 +1061,15 @@
         return;
       }
 
-      ghRepoListContainer.innerHTML = repos.map(r => `
-        <div class="gh-repo-card">
+      ghRepoListContainer.innerHTML = repos.map(r => {
+        const isPriv = Boolean(r.private || r.is_private);
+        return `
+        <div class="gh-repo-card" data-is-private="${isPriv}">
           <div class="gh-repo-info">
-            <div class="gh-repo-name">
-              ${r.private ? '<svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor"><path d="M4 4v2h-.5A1.5 1.5 0 0 0 2 7.5v6A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5v-6A1.5 1.5 0 0 0 12.5 6H12V4a4 4 0 0 0-8 0zm6 2H6V4a2 2 0 1 1 4 0v2z"/></svg>' : '<svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor"><circle cx="8" cy="8" r="7" stroke="currentColor" fill="none"/><path d="M8 1a7 7 0 0 0 0 14A7 7 0 0 0 8 1zm0 2a5 5 0 0 1 0 10A5 5 0 0 1 8 3z"/></svg>'}
+            <div class="gh-repo-name" style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+              ${isPriv ? '<svg viewBox="0 0 16 16" width="12" height="12" fill="#c24040"><path d="M4 4v2h-.5A1.5 1.5 0 0 0 2 7.5v6A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5v-6A1.5 1.5 0 0 0 12.5 6H12V4a4 4 0 0 0-8 0zm6 2H6V4a2 2 0 1 1 4 0v2z"/></svg>' : '<svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor"><circle cx="8" cy="8" r="7" stroke="currentColor" fill="none"/><path d="M8 1a7 7 0 0 0 0 14A7 7 0 0 0 8 1zm0 2a5 5 0 0 1 0 10A5 5 0 0 1 8 3z"/></svg>'}
               <a href="${r.html_url}" target="_blank" style="color: var(--ink); text-decoration: none; font-weight: 600;" title="${r.full_name}">${r.name}</a>
+              ${isPriv ? '<span class="badge" style="background: rgba(194, 64, 64, 0.15); color: #c24040; border-color: rgba(194, 64, 64, 0.3); font-size: 9.5px; padding: 1px 5px;">PRIVATE</span>' : '<span class="badge" style="background: rgba(45, 164, 78, 0.15); color: #2da44e; border-color: rgba(45, 164, 78, 0.3); font-size: 9.5px; padding: 1px 5px;">PUBLIC</span>'}
               ${r.fork ? '<span class="badge" style="font-size: 10px; padding: 1px 5px;">fork</span>' : ''}
             </div>
             ${r.description ? `<div style="font-size: 11.5px; color: var(--sub); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(r.description)}</div>` : ''}
@@ -1072,7 +1088,9 @@
             </button>
           </div>
         </div>
-      `).join('');
+      `;
+      }).join('');
+    }
     }
 
     window.selectRepoForScan = function(repoName, cloneUrl) {

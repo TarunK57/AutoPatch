@@ -1013,15 +1013,18 @@
       listContainer.innerHTML = '<div style="text-align: center; padding: 20px; font-size: 12px; color: var(--sub);">Loading connected GitHub repositories...</div>';
 
       try {
-        const repos = await window.autopatch.listGitHubRepos();
+        const res = await window.autopatch.listGitHubRepos();
+        const repos = Array.isArray(res) ? res : (res && res.repositories ? res.repositories : []);
         if (repos && repos.length > 0) {
           let html = '';
           repos.forEach(r => {
             const cloneUrl = r.clone_url || `https://github.com/${r.full_name}.git`;
+            const isPriv = Boolean(r.private || r.is_private);
             html += `
               <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-bottom: 1px solid rgba(100,75,60,0.08);">
                 <div>
                   <strong style="font-size: 13px; color: var(--ink);">${escapeHtml(r.name)}</strong>
+                  ${isPriv ? '<span class="badge" style="background: rgba(194, 64, 64, 0.15); color: #c24040; border-color: rgba(194, 64, 64, 0.3); font-size: 9.5px; padding: 1px 5px; margin-left: 5px;">PRIVATE</span>' : '<span class="badge" style="background: rgba(45, 164, 78, 0.15); color: #2da44e; border-color: rgba(45, 164, 78, 0.3); font-size: 9.5px; padding: 1px 5px; margin-left: 5px;">PUBLIC</span>'}
                   <div style="font-size: 11px; color: var(--sub);">${escapeHtml(r.full_name)} &bull; ${escapeHtml(r.language || 'Codebase')}</div>
                 </div>
                 <button type="button" class="btn" style="padding: 4px 10px; height: 28px; font-size: 11px;" onclick="importAndSelectRepo('${escapeHtml(r.name)}', '${escapeHtml(cloneUrl)}')">

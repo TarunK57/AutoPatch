@@ -214,12 +214,13 @@ class SafeExtractor:
         shutil.copy2(file_path, dst_file)
         return destination
 
-    def clone_git_repo(self, repo_url: str, destination: Path) -> Path:
+    def clone_git_repo(self, repo_url: str, destination: Path, token: Optional[str] = None) -> Path:
         """Clones a git repository (remote URL or local directory) into destination.
 
         Guarantees:
         - Prevents command injection and parameter injection
         - Handles GitHub, GitLab, Bitbucket, HTTPS, SSH, and local directory paths
+        - Supports authenticated clone for private GitHub repositories using Personal Access Tokens (PAT)
         - Enforces clone timeout
         """
         # 1. Check if it's a local filesystem path
@@ -248,7 +249,11 @@ class SafeExtractor:
         destination = destination.resolve()
         destination.mkdir(parents=True, exist_ok=True)
 
-        cmd = ["git", "clone", "--depth", "1", clean_url, str(destination)]
+        auth_token = (token or os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN") or "").strip()
+        cmd = ["git"]
+        if auth_token and ("github.com" in clean_url or clean_url.startswith("https://")):
+            cmd.extend(["-c", f"http.extraheader=Authorization: Bearer {auth_token}"])
+        cmd.extend(["clone", "--depth", "1", clean_url, str(destination)])
         try:
             result = subprocess.run(
                 cmd,
@@ -285,6 +290,6 @@ class SafeExtractor:
 
         return destination
 
-    def clone_github_repo(self, repo_url: str, destination: Path) -> Path:
+    def clone_github_repo(self, repo_url: str, destination: Path, token: Optional[str] = None) -> Path:
         """Alias for clone_git_repo for backward compatibility."""
-        return self.clone_git_repo(repo_url, destination)
+        return self.clone_git_repo(repo_url, destination, token=token)

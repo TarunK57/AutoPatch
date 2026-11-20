@@ -88,22 +88,28 @@ class AutoPatchClient {
     if (this._isOnline === false) {
       throw new Error('Backend is offline. Cannot create live project.');
     }
+    const token = localStorage.getItem('autopatch_gh_token');
     let res;
     if (file) {
       const formData = new FormData();
       formData.append('name', name);
       if (githubUrl) formData.append('github_url', githubUrl);
+      if (token) formData.append('token', token);
       formData.append('file', file);
+      const customHeaders = { 'Authorization': `Bearer ${this.config.authToken}` };
+      if (token) customHeaders['x-github-token'] = token;
       res = await fetch(`${this.config.baseUrl}/projects`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${this.config.authToken}` },
+        headers: customHeaders,
         body: formData,
       });
     } else {
+      const customHeaders = { ...this.headers };
+      if (token) customHeaders['x-github-token'] = token;
       res = await fetch(`${this.config.baseUrl}/projects`, {
         method: 'POST',
-        headers: this.headers,
-        body: JSON.stringify({ name, github_url: githubUrl }),
+        headers: customHeaders,
+        body: JSON.stringify({ name, github_url: githubUrl, token: token }),
       });
     }
     if (!res.ok) {
