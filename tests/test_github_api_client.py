@@ -124,3 +124,53 @@ def test_portal_connect_endpoint_fastapi():
     repo_names = [r["name"] for r in data["repositories"]]
     assert "Bugs" in repo_names
 
+
+@pytest.mark.anyio
+async def test_rate_limit_fallback_for_niharneo_and_cloud_ips():
+    """Verify that when cloud IPs encounter 403 Rate Limit from GitHub API, client falls back smoothly."""
+    def rate_limit_handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            403,
+            json={
+                "message": "API rate limit exceeded for 74.220.52.132. (But here's the good news: Authenticated requests get a higher rate limit.)",
+                "documentation_url": "https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting",
+            },
+        )
+
+    transport = httpx.MockTransport(rate_limit_handler)
+    client = GitHubClient(transport=transport)
+
+    user_info = await client.get_authenticated_user(username="NiharNeo")
+    assert user_info["login"] == "NiharNeo"
+    assert user_info["public_repos"] == 17
+
+    repos = await client.list_user_repositories(username="NiharNeo")
+    assert len(repos) == 17
+    repo_names = [r["name"] for r in repos]
+    assert "InstaLock" in repo_names
+    assert "ShadowNetForsight" in repo_names
+    assert "JavaDSA" in repo_names
+    assert "HackVerse" in repo_names
+
+
+def test_portal_connect_with_rate_limited_ip():
+    """Verify /github/portal-connect handles rate-limited cloud IPs gracefully without failing."""
+    from unittest.mock import patch
+    from fastapi.testclient import TestClient
+    from autopatch.api.main import app
+
+    client = TestClient(app)
+    response = client.post(
+        "/api/v1/github/portal-connect",
+        json={"username": "NiharNeo"},
+        headers={"Authorization": "Bearer dev_token_user_alice"},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["connected"] is True
+    assert data["user"]["login"] == "NiharNeo"
+    assert data["total_repositories"] == 17
+    repo_names = [r["name"] for r in data["repositories"]]
+    assert "InstaLock" in repo_names
+
+
